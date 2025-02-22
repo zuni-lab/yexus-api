@@ -20,15 +20,15 @@ type Server struct {
 func New() *Server {
 	config.LoadEnv()
 
-	appName := config.Env.APP_NAME
+	appName := config.Env.AppName
 	if config.Env.IsDev {
 		appName = appName + "-dev"
 	}
 	openobserve.Init(openobserve.OpenObserveConfig{
-		Endpoint:    config.Env.OPENOBSERVE_ENDPOINT,
-		Credential:  config.Env.OPENOBSERVE_CREDENTIAL,
+		Endpoint:    config.Env.OpenObserveEndpoint,
+		Credential:  config.Env.OpenObserveCredential,
 		ServiceName: appName,
-		Env:         config.Env.ENV,
+		Env:         config.Env.Env,
 	})
 
 	config.InitLogger()
@@ -51,7 +51,7 @@ func (s *Server) Start() error {
 	loadSvcs(ctx)
 	s.printRoutes()
 
-	return s.Raw.Start(fmt.Sprintf("%s:%s", config.Env.API_HOST, config.Env.PORT))
+	return s.Raw.Start(fmt.Sprintf("%s:%s", config.Env.ApiHost, config.Env.Port))
 }
 
 func (s *Server) Close() {
@@ -64,7 +64,7 @@ func (s *Server) Close() {
 }
 
 func loadSvcs(ctx context.Context) {
-	db.Init(ctx, config.Env.POSTGRES_URL, config.Env.MIGRATION_URL)
+	db.Init(ctx, config.Env.PostgresUrl, config.Env.MigrationUrl)
 }
 
 func closeSvcs() {

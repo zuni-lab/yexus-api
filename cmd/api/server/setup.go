@@ -68,7 +68,7 @@ func setupAddHandlerEvent(e *echo.Echo) {
 func setupMiddleware(e *echo.Echo) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     config.Env.CORS_WHITE_LIST,
+		AllowOrigins:     config.Env.CorsWhiteList,
 		AllowCredentials: true,
 		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))

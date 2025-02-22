@@ -10,25 +10,27 @@ import (
 )
 
 type ServerEnv struct {
-	ENV             string
-	CORS_WHITE_LIST []string
+	Env           string
+	CorsWhiteList []string
 
-	APP_NAME   string `validate:"min=1"`
-	API_HOST   string `validate:"min=1"`
-	JWT_SECRET string `validate:"min=10"`
+	AppName   string `validate:"min=1"`
+	ApiHost   string `validate:"min=1"`
+	JwtSecret string `validate:"min=10"`
 
-	PORT string `validate:"number"`
+	Port string `validate:"number"`
 
 	IsProd    bool
 	IsStaging bool
 	IsDev     bool
 	IsTest    bool
 
-	OPENOBSERVE_ENDPOINT   string `validate:"url"`
-	OPENOBSERVE_CREDENTIAL string `validate:"min=1"`
+	OpenObserveEndpoint   string `validate:"url"`
+	OpenObserveCredential string `validate:"min=1"`
 
-	POSTGRES_URL  string `validate:"url"`
-	MIGRATION_URL string `validate:"url"`
+	PostgresUrl  string `validate:"url"`
+	MigrationUrl string `validate:"url"`
+
+	AlchemyUrl string `validate:"url"`
 }
 
 var Env ServerEnv
@@ -44,7 +46,7 @@ func LoadEnvWithPath(path string) {
 
 func LoadEnv() {
 	if os.Getenv("ENV") == "" {
-		os.Setenv("ENV", "development")
+		_ = os.Setenv("ENV", "development")
 		err := godotenv.Load(os.ExpandEnv(".env"))
 		if err != nil {
 			log.Fatalln("Error loading .env file: ", err)
@@ -76,19 +78,21 @@ func loadEnv() {
 	}
 
 	Env = ServerEnv{
-		ENV:             os.Getenv("ENV"),
-		CORS_WHITE_LIST: corsWhiteList,
+		Env:           os.Getenv("ENV"),
+		CorsWhiteList: corsWhiteList,
 
-		APP_NAME:   os.Getenv("APP_NAME"),
-		API_HOST:   os.Getenv("API_HOST"),
-		JWT_SECRET: os.Getenv("JWT_SECRET"),
-		PORT:       port,
+		AppName:   os.Getenv("APP_NAME"),
+		ApiHost:   os.Getenv("API_HOST"),
+		JwtSecret: os.Getenv("JWT_SECRET"),
+		Port:      port,
 
-		OPENOBSERVE_ENDPOINT:   os.Getenv("OPENOBSERVE_ENDPOINT"),
-		OPENOBSERVE_CREDENTIAL: os.Getenv("OPENOBSERVE_CREDENTIAL"),
+		OpenObserveEndpoint:   os.Getenv("OPENOBSERVE_ENDPOINT"),
+		OpenObserveCredential: os.Getenv("OPENOBSERVE_CREDENTIAL"),
 
-		POSTGRES_URL:  os.Getenv("POSTGRES_URL"),
-		MIGRATION_URL: os.Getenv("MIGRATION_URL"),
+		PostgresUrl:  os.Getenv("POSTGRES_URL"),
+		MigrationUrl: os.Getenv("MIGRATION_URL"),
+
+		AlchemyUrl: os.Getenv("ALCHEMY_URL"),
 	}
 
 	validate := validator.New()
@@ -98,8 +102,8 @@ func loadEnv() {
 		panic(err)
 	}
 
-	Env.IsProd = Env.ENV == "production"
-	Env.IsStaging = Env.ENV == "staging"
-	Env.IsDev = Env.ENV == "development" || len(Env.ENV) == 0
-	Env.IsTest = Env.ENV == "test"
+	Env.IsProd = Env.Env == "production"
+	Env.IsStaging = Env.Env == "staging"
+	Env.IsDev = Env.Env == "development" || len(Env.Env) == 0
+	Env.IsTest = Env.Env == "test"
 }

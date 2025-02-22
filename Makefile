@@ -5,7 +5,7 @@ endif
 
 $(info POSTGRES_URL: $(POSTGRES_URL))
 
-.PHONY: test coverage clean run compose down watch
+.PHONY: test coverage clean run compose down watch worker
 
 test:
 	ENV=test go test -coverprofile=cover.out -v ./...
@@ -20,6 +20,8 @@ run:
 	go run cmd/api/main.go
 watch:
 	air -c .air.toml
+worker:
+	go run cmd/worker/main.go
 compose:
 	docker compose -f compose.yml up -d --remove-orphans
 start:
