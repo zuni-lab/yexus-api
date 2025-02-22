@@ -1,8 +1,8 @@
 services:
-  postgres:
-    image: postgres:latest
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
     restart: unless-stopped
-    container_name: dexon-postgres
+    container_name: dexon-timescaledb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - dexon_postgres_data:/var/lib/postgresql/data
+      - dexon_timescaledb_data:/var/lib/postgresql/data
 
   openobserve:
     image: public.ecr.aws/zinclabs/openobserve:latest
@@ -25,5 +25,5 @@ services:
       - dexon_openobserve_data:/data
 
 volumes:
-  dexon_postgres_data:
+  dexon_timescaledb_data:
   dexon_openobserve_data:

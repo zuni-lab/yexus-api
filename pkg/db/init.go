@@ -19,10 +19,6 @@ func Init(ctx context.Context, dbSource string, migrationURL string) {
 	runDBMigration(migrationURL, dbSource)
 
 	DB = NewStore(connPool)
-
-	log.Info().Msg("db initialized successfully")
-
-	runSeed()
 }
 
 func runDBMigration(migrationURL string, dbSource string) {
@@ -36,18 +32,6 @@ func runDBMigration(migrationURL string, dbSource string) {
 	}
 
 	log.Info().Msg("db migrated successfully")
-}
-
-func runSeed() {
-	log.Info().Msg("running seed")
-	result, err := DB.CreateBatchPoolsTx(context.Background(), CreateBatchPoolsTxParams{
-		Pools: poolsSeed,
-	})
-	if err != nil {
-		log.Warn().Err(err).Msg("seed operation encountered an error (might be due to existing data)")
-		return
-	}
-	log.Info().Msgf("successfully seeded %d pools", len(result.Pools))
 }
 
 func Close() {

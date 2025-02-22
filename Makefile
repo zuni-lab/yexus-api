@@ -36,7 +36,7 @@ shutdown:
 #### DB ####
 .PHONY: sqlc migrate-up migrate-down new-migration
 sqlc:
-	sqlc generate
+	./scripts/sqlc-generate.sh
 
 migrate-up:
 	migrate -path pkg/db/migration -database "$(POSTGRES_URL)" -verbose up
