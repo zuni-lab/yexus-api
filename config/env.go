@@ -1,12 +1,12 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 type ServerEnv struct {
@@ -41,7 +41,7 @@ var Env ServerEnv
 func LoadEnvWithPath(path string) {
 	err := godotenv.Load(os.ExpandEnv(path))
 	if err != nil {
-		log.Fatalf("Error loading %s file: %s", path, err)
+		log.Fatal().Msgf("Error loading %s file: %s", path, err)
 	}
 
 	loadEnv()
@@ -52,12 +52,12 @@ func LoadEnv() {
 		_ = os.Setenv("ENV", "development")
 		err := godotenv.Load(os.ExpandEnv(".env"))
 		if err != nil {
-			log.Fatalln("Error loading .env file: ", err)
+			log.Fatal().Msgf("Error loading .env file: %s", err)
 		}
 	} else if os.Getenv("ENV") == "test" {
 		err := godotenv.Load(os.ExpandEnv(".env.test"))
 		if err != nil {
-			log.Fatalln("Error loading .env.test file: ", err)
+			log.Fatal().Msgf("Error loading .env.test file: %s", err)
 		}
 	}
 
@@ -105,11 +105,13 @@ func loadEnv() {
 	err := validate.Struct(Env)
 
 	if err != nil {
-		panic(err)
+		log.Fatal().Msgf("Error validating env: %s", err)
 	}
 
 	Env.IsProd = Env.Env == "production"
 	Env.IsStaging = Env.Env == "staging"
 	Env.IsDev = Env.Env == "development" || len(Env.Env) == 0
 	Env.IsTest = Env.Env == "test"
+
+	log.Info().Msgf("Env: %+v", Env)
 }

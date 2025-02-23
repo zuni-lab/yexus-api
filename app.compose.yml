@@ -1,7 +1,31 @@
 services:
-  server:
-    image: server 
-    container_name: server 
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    restart: unless-stopped
+    container_name: dexon-timescaledb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dexon
+    ports:
+      - "5432:5432"
+    volumes:
+      - dexon_timescaledb_data:/var/lib/postgresql/data
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    restart: unless-stopped
+    container_name: dexon-openobserve
+    environment:
+      ZO_ROOT_USER_EMAIL: "root@gmail.com"
+      ZO_ROOT_USER_PASSWORD: "helloworld"
+    ports:
+      - "5080:5080"
+    volumes:
+      - dexon_openobserve_data:/data
+  api:
+    image: dexon-api 
+    container_name: dexon-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,6 +33,11 @@ services:
       - 12345:12345
     volumes:
       - ./.env:/app/.env
+    environment:
+      POSTGRES_URL: postgresql://postgres:postgres@timescaledb:5432/dexon?sslmode=disable
+    depends_on:
+      - timescaledb
+      - openobserve
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:12345/health"]
       interval: 30s
@@ -17,4 +46,5 @@ services:
     restart: always
 
 volumes:
-  data:
+  dexon_timescaledb_data:
+  dexon_openobserve_data:

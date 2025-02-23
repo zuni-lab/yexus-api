@@ -28,7 +28,7 @@ func ChatDex(ctx context.Context, input ChatParams, w http.ResponseWriter) error
 		threadID = input.ThreadID
 	}
 
-	log.Info().Msgf("threadID: %s", threadID)
+	log.Debug().Msgf("threadID: %s", threadID)
 
 	return openai.Streaming(ctx, threadID, input.Message, w)
 }
