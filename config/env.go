@@ -31,6 +31,9 @@ type ServerEnv struct {
 	MigrationUrl string `validate:"url"`
 
 	AlchemyUrl string `validate:"url"`
+
+	OpenaiApiKey      string `validate:"min=1"`
+	OpenaiAssistantId string `validate:"min=1"`
 }
 
 var Env ServerEnv
@@ -93,6 +96,9 @@ func loadEnv() {
 		MigrationUrl: os.Getenv("MIGRATION_URL"),
 
 		AlchemyUrl: os.Getenv("ALCHEMY_URL"),
+
+		OpenaiApiKey:      os.Getenv("OPENAI_API_KEY"),
+		OpenaiAssistantId: os.Getenv("OPENAI_ASSISTANT_ID"),
 	}
 
 	validate := validator.New()

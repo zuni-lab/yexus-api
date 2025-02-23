@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/config"
 	"github.com/zuni-lab/dexon-service/pkg/db"
+	"github.com/zuni-lab/dexon-service/pkg/openai"
 	"github.com/zuni-lab/dexon-service/pkg/openobserve"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
@@ -65,6 +66,7 @@ func (s *Server) Close() {
 
 func loadSvcs(ctx context.Context) {
 	db.Init(ctx, config.Env.PostgresUrl, config.Env.MigrationUrl)
+	openai.Init()
 }
 
 func closeSvcs() {
