@@ -17,6 +17,7 @@ type Querier interface {
 	GetPools(ctx context.Context) ([]Pool, error)
 	GetPriceByPoolID(ctx context.Context, poolID string) (Price, error)
 	GetPrices(ctx context.Context, arg GetPricesParams) ([]Price, error)
+	PoolDetails(ctx context.Context, id string) (PoolDetailsRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

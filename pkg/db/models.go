@@ -16,10 +16,20 @@ type Pool struct {
 }
 
 type Price struct {
-	ID        int64              `json:"id"`
-	PoolID    string             `json:"pool_id"`
-	PriceUsd  pgtype.Numeric     `json:"price_usd"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID             int64            `json:"id"`
+	PoolID         string           `json:"pool_id"`
+	BlockNumber    int64            `json:"block_number"`
+	BlockTimestamp int64            `json:"block_timestamp"`
+	Sender         string           `json:"sender"`
+	Recipient      string           `json:"recipient"`
+	Amount0        int64            `json:"amount0"`
+	Amount1        int64            `json:"amount1"`
+	SqrtPriceX96   int64            `json:"sqrt_price_x96"`
+	Liquidity      int64            `json:"liquidity"`
+	Tick           int32            `json:"tick"`
+	PriceUsd       pgtype.Numeric   `json:"price_usd"`
+	TimestampUtc   pgtype.Timestamp `json:"timestamp_utc"`
+	CreatedAt      pgtype.Timestamp `json:"created_at"`
 }
 
 type Token struct {
@@ -27,5 +37,6 @@ type Token struct {
 	Name      string             `json:"name"`
 	Symbol    string             `json:"symbol"`
 	Decimals  int32              `json:"decimals"`
+	IsStable  bool               `json:"is_stable"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

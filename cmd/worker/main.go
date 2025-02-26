@@ -10,6 +10,7 @@ import (
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"github.com/zuni-lab/dexon-service/pkg/openobserve"
+	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
 func main() {
@@ -19,10 +20,9 @@ func main() {
 
 	loadSvcs(ctx)
 
-	mgr := evm.NewManager([]common.Address{
-		common.HexToAddress("0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"),
-		common.HexToAddress("0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b"),
-	})
+	mgr := evm.NewManager()
+
+	mgr.AddHandler(handlers.NewSwapHandler())
 
 	for {
 		if err := mgr.Connect(); err != nil {
@@ -30,7 +30,17 @@ func main() {
 			continue
 		}
 
-		if err := mgr.WatchPools(ctx, handlers.HandleSwap); err != nil {
+		pools, err := db.DB.GetPools(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get pools")
+			continue
+		}
+
+		poolAddresses := utils.Map(pools, func(pool db.Pool) common.Address {
+			return common.HexToAddress(pool.ID)
+		})
+
+		if err := mgr.WatchPools(ctx, poolAddresses); err != nil {
 			log.Error().Err(err).Msg("Error watching pools")
 			mgr.Close()
 			continue

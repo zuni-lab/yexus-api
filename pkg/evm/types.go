@@ -1,3 +1,7 @@
 package evm
 
-type SwapHandler func(event *UniswapV3Swap) error
+import "context"
+
+type SwapHandler interface {
+	HandleSwap(ctx context.Context, event *UniswapV3Swap) error
+}

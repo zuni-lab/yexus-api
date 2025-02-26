@@ -78,3 +78,55 @@ func (q *Queries) GetPools(ctx context.Context) ([]Pool, error) {
 	}
 	return items, nil
 }
+
+const poolDetails = `-- name: PoolDetails :one
+SELECT 
+    pools.id,
+    pools.token0_id,
+    pools.token1_id,
+    token0.name AS token0_name,
+    token0.symbol AS token0_symbol,
+    token0.decimals AS token0_decimals,
+    token0.is_stable AS token0_is_stable,
+    token1.name AS token1_name,
+    token1.symbol AS token1_symbol,
+    token1.decimals AS token1_decimals,
+    token1.is_stable AS token1_is_stable
+FROM pools
+JOIN tokens AS token0 ON pools.token0_id = token0.id
+JOIN tokens AS token1 ON pools.token1_id = token1.id
+WHERE pools.id = $1
+`
+
+type PoolDetailsRow struct {
+	ID             string `json:"id"`
+	Token0ID       string `json:"token0_id"`
+	Token1ID       string `json:"token1_id"`
+	Token0Name     string `json:"token0_name"`
+	Token0Symbol   string `json:"token0_symbol"`
+	Token0Decimals int32  `json:"token0_decimals"`
+	Token0IsStable bool   `json:"token0_is_stable"`
+	Token1Name     string `json:"token1_name"`
+	Token1Symbol   string `json:"token1_symbol"`
+	Token1Decimals int32  `json:"token1_decimals"`
+	Token1IsStable bool   `json:"token1_is_stable"`
+}
+
+func (q *Queries) PoolDetails(ctx context.Context, id string) (PoolDetailsRow, error) {
+	row := q.db.QueryRow(ctx, poolDetails, id)
+	var i PoolDetailsRow
+	err := row.Scan(
+		&i.ID,
+		&i.Token0ID,
+		&i.Token1ID,
+		&i.Token0Name,
+		&i.Token0Symbol,
+		&i.Token0Decimals,
+		&i.Token0IsStable,
+		&i.Token1Name,
+		&i.Token1Symbol,
+		&i.Token1Decimals,
+		&i.Token1IsStable,
+	)
+	return i, err
+}

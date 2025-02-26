@@ -14,7 +14,7 @@ import (
 const createPrice = `-- name: CreatePrice :one
 INSERT INTO prices (id, pool_id, price_usd)
 VALUES ($1, $2, $3)
-RETURNING id, pool_id, price_usd, created_at
+RETURNING id, pool_id, block_number, block_timestamp, sender, recipient, amount0, amount1, sqrt_price_x96, liquidity, tick, price_usd, timestamp_utc, created_at
 `
 
 type CreatePriceParams struct {
@@ -29,7 +29,17 @@ func (q *Queries) CreatePrice(ctx context.Context, arg CreatePriceParams) (Price
 	err := row.Scan(
 		&i.ID,
 		&i.PoolID,
+		&i.BlockNumber,
+		&i.BlockTimestamp,
+		&i.Sender,
+		&i.Recipient,
+		&i.Amount0,
+		&i.Amount1,
+		&i.SqrtPriceX96,
+		&i.Liquidity,
+		&i.Tick,
 		&i.PriceUsd,
+		&i.TimestampUtc,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -94,7 +104,7 @@ func (q *Queries) GetMarketData(ctx context.Context, arg GetMarketDataParams) ([
 }
 
 const getPriceByPoolID = `-- name: GetPriceByPoolID :one
-SELECT id, pool_id, price_usd, created_at FROM prices
+SELECT id, pool_id, block_number, block_timestamp, sender, recipient, amount0, amount1, sqrt_price_x96, liquidity, tick, price_usd, timestamp_utc, created_at FROM prices
 WHERE pool_id = $1
 ORDER BY created_at DESC
 LIMIT 1
@@ -106,14 +116,24 @@ func (q *Queries) GetPriceByPoolID(ctx context.Context, poolID string) (Price, e
 	err := row.Scan(
 		&i.ID,
 		&i.PoolID,
+		&i.BlockNumber,
+		&i.BlockTimestamp,
+		&i.Sender,
+		&i.Recipient,
+		&i.Amount0,
+		&i.Amount1,
+		&i.SqrtPriceX96,
+		&i.Liquidity,
+		&i.Tick,
 		&i.PriceUsd,
+		&i.TimestampUtc,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getPrices = `-- name: GetPrices :many
-SELECT id, pool_id, price_usd, created_at FROM prices
+SELECT id, pool_id, block_number, block_timestamp, sender, recipient, amount0, amount1, sqrt_price_x96, liquidity, tick, price_usd, timestamp_utc, created_at FROM prices
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -135,7 +155,17 @@ func (q *Queries) GetPrices(ctx context.Context, arg GetPricesParams) ([]Price, 
 		if err := rows.Scan(
 			&i.ID,
 			&i.PoolID,
+			&i.BlockNumber,
+			&i.BlockTimestamp,
+			&i.Sender,
+			&i.Recipient,
+			&i.Amount0,
+			&i.Amount1,
+			&i.SqrtPriceX96,
+			&i.Liquidity,
+			&i.Tick,
 			&i.PriceUsd,
+			&i.TimestampUtc,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

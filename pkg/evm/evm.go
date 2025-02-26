@@ -19,10 +19,10 @@ type Manager struct {
 	client      *ethclient.Client
 	backoff     *backoff.ExponentialBackOff
 	maxAttempts uint64
-	pools       []common.Address
+	handlers    []SwapHandler
 }
 
-func NewManager(pools []common.Address) *Manager {
+func NewManager() *Manager {
 	b := backoff.NewExponentialBackOff()
 	b.InitialInterval = 1 * time.Second
 	b.MaxInterval = 1 * time.Minute
@@ -31,8 +31,11 @@ func NewManager(pools []common.Address) *Manager {
 	return &Manager{
 		backoff:     b,
 		maxAttempts: 100,
-		pools:       pools,
 	}
+}
+
+func (m *Manager) AddHandler(handler SwapHandler) {
+	m.handlers = append(m.handlers, handler)
 }
 
 func (m *Manager) Close() {
@@ -43,8 +46,6 @@ func (m *Manager) Close() {
 }
 
 func (m *Manager) Connect() error {
-	// url := strings.Replace(config.Env.AlchemyUrl, "https", "wss", 1)
-
 	var client *ethclient.Client
 	var err error
 
@@ -65,15 +66,15 @@ func (m *Manager) Connect() error {
 	return nil
 }
 
-func (m *Manager) WatchPools(ctx context.Context, handler SwapHandler) error {
-	errChan := make(chan error, len(m.pools))
+func (m *Manager) WatchPools(ctx context.Context, pools []common.Address) error {
+	errChan := make(chan error, len(pools))
 	var wg sync.WaitGroup
 
-	for _, pool := range m.pools {
+	for _, pool := range pools {
 		wg.Add(1)
 		go func(pool common.Address) {
 			defer wg.Done()
-			if err := m.WatchPool(ctx, pool, handler); err != nil {
+			if err := m.WatchPool(ctx, pool); err != nil {
 				select {
 				case errChan <- fmt.Errorf("pool %s: %w", pool.Hex(), err):
 				default:
@@ -95,9 +96,9 @@ func (m *Manager) WatchPools(ctx context.Context, handler SwapHandler) error {
 	}
 }
 
-func (m *Manager) WatchPool(ctx context.Context, pool common.Address, handler SwapHandler) error {
+func (m *Manager) WatchPool(ctx context.Context, pool common.Address) error {
 	for {
-		if err := m.watchPoolWithRetry(ctx, pool, handler); err != nil {
+		if err := m.watchPoolWithRetry(ctx, pool); err != nil {
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
@@ -111,19 +112,19 @@ func (m *Manager) WatchPool(ctx context.Context, pool common.Address, handler Sw
 	}
 }
 
-func (m *Manager) watchPoolWithRetry(ctx context.Context, pool common.Address, handler SwapHandler) error {
+func (m *Manager) watchPoolWithRetry(ctx context.Context, pool common.Address) error {
 	log.Info().Msgf("Watching pool %s", pool.Hex())
 
 	// Determine if we should use WebSocket or polling based on URL
 	isWebSocket := strings.HasPrefix(config.Env.AlchemyUrl, "wss")
 
 	if isWebSocket {
-		return m.watchPoolWebSocket(ctx, pool, handler)
+		return m.watchPoolWebSocket(ctx, pool)
 	}
-	return m.watchPoolPolling(ctx, pool, handler)
+	return m.watchPoolPolling(ctx, pool)
 }
 
-func (m *Manager) watchPoolPolling(ctx context.Context, pool common.Address, handler SwapHandler) error {
+func (m *Manager) watchPoolPolling(ctx context.Context, pool common.Address) error {
 	const pollingInterval = 15 * time.Second
 	ticker := time.NewTicker(pollingInterval)
 	defer ticker.Stop()
@@ -133,6 +134,8 @@ func (m *Manager) watchPoolPolling(ctx context.Context, pool common.Address, han
 		return fmt.Errorf("failed to create contract instance: %w", err)
 	}
 
+	// TODO: remove
+	// var lastProcessedBlock = uint64(4_668_400)
 	var lastProcessedBlock uint64
 	log.Info().Msg("🚀 Ready to watch pool via Polling")
 
@@ -172,11 +175,19 @@ func (m *Manager) watchPoolPolling(ctx context.Context, pool common.Address, han
 			}
 
 			for events.Next() {
-				if err := handler(events.Event); err != nil {
-					log.Error().
-						Err(err).
-						Str("pool", pool.Hex()).
-						Msg("Error handling event")
+				// if err := handler(events.Event); err != nil {
+				// 	log.Error().
+				// 		Err(err).
+				// 		Str("pool", pool.Hex()).
+				// 		Msg("Error handling event")
+				// }
+				for _, handler := range m.handlers {
+					if err := handler.HandleSwap(ctx, events.Event); err != nil {
+						log.Error().
+							Err(err).
+							Str("pool", pool.Hex()).
+							Msg("Error handling event")
+					}
 				}
 			}
 
@@ -185,7 +196,7 @@ func (m *Manager) watchPoolPolling(ctx context.Context, pool common.Address, han
 	}
 }
 
-func (p *Manager) watchPoolWebSocket(ctx context.Context, pool common.Address, handler SwapHandler) error {
+func (p *Manager) watchPoolWebSocket(ctx context.Context, pool common.Address) error {
 
 	attempt := 0
 RETRY:
@@ -240,11 +251,13 @@ RETRY:
 					goto RETRY
 				}
 			case event := <-sink:
-				if err := handler(event); err != nil {
-					log.Error().
-						Err(err).
-						Str("pool", pool.Hex()).
-						Msg("Error handling event")
+				for _, handler := range p.handlers {
+					if err := handler.HandleSwap(ctx, event); err != nil {
+						log.Error().
+							Err(err).
+							Str("pool", pool.Hex()).
+							Msg("Error handling event")
+					}
 				}
 			}
 		}

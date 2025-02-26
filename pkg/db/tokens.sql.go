@@ -10,9 +10,9 @@ import (
 )
 
 const createToken = `-- name: CreateToken :one
-INSERT INTO tokens (id, name, symbol, decimals)
-VALUES ($1, $2, $3, $4)
-RETURNING id, name, symbol, decimals, created_at
+INSERT INTO tokens (id, name, symbol, decimals, is_stable)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, name, symbol, decimals, is_stable, created_at
 `
 
 type CreateTokenParams struct {
@@ -20,6 +20,7 @@ type CreateTokenParams struct {
 	Name     string `json:"name"`
 	Symbol   string `json:"symbol"`
 	Decimals int32  `json:"decimals"`
+	IsStable bool   `json:"is_stable"`
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error) {
@@ -28,6 +29,7 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token
 		arg.Name,
 		arg.Symbol,
 		arg.Decimals,
+		arg.IsStable,
 	)
 	var i Token
 	err := row.Scan(
@@ -35,6 +37,7 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token
 		&i.Name,
 		&i.Symbol,
 		&i.Decimals,
+		&i.IsStable,
 		&i.CreatedAt,
 	)
 	return i, err
