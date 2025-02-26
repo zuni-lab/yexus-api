@@ -49,3 +49,46 @@ INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
 ('0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
+
+
+
+
+-- -- For tracking processed blocks
+-- CREATE TABLE block_processing_state (
+--     pool_address VARCHAR NOT NULL,
+--     last_processed_block BIGINT NOT NULL,
+--     is_backfill BOOLEAN NOT NULL,
+--     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--     PRIMARY KEY (pool_address, is_backfill)
+-- );
+
+-- -- For storing swap events
+-- CREATE TABLE swap_events (
+--     id SERIAL PRIMARY KEY,
+--     pool_address VARCHAR NOT NULL,
+--     block_number BIGINT NOT NULL,
+--     transaction_hash VARCHAR NOT NULL,
+--     sender VARCHAR NOT NULL,
+--     recipient VARCHAR NOT NULL,
+--     amount0 NUMERIC NOT NULL,
+--     amount1 NUMERIC NOT NULL,
+--     sqrt_price_x96 NUMERIC NOT NULL,
+--     liquidity NUMERIC NOT NULL,
+--     tick INTEGER NOT NULL,
+--     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--     UNIQUE(transaction_hash, pool_address)
+-- );
+
+-- -- For tracking backfill chunks
+-- CREATE TABLE backfill_chunks (
+--     id SERIAL PRIMARY KEY,
+--     pool_address VARCHAR NOT NULL,
+--     start_block BIGINT NOT NULL,
+--     end_block BIGINT NOT NULL,
+--     status VARCHAR NOT NULL, -- 'pending', 'processing', 'completed', 'failed'
+--     error TEXT,
+--     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+--     UNIQUE(pool_address, start_block, end_block)
+-- );

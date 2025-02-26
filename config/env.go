@@ -2,38 +2,63 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
-type ServerEnv struct {
-	Env           string
-	CorsWhiteList []string
+// Common configuration shared between server and indexer
+type CommonConfig struct {
+	Env     string
+	AppName string `validate:"min=1"`
+	IsProd  bool
+	IsDev   bool
+	IsTest  bool
 
-	AppName   string `validate:"min=1"`
-	ApiHost   string `validate:"min=1"`
-	JwtSecret string `validate:"min=10"`
-
-	Port string `validate:"number"`
-
-	IsProd    bool
-	IsStaging bool
-	IsDev     bool
-	IsTest    bool
-
-	OpenObserveEndpoint   string `validate:"url"`
-	OpenObserveCredential string `validate:"min=1"`
-
+	// Database
 	PostgresUrl  string `validate:"url"`
 	MigrationUrl string `validate:"url"`
 
-	AlchemyUrl string `validate:"url"`
+	// Monitoring
+	OpenObserveEndpoint   string `validate:"url"`
+	OpenObserveCredential string `validate:"min=1"`
 
+	// EVM
+	AlchemyUrl string `validate:"url"`
+}
+
+// Server configuration
+type ServerConfig struct {
+	ApiHost       string `validate:"min=1"`
+	Port          string `validate:"number"`
+	JwtSecret     string `validate:"min=10"`
+	CorsWhiteList []string
+
+	// OpenAI
 	OpenaiApiKey      string `validate:"min=1"`
 	OpenaiAssistantId string `validate:"min=1"`
+
+	// Realtime Manager
+	RealtimeInterval time.Duration `validate:"min=1s"`
+}
+
+// Indexer-specific configuration
+type IndexerConfig struct {
+	ChunkSize     uint64        `validate:"min=1"`
+	Concurrency   int           `validate:"min=1"`
+	StartBlock    uint64        `validate:"min=1"`
+	FetchInterval time.Duration `validate:"min=1s"`
+}
+
+// ServerEnv combines all configurations
+type ServerEnv struct {
+	CommonConfig
+	ServerConfig
+	IndexerConfig
 }
 
 var Env ServerEnv
@@ -43,7 +68,6 @@ func LoadEnvWithPath(path string) {
 	if err != nil {
 		log.Fatal().Msgf("Error loading %s file: %s", path, err)
 	}
-
 	loadEnv()
 }
 
@@ -60,18 +84,54 @@ func LoadEnv() {
 			log.Fatal().Msgf("Error loading .env.test file: %s", err)
 		}
 	}
-
 	loadEnv()
 }
 
 func loadEnv() {
+	common := loadCommonConfig()
+
+	server := loadServerConfig()
+
+	indexer := loadIndexerConfig()
+
+	Env = ServerEnv{
+		CommonConfig:  common,
+		ServerConfig:  server,
+		IndexerConfig: indexer,
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(Env); err != nil {
+		log.Fatal().Msgf("Error validating env: %s", err)
+	}
+
+	log.Info().Msgf("Environment loaded: %+v", Env)
+}
+
+func loadCommonConfig() CommonConfig {
+	env := os.Getenv("ENV")
+	return CommonConfig{
+		Env:     env,
+		AppName: os.Getenv("APP_NAME"),
+		IsProd:  env == "production",
+		IsDev:   env == "development" || env == "",
+		IsTest:  env == "test",
+
+		PostgresUrl:  os.Getenv("POSTGRES_URL"),
+		MigrationUrl: os.Getenv("MIGRATION_URL"),
+
+		OpenObserveEndpoint:   os.Getenv("OPENOBSERVE_ENDPOINT"),
+		OpenObserveCredential: os.Getenv("OPENOBSERVE_CREDENTIAL"),
+
+		AlchemyUrl: os.Getenv("ALCHEMY_URL"),
+	}
+}
+
+func loadServerConfig() ServerConfig {
+	// Load CORS whitelist
 	rawCORSWhiteList := os.Getenv("CORS_WHITE_LIST")
-	var corsWhiteList []string
-	if rawCORSWhiteList == "" {
-		corsWhiteList = []string{
-			"http://localhost:3000",
-		}
-	} else {
+	corsWhiteList := []string{"http://localhost:3000"}
+	if rawCORSWhiteList != "" {
 		corsWhiteList = strings.Split(rawCORSWhiteList, ",")
 	}
 
@@ -80,38 +140,63 @@ func loadEnv() {
 		port = "12345"
 	}
 
-	Env = ServerEnv{
-		Env:           os.Getenv("ENV"),
+	realtimeInterval := getEnvDuration("REALTIME_INTERVAL", "1s")
+
+	return ServerConfig{
+		ApiHost:       os.Getenv("API_HOST"),
+		Port:          port,
+		JwtSecret:     os.Getenv("JWT_SECRET"),
 		CorsWhiteList: corsWhiteList,
-
-		AppName:   os.Getenv("APP_NAME"),
-		ApiHost:   os.Getenv("API_HOST"),
-		JwtSecret: os.Getenv("JWT_SECRET"),
-		Port:      port,
-
-		OpenObserveEndpoint:   os.Getenv("OPENOBSERVE_ENDPOINT"),
-		OpenObserveCredential: os.Getenv("OPENOBSERVE_CREDENTIAL"),
-
-		PostgresUrl:  os.Getenv("POSTGRES_URL"),
-		MigrationUrl: os.Getenv("MIGRATION_URL"),
-
-		AlchemyUrl: os.Getenv("ALCHEMY_URL"),
 
 		OpenaiApiKey:      os.Getenv("OPENAI_API_KEY"),
 		OpenaiAssistantId: os.Getenv("OPENAI_ASSISTANT_ID"),
+
+		RealtimeInterval: realtimeInterval,
 	}
+}
 
-	validate := validator.New()
-	err := validate.Struct(Env)
+func loadIndexerConfig() IndexerConfig {
+	return IndexerConfig{
+		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
+		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
+		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
+		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
+	}
+}
 
+// Helper functions for environment variable parsing
+func getEnvDuration(key, defaultValue string) time.Duration {
+	value := os.Getenv(key)
+	if value == "" {
+		value = defaultValue
+	}
+	duration, err := time.ParseDuration(value)
 	if err != nil {
-		log.Fatal().Msgf("Error validating env: %s", err)
+		log.Fatal().Msgf("Error parsing %s: %s", key, err)
 	}
+	return duration
+}
 
-	Env.IsProd = Env.Env == "production"
-	Env.IsStaging = Env.Env == "staging"
-	Env.IsDev = Env.Env == "development" || len(Env.Env) == 0
-	Env.IsTest = Env.Env == "test"
+func getEnvUint64(key string, defaultValue uint64) uint64 {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		log.Fatal().Msgf("Error parsing %s: %s", key, err)
+	}
+	return parsed
+}
 
-	log.Info().Msgf("Env: %+v", Env)
+func getEnvInt(key string, defaultValue int) int {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		log.Fatal().Msgf("Error parsing %s: %s", key, err)
+	}
+	return parsed
 }

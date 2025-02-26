@@ -24,7 +24,7 @@ func InitLogger() {
 	o2Writer := openobserve.NewLogWriter(zerolog.InfoLevel)
 	consoleWriter := zerolog.ConsoleWriter{Out: os.Stderr}
 
-	if Env.IsProd || Env.IsStaging {
+	if Env.IsProd || Env.IsDev {
 		subWriters = append(subWriters, os.Stdout)
 		subWriters = append(subWriters, o2Writer)
 	} else {
