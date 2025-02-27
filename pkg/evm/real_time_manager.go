@@ -73,8 +73,6 @@ func (m *RealtimeManager) watchPool(ctx context.Context, pool common.Address) er
 }
 
 func (m *RealtimeManager) watchPoolWithRetry(ctx context.Context, pool common.Address) error {
-	log.Info().Msgf("Watching pool %s", pool.Hex())
-
 	// Determine if we should use WebSocket or polling based on URL
 	isWebSocket := strings.HasPrefix(config.Env.AlchemyUrl, "wss")
 
@@ -85,7 +83,6 @@ func (m *RealtimeManager) watchPoolWithRetry(ctx context.Context, pool common.Ad
 }
 
 func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Address) error {
-
 	contract, err := NewUniswapV3(pool, m.client)
 	if err != nil {
 		return fmt.Errorf("failed to create contract instance: %w", err)
@@ -95,7 +92,9 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 	defer ticker.Stop()
 
 	var lastProcessedBlock uint64
-	log.Info().Msg("🚀 Ready to watch pool via Polling")
+	log.Info().
+		Str("pool", pool.Hex()).
+		Msg("🚀 Ready to watch pool via Polling")
 
 	for {
 		select {
@@ -115,7 +114,32 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 				lastProcessedBlock = currentBlock - 1
 			}
 
-			if err := m.processPoolBlockRange(ctx, contract, lastProcessedBlock+1, currentBlock); err != nil {
+			// Ensure we don't request too many blocks
+			startBlock := lastProcessedBlock + 1
+			if currentBlock-startBlock > 2048 {
+				log.Warn().
+					Uint64("gap", currentBlock-startBlock).
+					Str("pool", pool.Hex()).
+					Msg("Too many missed blocks, adjusting range")
+				startBlock = currentBlock - 2048
+			}
+
+			log.Info().
+				Uint64("start", startBlock).
+				Uint64("end", currentBlock).
+				Str("pool", pool.Hex()).
+				Msg("Processing block range")
+
+			if err := m.processPoolBlockRange(ctx, contract, startBlock, currentBlock); err != nil {
+				if strings.Contains(err.Error(), "cannot be found") {
+					log.Warn().
+						Str("pool", pool.Hex()).
+						Uint64("start", startBlock).
+						Uint64("end", currentBlock).
+						Msg("Blocks not available, adjusting range")
+					lastProcessedBlock = currentBlock - 1
+					continue
+				}
 				log.Error().
 					Err(err).
 					Str("pool", pool.Hex()).

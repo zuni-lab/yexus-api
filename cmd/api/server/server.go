@@ -35,6 +35,7 @@ func New() *Server {
 	if config.Env.IsDev {
 		appName = appName + "-dev"
 	}
+	
 	openobserve.Init(openobserve.OpenObserveConfig{
 		Endpoint:    config.Env.OpenObserveEndpoint,
 		Credential:  config.Env.OpenObserveCredential,
@@ -71,6 +72,9 @@ func (s *Server) Start() error {
 	}
 
 	s.printRoutes()
+
+	log.Info().Msgf("🥪 Environment loaded: %+v", config.Env)
+
 	return s.Raw.Start(fmt.Sprintf("%s:%s", config.Env.ApiHost, config.Env.Port))
 }
 

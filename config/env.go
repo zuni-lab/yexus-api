@@ -104,8 +104,6 @@ func loadEnv() {
 	if err := validate.Struct(Env); err != nil {
 		log.Fatal().Msgf("Error validating env: %s", err)
 	}
-
-	log.Info().Msgf("Environment loaded: %+v", Env)
 }
 
 func loadCommonConfig() CommonConfig {

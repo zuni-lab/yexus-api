@@ -37,18 +37,63 @@ CREATE TABLE IF NOT EXISTS prices (
     PRIMARY KEY (id, timestamp_utc)
 );
 
+
 -- Create a hypertable for prices
 SELECT create_hypertable('prices', by_range('timestamp_utc'));
+
+
+CREATE TYPE ORDER_STATUS AS ENUM ('PENDING', 'PARTIAL_FILLED' ,'FILLED', 'REJECTED', 'CANCELLED');
+CREATE TYPE ORDER_SIDE AS ENUM ('BUY', 'SELL');
+CREATE TYPE ORDER_TYPE AS ENUM ('MARKET', 'LIMIT', 'STOP', 'TWAP');
+
+CREATE TABLE IF NOT EXISTS orders (
+    id BIGSERIAL PRIMARY KEY,
+    pool_ids VARCHAR(42)[] NOT NULL,
+    paths VARCHAR(256) NOT NULL,
+
+    wallet VARCHAR(42),
+    status ORDER_STATUS NOT NULL DEFAULT 'PENDING',
+    
+    side ORDER_SIDE NOT NULL,
+    type ORDER_TYPE NOT NULL,
+    
+    price NUMERIC(78,18) NOT NULL,
+    amount NUMERIC(78,18) NOT NULL,
+    slippage DOUBLE PRECISION,
+    signature VARCHAR(130), -- 0x + 64 bytes for r, 64 bytes for s, 2 bytes for v
+    nonce BIGINT NOT NULL,
+
+    parent_id BIGINT,
+    twap_interval_seconds INT,
+    twap_executed_times INT,
+    twap_current_executed_times INT,
+    twap_min_price NUMERIC(78,18),
+    twap_max_price NUMERIC(78,18),
+
+    deadline TIMESTAMP,
+    partial_filled_at TIMESTAMP,
+    filled_at TIMESTAMP,
+    rejected_at TIMESTAMP,
+    cancelled_at TIMESTAMP,
+    created_at TIMESTAMP,
+
+    FOREIGN KEY (parent_id) REFERENCES orders(id) ON DELETE CASCADE
+);
 
 
 --- Seed data ---
 
 INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES
 ('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 'USD Coin', 'USDC', 6, TRUE),
-('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 'Wrapped Ether', 'WETH', 18, FALSE);
+('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 'Wrapped Ether', 'WETH', 18, FALSE),
+('0xdAC17F958D2ee523a2206206994597C13D831ec7', 'Tether USD', 'USDT', 6, TRUE);
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
 ('0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
+
+INSERT INTO pools (id, token0_id, token1_id) VALUES
+('0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '0xdAC17F958D2ee523a2206206994597C13D831ec7');
+
 
 
 

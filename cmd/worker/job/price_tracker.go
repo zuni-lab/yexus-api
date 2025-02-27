@@ -3,11 +3,12 @@ package job
 import (
 	"context"
 	"fmt"
-	"github.com/zuni-lab/dexon-service/internal/orders/services"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/zuni-lab/dexon-service/internal/orders/services"
+	"github.com/zuni-lab/dexon-service/pkg/utils"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -131,7 +132,7 @@ func (p *PriceTracker) WatchPool(ctx context.Context, pool common.Address) error
 }
 
 func (p *PriceTracker) watchPoolWithRetry(ctx context.Context, pool common.Address) error {
-	log.Info().Msgf("Watching pool %s", pool.Hex())
+	log.Info().Msgf("🚀 Connecting to pool %s", pool.Hex())
 	attempt := 0
 RETRY:
 	for attempt < int(p.maxAttempts) {
@@ -170,7 +171,7 @@ RETRY:
 		attempt = 0
 		p.backoff.Reset()
 
-		log.Info().Msg("🚀 Ready to watch pool")
+		log.Info().Msg("🚀 Start watching pool")
 
 		for {
 			select {
