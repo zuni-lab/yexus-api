@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"strings"
+	"sync"
 
 	"github.com/rs/zerolog/log"
+	"github.com/zuni-lab/dexon-service/internal/orders/services"
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
@@ -13,6 +14,7 @@ import (
 
 type swapHandler struct {
 	tokens map[string]*db.PoolDetailsRow // Cache token info by pool address
+	mu     sync.RWMutex
 }
 
 var _ evm.SwapHandler = &swapHandler{}
@@ -24,11 +26,7 @@ func NewSwapHandler() *swapHandler {
 }
 
 func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) error {
-	log.Info().
-		Str("pool", event.Raw.Address.Hex()).
-		Msg("Handling swap event")
-
-	poolAddress := event.Raw.Address.Hex()
+	poolAddress := utils.NormalizeAddress(event.Raw.Address.Hex())
 
 	// Get or load token info
 	tokenInfo, err := h.getTokenInfo(ctx, poolAddress)
@@ -47,13 +45,13 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 	log.Info().
 		Str("pool", poolAddress).
 		Str("sqrtPriceX96", event.SqrtPriceX96.String()).
-		Msg("Swap event")
+		Msg("Handling Swap event")
 
 	// Calculate price
 	price := utils.CalculatePrice(
 		event.SqrtPriceX96,
-		uint8(tokenInfo.Token0Decimals),
-		uint8(tokenInfo.Token1Decimals),
+		tokenInfo.Token0Decimals,
+		tokenInfo.Token1Decimals,
 		tokenInfo.Token0IsStable,
 	)
 
@@ -61,21 +59,27 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 		return fmt.Errorf("failed to calculate price for pool %s", poolAddress)
 	}
 
-	log.Info().
-		Str("pool", poolAddress).
-		Str("price", price.String()).
-		Msg("Price calculated")
+	_, err = services.MatchOrder(ctx, price)
+	if err != nil {
+		log.Error().Any("pool", poolAddress).Any("price", price).Err(err).Msgf("❌ [SwapHandler] Failed to match order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
 
+		// TODO: return
+	}
+
+	log.Info().Any("pool", poolAddress).Msgf("✅ [SwapHandler] Successfully matched order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
 	return nil
 }
 
 func (h *swapHandler) getTokenInfo(ctx context.Context, poolAddress string) (*db.PoolDetailsRow, error) {
+
 	// Check cache first
-	if info, exists := h.tokens[poolAddress]; exists {
+	h.mu.RLock()
+	info, exists := h.tokens[poolAddress]
+	h.mu.RUnlock()
+
+	if exists {
 		return info, nil
 	}
-
-	poolAddress = strings.ToLower(poolAddress)
 
 	// Get pool info from database
 	pool, err := db.DB.PoolDetails(ctx, poolAddress)
@@ -83,7 +87,9 @@ func (h *swapHandler) getTokenInfo(ctx context.Context, poolAddress string) (*db
 		return nil, fmt.Errorf("failed to get pool: %w", err)
 	}
 
+	h.mu.Lock()
 	h.tokens[poolAddress] = &pool
+	h.mu.Unlock()
 
 	return h.tokens[poolAddress], nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/zuni-lab/dexon-service/pkg/db"
+	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
 type GetMarketDataParams struct {
@@ -13,7 +14,7 @@ type GetMarketDataParams struct {
 
 func GetMarketData(ctx context.Context, input GetMarketDataParams) ([]db.GetMarketDataRow, error) {
 	return db.DB.GetMarketData(ctx, db.GetMarketDataParams{
-		PoolID:     input.PoolID,
+		PoolID:     utils.NormalizeAddress(input.PoolID),
 		TimeBucket: input.TimeBucket,
 	})
 }

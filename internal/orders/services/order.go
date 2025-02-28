@@ -2,11 +2,16 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jinzhu/copier"
-	"github.com/zuni-lab/dexon-service/pkg/db"
+	"math/big"
 	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jinzhu/copier"
+	"github.com/rs/zerolog/log"
+	"github.com/zuni-lab/dexon-service/pkg/db"
+	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
 type ListOrdersByWalletQuery struct {
@@ -96,17 +101,22 @@ func FillPartialOrder(ctx context.Context, parent db.Order, price, amount string
 	return &order, nil
 }
 
-func MatchOrder(ctx context.Context, price string) (*db.Order, error) {
-	var numericPrice pgtype.Numeric
-	err := numericPrice.Scan(price)
+func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
+
+	numericPrice, err := utils.BigFloatToNumeric(price)
 	if err != nil {
 		return nil, err
 	}
 
 	order, err := db.DB.GetMatchedOrder(ctx, numericPrice)
 	if err != nil {
+		if err == sql.ErrNoRows || err == pgx.ErrNoRows {
+			return nil, errors.New("no order matched")
+		}
 		return nil, err
 	}
+
+	log.Info().Any("matched orders", order).Msg("Matched order")
 
 	// TODO: Call to contract
 

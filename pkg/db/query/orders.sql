@@ -29,7 +29,7 @@ WHERE (
         (side = 'BUY' AND type = 'LIMIT' AND price <= $1)
         OR (side = 'SELL' AND type = 'LIMIT' AND price >= $1)
         OR (side = 'BUY' AND type = 'STOP' AND price >= $1)
-        OR (side = 'SELL' AND type 'STOP' AND price <= $1)
+        OR (side = 'SELL' AND type = 'STOP' AND price <= $1)
         OR (side = 'BUY' AND type = 'TWAP' AND price <= $1)
         OR (side = 'SELL' AND type = 'TWAP' AND price >= $1)
     )

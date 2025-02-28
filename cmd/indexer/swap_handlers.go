@@ -25,10 +25,6 @@ func NewSwapHandler() *swapHandler {
 }
 
 func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) error {
-	log.Info().
-		Str("pool", event.Raw.Address.Hex()).
-		Msg("Handling swap event")
-
 	poolAddress := event.Raw.Address.Hex()
 
 	// Get or load token info
@@ -53,8 +49,8 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 	// Calculate price
 	price := utils.CalculatePrice(
 		event.SqrtPriceX96,
-		uint8(tokenInfo.Token0Decimals),
-		uint8(tokenInfo.Token1Decimals),
+		tokenInfo.Token0Decimals,
+		tokenInfo.Token1Decimals,
 		tokenInfo.Token0IsStable,
 	)
 
