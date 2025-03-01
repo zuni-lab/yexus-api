@@ -21,3 +21,14 @@ func ChatDex(c echo.Context) error {
 
 	return services.ChatDex(ctx, body, c.Response().Writer)
 }
+
+func GetMessagesList(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var body services.GetMessagesListParams
+	if err := utils.BindAndValidate(c, &body); err != nil {
+		return err
+	}
+
+	return services.GetMessagesList(ctx, body, c.Response().Writer)
+}

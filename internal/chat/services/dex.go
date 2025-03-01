@@ -54,3 +54,16 @@ func ChatDex(ctx context.Context, input ChatParams, w http.ResponseWriter) error
 
 	return openai.Streaming(ctx, threadID, input.Message, w)
 }
+
+type GetMessagesListParams struct {
+	ThreadID string `json:"thread_id"`
+}
+
+func GetMessagesList(ctx context.Context, input GetMessagesListParams, w http.ResponseWriter) error {
+	messages, err := openai.GetMessagesList(ctx, input.ThreadID)
+	if err != nil {
+		return fmt.Errorf("failed to get messages list: %w", err)
+	}
+
+	return json.NewEncoder(w).Encode(messages)
+}
