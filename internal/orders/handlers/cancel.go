@@ -1,16 +1,19 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/zuni-lab/dexon-service/internal/orders/services"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
-func Create(c echo.Context) error {
+func Cancel(c echo.Context) error {
 	var (
-		body services.CreateOrderBody
+		body services.CancelOrderBody
+		err  error
 		ctx  = c.Request().Context()
 	)
 
@@ -18,7 +21,12 @@ func Create(c echo.Context) error {
 		return err
 	}
 
-	order, err := services.CreateOrder(ctx, body)
+	body.ID, err = strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid id"))
+	}
+
+	order, err := services.CancelOrder(ctx, body)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

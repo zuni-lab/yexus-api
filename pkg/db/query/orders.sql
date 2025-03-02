@@ -18,12 +18,24 @@ RETURNING *;
 -- name: GetOrdersByWallet :many
 SELECT * FROM orders
 WHERE wallet = $1
+    AND (
+        ARRAY_LENGTH(@status::order_status[], 1) IS NULL
+        OR status = ANY(@status)
+    )
+    AND (
+        ARRAY_LENGTH(@types::order_type[], 1) IS NULL
+        OR type = ANY(@types)
+    )
+    AND (
+        sqlc.narg(side)::order_side IS NULL
+        OR side = @side
+    )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
 
--- name: GetOrdersByStatus :many
+-- name: GetOrderByID :one
 SELECT * FROM orders
-WHERE status = ANY(@status::varchar[]);
+WHERE wallet = $1 AND id = $2;
 
 -- name: GetMatchedOrder :one
 SELECT * FROM orders
@@ -32,21 +44,48 @@ WHERE (
         OR (side = 'SELL' AND type = 'LIMIT' AND price >= $1)
         OR (side = 'BUY' AND type = 'STOP' AND price >= $1)
         OR (side = 'SELL' AND type = 'STOP' AND price <= $1)
-        OR (side = 'BUY' AND type = 'TWAP' AND price <= $1)
-        OR (side = 'SELL' AND type = 'TWAP' AND price >= $1)
+        OR (type = 'TWAP' AND price BETWEEN twap_min_price AND twap_max_price)
     )
     AND status IN ('PENDING', 'PARTIAL_FILLED')
+    AND (
+        type <> 'TWAP'
+        OR ( -- Check TWAP condition
+            twap_current_executed_times < twap_executed_times
+            AND (
+                partial_filled_at IS NULL
+                OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+            )
+        )
+    )
+    AND (
+        deadline IS NULL
+        OR deadline >= NOW()
+    )
 ORDER BY created_at ASC
 LIMIT 1;
 
--- name: UpdateOrder :one
+-- name: CancelOrder :one
 UPDATE orders
 SET
-    status = COALESCE($2, status),
-    twap_current_executed_times = COALESCE($3, twap_current_executed_times),
-    filled_at = COALESCE($4, filled_at),
-    cancelled_at = COALESCE($5, cancelled_at),
-    partial_filled_at = COALESCE($6, partial_filled_at),
-    rejected_at = COALESCE($7, rejected_at)
-WHERE id = $1
+    status = 'CANCELLED',
+    cancelled_at = $1
+WHERE id = $2 AND wallet = $3 AND status NOT IN ('REJECTED', 'FILLED')
+RETURNING *;
+
+-- name: FillOrder :one
+UPDATE orders
+SET
+    status = 'FILLED',
+    filled_at = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: FillTwapOrder :one
+UPDATE orders
+SET
+    status = $1,
+    twap_current_executed_times = $2,
+    partial_filled_at = COALESCE($3, partial_filled_atcancelled_at),
+    filled_at = $4
+WHERE id = $5
 RETURNING *;
