@@ -150,6 +150,16 @@ type BlockProcessingState struct {
 	UpdatedAt          pgtype.Timestamp `json:"updatedAt"`
 }
 
+type ChatThread struct {
+	ID          int64            `json:"id"`
+	ThreadID    string           `json:"threadId"`
+	UserAddress string           `json:"userAddress"`
+	ThreadName  string           `json:"threadName"`
+	CreatedAt   pgtype.Timestamp `json:"createdAt"`
+	UpdatedAt   pgtype.Timestamp `json:"updatedAt"`
+	IsDeleted   bool             `json:"isDeleted"`
+}
+
 type Order struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`

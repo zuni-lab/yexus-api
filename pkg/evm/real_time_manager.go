@@ -179,11 +179,12 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 					Bool("first_run", isFirstRun).
 					Str("pool", pool.Hex()).
 					Msg("Processing blocks despite being below threshold")
-			} else if newBlocks > 100 {
+			} else if newBlocks > config.Env.RealtimeMaxBlockRange {
 				log.Warn().
 					Uint64("blocks", newBlocks).
 					Str("pool", pool.Hex()).
 					Msg("Processing unusually large block range")
+				lastProcessedBlock = currentBlock - config.Env.RealtimeMaxBlockRange
 			}
 
 			// Process the new blocks

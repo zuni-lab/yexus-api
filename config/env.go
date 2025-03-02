@@ -45,6 +45,7 @@ type ServerConfig struct {
 	// Realtime Manager
 	RealtimeInterval      time.Duration `validate:"min=1s"`
 	RealtimeMinBlockRange uint64        `validate:"min=1"`
+	RealtimeMaxBlockRange uint64        `validate:"min=1"`
 }
 
 // Indexer-specific configuration
@@ -152,6 +153,7 @@ func loadServerConfig() ServerConfig {
 
 		RealtimeInterval:      realtimeInterval,
 		RealtimeMinBlockRange: getEnvUint64("REALTIME_MIN_BLOCK_RANGE", 5),
+		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
 	}
 }
 

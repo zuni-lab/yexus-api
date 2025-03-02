@@ -1,35 +1,29 @@
-package server
+package swap
 
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/internal/orders/services"
-	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
 type swapHandler struct {
-	tokens map[string]*db.PoolDetailsRow // Cache token info by pool address
-	mu     sync.RWMutex
 }
 
 var _ evm.SwapHandler = &swapHandler{}
 
 func NewSwapHandler() *swapHandler {
-	return &swapHandler{
-		tokens: make(map[string]*db.PoolDetailsRow),
-	}
+	return &swapHandler{}
 }
 
 func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) error {
 	poolAddress := utils.NormalizeAddress(event.Raw.Address.Hex())
 
 	// Get or load token info
-	tokenInfo, err := h.getTokenInfo(ctx, poolAddress)
+	tokenInfo, err := PoolInfo.getTokenInfo(ctx, poolAddress)
 	if err != nil {
 		return fmt.Errorf("failed to get token info: %w", err)
 	}
@@ -59,6 +53,8 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 		return fmt.Errorf("failed to calculate price for pool %s", poolAddress)
 	}
 
+	PoolInfo.updateUsdPrice(poolAddress, price.Text('f', -1))
+
 	_, err = services.MatchOrder(ctx, price)
 	if err != nil {
 		log.Error().Any("pool", poolAddress).Any("price", price).Err(err).Msgf("❌ [SwapHandler] Failed to match order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
@@ -68,28 +64,4 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 
 	log.Info().Any("pool", poolAddress).Msgf("✅ [SwapHandler] Successfully matched order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
 	return nil
-}
-
-func (h *swapHandler) getTokenInfo(ctx context.Context, poolAddress string) (*db.PoolDetailsRow, error) {
-
-	// Check cache first
-	h.mu.RLock()
-	info, exists := h.tokens[poolAddress]
-	h.mu.RUnlock()
-
-	if exists {
-		return info, nil
-	}
-
-	// Get pool info from database
-	pool, err := db.DB.PoolDetails(ctx, poolAddress)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get pool: %w", err)
-	}
-
-	h.mu.Lock()
-	h.tokens[poolAddress] = &pool
-	h.mu.Unlock()
-
-	return h.tokens[poolAddress], nil
 }

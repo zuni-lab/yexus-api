@@ -86,13 +86,13 @@ CREATE TABLE IF NOT EXISTS orders (
 INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES
 ('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'USD Coin', 'USDC', 6, TRUE),
 ('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'Wrapped Ether', 'WETH', 18, FALSE),
-('0xdac17f958d2ee523a2206206994597c13d831ec7', 'Tether USD', 'USDT', 6, TRUE);
+('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'Wrapped BTC', 'WBTC', 8, FALSE);
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
 ('0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
-('0xc7bbec68d12a0d1830360f8ec58fa599ba1b0e9b', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0xdac17f958d2ee523a2206206994597c13d831ec7');
+('0x56534741cd8b152df6d48adf7ac51f75169a83b2', '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48');
 
 -- -- For tracking processed blocks
 CREATE TABLE block_processing_state (
@@ -102,4 +102,16 @@ CREATE TABLE block_processing_state (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (pool_address, is_backfill)
+);
+
+
+--- For user chat ---
+CREATE TABLE IF NOT EXISTS chat_threads (
+    id BIGSERIAL PRIMARY KEY,
+    thread_id VARCHAR(256) NOT NULL,
+    user_address VARCHAR(42) NOT NULL,
+    thread_name VARCHAR(256) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );

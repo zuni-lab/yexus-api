@@ -13,6 +13,7 @@ import (
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"github.com/zuni-lab/dexon-service/pkg/openai"
 	"github.com/zuni-lab/dexon-service/pkg/openobserve"
+	"github.com/zuni-lab/dexon-service/pkg/swap"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
@@ -35,7 +36,7 @@ func New() *Server {
 	if config.Env.IsDev {
 		appName = appName + "-dev"
 	}
-	
+
 	openobserve.Init(openobserve.OpenObserveConfig{
 		Endpoint:    config.Env.OpenObserveEndpoint,
 		Credential:  config.Env.OpenObserveCredential,
@@ -89,7 +90,7 @@ func (s *Server) startRealtimeManager() error {
 	})
 
 	s.rtManager = evm.NewRealtimeManager()
-	s.rtManager.AddHandler(NewSwapHandler())
+	s.rtManager.AddHandler(swap.NewSwapHandler())
 
 	s.wg.Add(1)
 	go func() {
@@ -136,6 +137,7 @@ func (s *Server) Close() {
 func loadSvcs(ctx context.Context) {
 	db.Init(ctx, config.Env.PostgresUrl, config.Env.MigrationUrl)
 	openai.Init()
+	swap.InitPoolInfo()
 }
 
 func closeSvcs() {
