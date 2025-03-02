@@ -92,6 +92,11 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.Order, error) {
 		if params.Type == db.OrderTypeTWAP {
 			_ = params.Price.Scan("0")
 			_ = params.Slippage.Scan("0")
+		} else {
+			params.TwapIntervalSeconds.Valid = false
+			params.TwapExecutedTimes.Valid = false
+			params.TwapMinPrice.Valid = false
+			params.TwapMaxPrice.Valid = false
 		}
 	}
 
