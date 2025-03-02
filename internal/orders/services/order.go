@@ -24,6 +24,8 @@ type ListOrdersByWalletQuery struct {
 }
 
 func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) ([]db.Order, error) {
+	query.Wallet = utils.NormalizeAddress(query.Wallet)
+
 	var params db.GetOrdersByWalletParams
 	if err := copier.Copy(&params, &query); err != nil {
 		return nil, err
@@ -43,6 +45,8 @@ type GetOrderByIDQuery struct {
 }
 
 func GetOrderByID(ctx context.Context, query GetOrderByIDQuery) (*db.Order, error) {
+	query.Wallet = utils.NormalizeAddress(query.Wallet)
+
 	var params db.GetOrderByIDParams
 	if err := copier.Copy(&params, &query); err != nil {
 		return nil, err
@@ -75,6 +79,8 @@ type CreateOrderBody struct {
 }
 
 func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.Order, error) {
+	body.Wallet = utils.NormalizeAddress(body.Wallet)
+
 	var params db.InsertOrderParams
 	if err := copier.Copy(&params, &body); err != nil {
 		return nil, err
@@ -121,6 +127,8 @@ type CancelOrderBody struct {
 }
 
 func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.Order, error) {
+	body.Wallet = utils.NormalizeAddress(body.Wallet)
+
 	var params db.CancelOrderParams
 	if err := copier.Copy(&params, &body); err != nil {
 		return nil, err
