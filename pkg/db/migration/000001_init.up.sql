@@ -82,17 +82,29 @@ CREATE TABLE IF NOT EXISTS orders (
 
 
 --- Seed data ---
-
 INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES
-('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'USD Coin', 'USDC', 6, TRUE),
-('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'Wrapped Ether', 'WETH', 18, FALSE),
-('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', 'Wrapped BTC', 'WBTC', 8, FALSE);
+(LOWER('0x9f6006523bbe9d719e83a9f050108dd5463f269d'), 'USD Coin', 'USDC', 6, TRUE),
+(LOWER('0xbcb4d4effb4820abe4ab77f4349605dc2ebae551'), 'Wrapped BTC', 'WBTC', 8, FALSE),
+(LOWER('0x951dbc0e23228a5b5a40f4b845da75e5658ba3e4'), 'Wrapped ETH', 'WETH', 18, FALSE),
+(LOWER('0xe6ae5d42b0952c5a885538ec0aceb8f5c0c3857d'), 'Wrapped SOL', 'WSOL', 18, FALSE);
+
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
-('0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
+(LOWER('0x70429da31815168EcCDd6898DA18D44d5641540d'), 
+LOWER('0x9f6006523bbe9d719e83a9f050108dd5463f269d'), 
+LOWER('0xbcb4d4effb4820abe4ab77f4349605dc2ebae551'));
 
 INSERT INTO pools (id, token0_id, token1_id) VALUES
-('0x56534741cd8b152df6d48adf7ac51f75169a83b2', '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48');
+(LOWER('0xb8bd80BA7aFA32006Ae4cF7D1dA2Ecb8bBCa9Bf8'), 
+LOWER('0x951dbc0e23228a5b5a40f4b845da75e5658ba3e4'), 
+LOWER('0x9f6006523bbe9d719e83a9f050108dd5463f269d'));
+
+INSERT INTO pools (id, token0_id, token1_id) VALUES
+(LOWER('0x1BeCb7209e86A3d7D4631E6dC3bc59E897F54aF5'), 
+LOWER('0x9f6006523bbe9d719e83a9f050108dd5463f269d'), 
+LOWER('0xe6ae5d42b0952c5a885538ec0aceb8f5c0c3857d'));
+
+
 
 -- -- For tracking processed blocks
 CREATE TABLE block_processing_state (
