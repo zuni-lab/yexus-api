@@ -32,6 +32,7 @@ type Querier interface {
 	GetPoolsByIDs(ctx context.Context, ids []string) ([]Pool, error)
 	GetPriceByPoolID(ctx context.Context, poolID string) (Price, error)
 	GetPrices(ctx context.Context, arg GetPricesParams) ([]Price, error)
+	IncreaseOrderNonce(ctx context.Context, wallet string) (int64, error)
 	InsertOrder(ctx context.Context, arg InsertOrderParams) (InsertOrderRow, error)
 	PoolDetails(ctx context.Context, id string) (PoolDetailsRow, error)
 	UpsertBlockProcessingState(ctx context.Context, arg UpsertBlockProcessingStateParams) error

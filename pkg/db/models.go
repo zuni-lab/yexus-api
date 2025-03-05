@@ -172,7 +172,6 @@ type Order struct {
 	Amount                   pgtype.Numeric   `json:"amount"`
 	Slippage                 pgtype.Float8    `json:"slippage"`
 	Signature                pgtype.Text      `json:"signature"`
-	Nonce                    int64            `json:"nonce"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
 	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
 	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
@@ -185,6 +184,13 @@ type Order struct {
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
 	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
 	CreatedAt                pgtype.Timestamp `json:"createdAt"`
+}
+
+type OrderNonce struct {
+	Wallet    string           `json:"wallet"`
+	Nonce     int64            `json:"nonce"`
+	UpdatedAt pgtype.Timestamp `json:"updatedAt"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
 }
 
 type Pool struct {

@@ -79,6 +79,12 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (parent_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS order_nonces (
+    wallet VARCHAR(42) PRIMARY KEY,
+    nonce BIGINT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 --- Seed data ---
 INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES

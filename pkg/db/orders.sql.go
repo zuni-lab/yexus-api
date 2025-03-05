@@ -130,7 +130,7 @@ SET
     status = 'FILLED',
     filled_at = $1
 WHERE id = $2
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
 type FillOrderParams struct {
@@ -153,7 +153,6 @@ func (q *Queries) FillOrder(ctx context.Context, arg FillOrderParams) (Order, er
 		&i.Amount,
 		&i.Slippage,
 		&i.Signature,
-		&i.Nonce,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -178,7 +177,7 @@ SET
     partial_filled_at = COALESCE($3, partial_filled_atcancelled_at),
     filled_at = $4
 WHERE id = $5
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
 type FillTwapOrderParams struct {
@@ -210,7 +209,6 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 		&i.Amount,
 		&i.Slippage,
 		&i.Signature,
-		&i.Nonce,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -228,7 +226,7 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 }
 
 const getMatchedOrder = `-- name: GetMatchedOrder :one
-SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
+SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
 WHERE (
         (side = 'BUY' AND type = 'LIMIT' AND price <= $1)
         OR (side = 'SELL' AND type = 'LIMIT' AND price >= $1)
@@ -270,7 +268,6 @@ func (q *Queries) GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Or
 		&i.Amount,
 		&i.Slippage,
 		&i.Signature,
-		&i.Nonce,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -359,7 +356,7 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Get
 }
 
 const getOrdersByWallet = `-- name: GetOrdersByWallet :many
-SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 FROM orders
 WHERE wallet = $1
     AND (
@@ -415,7 +412,6 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 			&i.Amount,
 			&i.Slippage,
 			&i.Signature,
-			&i.Nonce,
 			&i.ParentID,
 			&i.TwapIntervalSeconds,
 			&i.TwapExecutedTimes,
@@ -437,6 +433,22 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 		return nil, err
 	}
 	return items, nil
+}
+
+const increaseOrderNonce = `-- name: IncreaseOrderNonce :one
+INSERT INTO order_nonces (wallet, nonce, updated_at)
+    VALUES ($1, 1, NOW())
+ON CONFLICT (wallet)
+DO UPDATE
+    SET nonce = order_nonces.nonce + 1, updated_at = NOW()
+RETURNING nonce
+`
+
+func (q *Queries) IncreaseOrderNonce(ctx context.Context, wallet string) (int64, error) {
+	row := q.db.QueryRow(ctx, increaseOrderNonce, wallet)
+	var nonce int64
+	err := row.Scan(&nonce)
+	return nonce, err
 }
 
 const insertOrder = `-- name: InsertOrder :one

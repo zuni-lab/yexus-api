@@ -127,3 +127,11 @@ SET
     filled_at = $4
 WHERE id = $5
 RETURNING *;
+
+-- name: IncreaseOrderNonce :one
+INSERT INTO order_nonces (wallet, nonce, updated_at)
+    VALUES ($1, 1, NOW())
+ON CONFLICT (wallet)
+DO UPDATE
+    SET nonce = order_nonces.nonce + 1, updated_at = NOW()
+RETURNING nonce;

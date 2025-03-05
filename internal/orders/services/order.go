@@ -187,18 +187,19 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 }
 
 func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
-	params := db.FillOrderParams{
-		ID: order.ID,
-	}
-	_ = params.FilledAt.Scan(time.Now())
 	dexonContract, err := evmManager().DexonInstance(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce, err := db.DB.IncreaseOrderNonce(ctx, utils.NormalizeAddress(order.Wallet.String))
 	if err != nil {
 		return nil, err
 	}
 
 	contractParams := evm.DexonOrder{
 		Account:   common.HexToAddress(order.Wallet.String),
-		Nonce:     nil,
+		Nonce:     new(big.Int).SetInt64(nonce),
 		Path:      []byte(order.Paths),
 		Amount:    new(big.Int).Mul(order.Amount.Int, new(big.Int).SetInt64(10e18)),
 		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e4)),
@@ -219,6 +220,10 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
+	params := db.FillOrderParams{
+		ID: order.ID,
+	}
+	_ = params.FilledAt.Scan(time.Now())
 	filledOrder, err := db.DB.FillOrder(ctx, params)
 	if err != nil {
 		return nil, err
