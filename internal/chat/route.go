@@ -8,5 +8,6 @@ import (
 func Route(g *echo.Group, path string) {
 	chatGroup := g.Group(path)
 	chatGroup.POST("/dex", handlers.ChatDex)
-	chatGroup.GET("/dex/messages", handlers.GetMessagesList)
+	chatGroup.POST("/dex/thread", handlers.GetThreadDetails)
+	chatGroup.POST("/dex/thread/list", handlers.GetThreadList)
 }

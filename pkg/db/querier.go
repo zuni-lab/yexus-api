@@ -19,7 +19,7 @@ type Querier interface {
 	FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (Order, error)
 	GetBlockProcessingState(ctx context.Context, arg GetBlockProcessingStateParams) (BlockProcessingState, error)
 	GetChatThread(ctx context.Context, arg GetChatThreadParams) (ChatThread, error)
-	GetChatThreads(ctx context.Context, arg GetChatThreadsParams) ([]GetChatThreadsRow, error)
+	GetChatThreads(ctx context.Context, arg GetChatThreadsParams) ([]ChatThread, error)
 	GetMarketData(ctx context.Context, arg GetMarketDataParams) ([]GetMarketDataRow, error)
 	GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Order, error)
 	GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (GetOrderByIDRow, error)
@@ -30,10 +30,10 @@ type Querier interface {
 	GetPoolsByIDs(ctx context.Context, ids []string) ([]Pool, error)
 	GetPriceByPoolID(ctx context.Context, poolID string) (Price, error)
 	GetPrices(ctx context.Context, arg GetPricesParams) ([]Price, error)
-	InsertChatThread(ctx context.Context, arg InsertChatThreadParams) (ChatThread, error)
 	InsertOrder(ctx context.Context, arg InsertOrderParams) (InsertOrderRow, error)
 	PoolDetails(ctx context.Context, id string) (PoolDetailsRow, error)
 	UpsertBlockProcessingState(ctx context.Context, arg UpsertBlockProcessingStateParams) error
+	UpsertChatThread(ctx context.Context, arg UpsertChatThreadParams) (ChatThread, error)
 }
 
 var _ Querier = (*Queries)(nil)

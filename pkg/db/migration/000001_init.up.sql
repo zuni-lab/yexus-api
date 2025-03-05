@@ -127,3 +127,5 @@ CREATE TABLE IF NOT EXISTS chat_threads (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_chat_threads_thread_id_user_address ON chat_threads(thread_id, user_address) WHERE NOT is_deleted;

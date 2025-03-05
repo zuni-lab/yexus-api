@@ -37,7 +37,7 @@ func (q *Queries) GetChatThread(ctx context.Context, arg GetChatThreadParams) (C
 }
 
 const getChatThreads = `-- name: GetChatThreads :many
-SELECT thread_id, thread_name FROM chat_threads
+SELECT id, thread_id, user_address, thread_name, created_at, updated_at, is_deleted FROM chat_threads
 WHERE user_address = $1
 AND is_deleted = FALSE
 ORDER BY created_at DESC
@@ -50,21 +50,24 @@ type GetChatThreadsParams struct {
 	Offset      int32  `json:"offset"`
 }
 
-type GetChatThreadsRow struct {
-	ThreadID   string `json:"threadId"`
-	ThreadName string `json:"threadName"`
-}
-
-func (q *Queries) GetChatThreads(ctx context.Context, arg GetChatThreadsParams) ([]GetChatThreadsRow, error) {
+func (q *Queries) GetChatThreads(ctx context.Context, arg GetChatThreadsParams) ([]ChatThread, error) {
 	rows, err := q.db.Query(ctx, getChatThreads, arg.UserAddress, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetChatThreadsRow{}
+	items := []ChatThread{}
 	for rows.Next() {
-		var i GetChatThreadsRow
-		if err := rows.Scan(&i.ThreadID, &i.ThreadName); err != nil {
+		var i ChatThread
+		if err := rows.Scan(
+			&i.ID,
+			&i.ThreadID,
+			&i.UserAddress,
+			&i.ThreadName,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsDeleted,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -75,20 +78,24 @@ func (q *Queries) GetChatThreads(ctx context.Context, arg GetChatThreadsParams) 
 	return items, nil
 }
 
-const insertChatThread = `-- name: InsertChatThread :one
+const upsertChatThread = `-- name: UpsertChatThread :one
 INSERT INTO chat_threads (thread_id, user_address, thread_name)
 VALUES ($1, $2, $3)
+ON CONFLICT (thread_id, user_address) WHERE NOT is_deleted
+DO UPDATE SET 
+    thread_name = EXCLUDED.thread_name,
+    updated_at = NOW()
 RETURNING id, thread_id, user_address, thread_name, created_at, updated_at, is_deleted
 `
 
-type InsertChatThreadParams struct {
+type UpsertChatThreadParams struct {
 	ThreadID    string `json:"threadId"`
 	UserAddress string `json:"userAddress"`
 	ThreadName  string `json:"threadName"`
 }
 
-func (q *Queries) InsertChatThread(ctx context.Context, arg InsertChatThreadParams) (ChatThread, error) {
-	row := q.db.QueryRow(ctx, insertChatThread, arg.ThreadID, arg.UserAddress, arg.ThreadName)
+func (q *Queries) UpsertChatThread(ctx context.Context, arg UpsertChatThreadParams) (ChatThread, error) {
+	row := q.db.QueryRow(ctx, upsertChatThread, arg.ThreadID, arg.UserAddress, arg.ThreadName)
 	var i ChatThread
 	err := row.Scan(
 		&i.ID,
