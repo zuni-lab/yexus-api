@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -12,6 +15,16 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
+)
+
+var (
+	evmManager = sync.OnceValue[*evm.Manager](func() *evm.Manager {
+		manager := evm.NewManager()
+		if err := manager.Connect(); err != nil {
+			panic(err)
+		}
+		return manager
+	})
 )
 
 type ListOrdersByWalletQuery struct {
@@ -178,15 +191,62 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		ID: order.ID,
 	}
 	_ = params.FilledAt.Scan(time.Now())
+	dexonContract, err := evmManager().DexonInstance(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	contractParams := evm.DexonOrder{
+		Account:   common.HexToAddress(order.Wallet.String),
+		Nonce:     nil,
+		Path:      []byte(order.Paths),
+		Amount:    new(big.Int).Mul(order.Amount.Int, new(big.Int).SetInt64(10e18)),
+		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e4)),
+		Deadline:  new(big.Int).SetInt64(order.Deadline.Time.Unix()),
+		Signature: []byte(order.Signature.String),
+	}
+	contractParams.OrderType, err = convertOrderTypeToEvmType(order.Type)
+	if err != nil {
+		return nil, err
+	}
+	contractParams.OrderSide, err = convertOrderSideToEvmType(order.Side)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = dexonContract.ExecuteOrder(nil, contractParams)
+	if err != nil {
+		return nil, err
+	}
 
 	filledOrder, err := db.DB.FillOrder(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Call to contract
-
 	return &filledOrder, nil
+}
+
+func convertOrderTypeToEvmType(orderType db.OrderType) (uint8, error) {
+	switch orderType {
+	case db.OrderTypeLIMIT:
+		return 0, nil
+	case db.OrderTypeSTOP:
+		return 1, nil
+	default:
+		return 0, errors.New("invalid order type")
+	}
+}
+
+func convertOrderSideToEvmType(side db.OrderSide) (uint8, error) {
+	switch side {
+	case db.OrderSideBUY:
+		return 0, nil
+	case db.OrderSideSELL:
+		return 1, nil
+	default:
+		return 0, errors.New("invalid order side")
+	}
 }
 
 func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.Order, error) {
@@ -210,7 +270,7 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		return nil, err
 	}
 
-	// TODO: Call to contract
+	// TODO: Call to contract (not implemented yet)
 
 	filledOrder, err := db.DB.FillTwapOrder(ctx, params)
 	if err != nil {

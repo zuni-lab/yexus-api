@@ -3,6 +3,7 @@ package evm
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -36,8 +37,10 @@ func (m *Manager) AddHandler(handler SwapHandler) {
 }
 
 func (m *Manager) Connect() error {
-	var client *ethclient.Client
-	var err error
+	var (
+		client *ethclient.Client
+		err    error
+	)
 
 	operation := func() error {
 		log.Info().Msg("Attempting to connect to Ethereum client...")
@@ -96,5 +99,9 @@ func (m *Manager) processPoolBlockRange(ctx context.Context, contract *UniswapV3
 		Msg("processPoolBlockRange")
 
 	return nil
+}
 
+func (m *Manager) DexonInstance(ctx context.Context) (*Dexon, error) {
+	contractAddress := common.HexToAddress(config.Env.ContractAddress)
+	return NewDexon(contractAddress, m.client)
 }
