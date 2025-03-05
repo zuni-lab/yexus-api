@@ -192,7 +192,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	nonce, err := db.DB.IncreaseOrderNonce(ctx, utils.NormalizeAddress(order.Wallet.String))
+	nonce, err := db.DB.IncreaseOrderNonce(ctx, order.Wallet.String)
 	if err != nil {
 		return nil, err
 	}
