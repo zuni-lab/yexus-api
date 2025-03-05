@@ -10,7 +10,6 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/config"
 	"github.com/zuni-lab/dexon-service/pkg/db"
@@ -96,44 +95,7 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 
 	poolAddress := utils.NormalizeAddress(pool.Hex())
 
-	// Get last processed block
-	state, err := db.DB.GetBlockProcessingState(ctx, db.GetBlockProcessingStateParams{
-		PoolAddress: poolAddress,
-		IsBackfill:  false,
-	})
-
-	var lastProcessedBlock uint64
-	isFirstRun := false
-
-	if err != nil {
-		if err != pgx.ErrNoRows {
-			return fmt.Errorf("failed to get block processing state: %w", err)
-		}
-
-		currentBlock, err := m.client.BlockNumber(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to get current block number: %w", err)
-		}
-		lastProcessedBlock = currentBlock - 1
-		isFirstRun = true // Mark the first run
-
-		// initialize the state
-		if err := db.DB.UpsertBlockProcessingState(ctx, db.UpsertBlockProcessingStateParams{
-			PoolAddress:        poolAddress,
-			IsBackfill:         false,
-			LastProcessedBlock: int64(lastProcessedBlock),
-		}); err != nil {
-			return fmt.Errorf("failed to initialize block processing state: %w", err)
-		}
-	} else {
-		lastProcessedBlock = uint64(state.LastProcessedBlock)
-	}
-
-	log.Info().
-		Uint64("last_processed_block", lastProcessedBlock).
-		Bool("first_run", isFirstRun).
-		Str("pool", pool.Hex()).
-		Msg("🚀 Ready to watch pool via Polling")
+	var lastProcessedBlock uint64 = 0
 
 	for {
 		select {
@@ -149,54 +111,27 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 				continue
 			}
 
-			// Calculate how many new blocks are available
-			newBlocks := currentBlock - lastProcessedBlock
-
-			// Skip if no new blocks
-			if newBlocks == 0 {
+			if lastProcessedBlock >= currentBlock-1 {
 				log.Debug().
-					Str("pool", pool.Hex()).
+					Uint64("LastProcessedBlock", lastProcessedBlock).
+					Uint64("CurrentBlock", currentBlock).
 					Msg("No new blocks to process")
 				continue
-			}
-
-			// Check if we have enough blocks to process
-			if newBlocks < config.Env.RealtimeMinBlockRange {
-				// Special cases to process anyway:
-				// 1. First polling cycle after initialization
-				// 2. When we have a significant gap (more than 5 blocks)
-				if !isFirstRun {
-					log.Debug().
-						Uint64("blocks", newBlocks).
-						Uint64("minimum", config.Env.RealtimeMinBlockRange).
-						Str("pool", pool.Hex()).
-						Msg("Not enough blocks to process yet, waiting for more")
-					continue
-				}
-
-				log.Info().
-					Uint64("blocks", newBlocks).
-					Bool("first_run", isFirstRun).
-					Str("pool", pool.Hex()).
-					Msg("Processing blocks despite being below threshold")
-			} else if newBlocks > config.Env.RealtimeMaxBlockRange {
-				log.Warn().
-					Uint64("blocks", newBlocks).
-					Str("pool", pool.Hex()).
-					Msg("Processing unusually large block range")
-				lastProcessedBlock = currentBlock - config.Env.RealtimeMaxBlockRange
 			}
 
 			// Process the new blocks
 			startBlock := lastProcessedBlock + 1
 			endBlock := currentBlock
 
+			if lastProcessedBlock == 0 {
+				startBlock = currentBlock - 1
+			}
+
 			log.Info().
-				Uint64("start", startBlock).
-				Uint64("end", endBlock).
-				Uint64("count", endBlock-startBlock+1).
 				Str("pool", pool.Hex()).
-				Msg("Processing block range")
+				Uint64("StartBlock", startBlock).
+				Uint64("endBlock", endBlock).
+				Msg("watchPoolPolling")
 
 			if err := m.processPoolBlockRange(ctx, contract, startBlock, endBlock); err != nil {
 				// Check if it's a block availability error
@@ -205,24 +140,12 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 						Err(err).
 						Str("pool", pool.Hex()).
 						Msg("Some blocks not available, adjusting range")
-
-					// Skip ahead to avoid getting stuck
-					if err := db.DB.UpsertBlockProcessingState(ctx, db.UpsertBlockProcessingStateParams{
-						PoolAddress:        poolAddress,
-						IsBackfill:         false,
-						LastProcessedBlock: int64(currentBlock),
-					}); err != nil {
-						log.Error().Err(err).Msg("Failed to update block processing state")
-					}
-
-					lastProcessedBlock = currentBlock
 				} else {
 					log.Error().
 						Err(err).
 						Str("pool", pool.Hex()).
 						Msg("Error processing block range")
 				}
-				continue
 			}
 
 			if err := db.DB.UpsertBlockProcessingState(ctx, db.UpsertBlockProcessingStateParams{
@@ -233,11 +156,9 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 				log.Error().
 					Err(err).
 					Msg("Failed to update block processing state")
-				continue
 			}
 
 			lastProcessedBlock = currentBlock
-			isFirstRun = false
 		}
 	}
 }

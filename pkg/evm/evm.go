@@ -76,6 +76,10 @@ func (m *Manager) processPoolBlockRange(ctx context.Context, contract *UniswapV3
 		return fmt.Errorf("failed to filter swap events: %w", err)
 	}
 
+	// TODO: Get latest event from the contract
+
+	var i uint64
+
 	for events.Next() {
 		for _, handler := range m.handlers {
 			if err := handler.HandleSwap(ctx, events.Event); err != nil {
@@ -84,7 +88,12 @@ func (m *Manager) processPoolBlockRange(ctx context.Context, contract *UniswapV3
 					Msg("Error handling event")
 			}
 		}
+		i += 1
 	}
+
+	log.Info().
+		Uint64("Number of events", i).
+		Msg("processPoolBlockRange")
 
 	return nil
 
