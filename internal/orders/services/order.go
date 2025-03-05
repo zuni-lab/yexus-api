@@ -23,7 +23,7 @@ type ListOrdersByWalletQuery struct {
 	Offset int32            `query:"offset" validate:"gte=0"`
 }
 
-func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) ([]db.Order, error) {
+func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) ([]db.GetOrdersByWalletRow, error) {
 	query.Wallet = utils.NormalizeAddress(query.Wallet)
 
 	var params db.GetOrdersByWalletParams
@@ -44,7 +44,7 @@ type GetOrderByIDQuery struct {
 	Wallet string `query:"wallet" validate:"eth_addr"`
 }
 
-func GetOrderByID(ctx context.Context, query GetOrderByIDQuery) (*db.Order, error) {
+func GetOrderByID(ctx context.Context, query GetOrderByIDQuery) (*db.GetOrderByIDRow, error) {
 	query.Wallet = utils.NormalizeAddress(query.Wallet)
 
 	var params db.GetOrderByIDParams
@@ -78,7 +78,7 @@ type CreateOrderBody struct {
 	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,numeric,gtefield=TwapMinPrice"`
 }
 
-func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.Order, error) {
+func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow, error) {
 	body.Wallet = utils.NormalizeAddress(body.Wallet)
 
 	var params db.InsertOrderParams
@@ -126,7 +126,7 @@ type CancelOrderBody struct {
 	Wallet string `json:"wallet" validate:"eth_addr"`
 }
 
-func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.Order, error) {
+func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.CancelOrderRow, error) {
 	body.Wallet = utils.NormalizeAddress(body.Wallet)
 
 	var params db.CancelOrderParams

@@ -13,10 +13,22 @@ VALUES ($1, $2, $3, $4, $5, $6,
         $14, $15, $16,
         $17, $18, $19, $20,
         $21, $22)
-RETURNING *;
+RETURNING
+    id, pool_ids, parent_id, wallet, status, side, type,
+    price, amount, slippage, twap_interval_seconds,
+    twap_executed_times, twap_current_executed_times,
+    twap_min_price, twap_max_price, deadline,
+    paths, partial_filled_at, filled_at, rejected_at,
+    cancelled_at, created_at;
 
 -- name: GetOrdersByWallet :many
-SELECT * FROM orders
+SELECT id, pool_ids, parent_id, wallet, status, side, type,
+       price, amount, slippage, twap_interval_seconds,
+       twap_executed_times, twap_current_executed_times,
+       twap_min_price, twap_max_price, deadline,
+       paths, partial_filled_at, filled_at, rejected_at,
+       cancelled_at, created_at
+FROM orders
 WHERE wallet = $1
     AND (
         ARRAY_LENGTH(@status::order_status[], 1) IS NULL
@@ -34,7 +46,13 @@ ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
 
 -- name: GetOrderByID :one
-SELECT * FROM orders
+SELECT id, pool_ids, parent_id, wallet, status, side, type,
+       price, amount, slippage, twap_interval_seconds,
+       twap_executed_times, twap_current_executed_times,
+       twap_min_price, twap_max_price, deadline,
+       paths, partial_filled_at, filled_at, rejected_at,
+       cancelled_at, created_at
+FROM orders
 WHERE wallet = $1 AND id = $2;
 
 -- name: GetMatchedOrder :one
@@ -70,7 +88,13 @@ SET
     status = 'CANCELLED',
     cancelled_at = $1
 WHERE id = $2 AND wallet = $3 AND status NOT IN ('REJECTED', 'FILLED')
-RETURNING *;
+RETURNING
+    id, pool_ids, parent_id, wallet, status, side, type,
+    price, amount, slippage, twap_interval_seconds,
+    twap_executed_times, twap_current_executed_times,
+    twap_min_price, twap_max_price, deadline,
+    paths, partial_filled_at, filled_at, rejected_at,
+    cancelled_at, created_at;
 
 -- name: FillOrder :one
 UPDATE orders

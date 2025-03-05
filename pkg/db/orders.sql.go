@@ -17,7 +17,13 @@ SET
     status = 'CANCELLED',
     cancelled_at = $1
 WHERE id = $2 AND wallet = $3 AND status NOT IN ('REJECTED', 'FILLED')
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+RETURNING
+    id, pool_ids, parent_id, wallet, status, side, type,
+    price, amount, slippage, twap_interval_seconds,
+    twap_executed_times, twap_current_executed_times,
+    twap_min_price, twap_max_price, deadline,
+    paths, partial_filled_at, filled_at, rejected_at,
+    cancelled_at, created_at
 `
 
 type CancelOrderParams struct {
@@ -26,13 +32,38 @@ type CancelOrderParams struct {
 	Wallet      pgtype.Text      `json:"wallet"`
 }
 
-func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (Order, error) {
+type CancelOrderRow struct {
+	ID                       int64            `json:"id"`
+	PoolIds                  []string         `json:"poolIds"`
+	ParentID                 pgtype.Int8      `json:"parentId"`
+	Wallet                   pgtype.Text      `json:"wallet"`
+	Status                   OrderStatus      `json:"status"`
+	Side                     OrderSide        `json:"side"`
+	Type                     OrderType        `json:"type"`
+	Price                    pgtype.Numeric   `json:"price"`
+	Amount                   pgtype.Numeric   `json:"amount"`
+	Slippage                 pgtype.Float8    `json:"slippage"`
+	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
+	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
+	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
+	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
+	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
+	Deadline                 pgtype.Timestamp `json:"deadline"`
+	Paths                    string           `json:"paths"`
+	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
+	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
+	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
+	CreatedAt                pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (CancelOrderRow, error) {
 	row := q.db.QueryRow(ctx, cancelOrder, arg.CancelledAt, arg.ID, arg.Wallet)
-	var i Order
+	var i CancelOrderRow
 	err := row.Scan(
 		&i.ID,
 		&i.PoolIds,
-		&i.Paths,
+		&i.ParentID,
 		&i.Wallet,
 		&i.Status,
 		&i.Side,
@@ -40,15 +71,13 @@ func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (Order
 		&i.Price,
 		&i.Amount,
 		&i.Slippage,
-		&i.Signature,
-		&i.Nonce,
-		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
 		&i.TwapCurrentExecutedTimes,
 		&i.TwapMinPrice,
 		&i.TwapMaxPrice,
 		&i.Deadline,
+		&i.Paths,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
@@ -222,7 +251,13 @@ func (q *Queries) GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Or
 }
 
 const getOrderByID = `-- name: GetOrderByID :one
-SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
+SELECT id, pool_ids, parent_id, wallet, status, side, type,
+       price, amount, slippage, twap_interval_seconds,
+       twap_executed_times, twap_current_executed_times,
+       twap_min_price, twap_max_price, deadline,
+       paths, partial_filled_at, filled_at, rejected_at,
+       cancelled_at, created_at
+FROM orders
 WHERE wallet = $1 AND id = $2
 `
 
@@ -231,13 +266,38 @@ type GetOrderByIDParams struct {
 	ID     int64       `json:"id"`
 }
 
-func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Order, error) {
+type GetOrderByIDRow struct {
+	ID                       int64            `json:"id"`
+	PoolIds                  []string         `json:"poolIds"`
+	ParentID                 pgtype.Int8      `json:"parentId"`
+	Wallet                   pgtype.Text      `json:"wallet"`
+	Status                   OrderStatus      `json:"status"`
+	Side                     OrderSide        `json:"side"`
+	Type                     OrderType        `json:"type"`
+	Price                    pgtype.Numeric   `json:"price"`
+	Amount                   pgtype.Numeric   `json:"amount"`
+	Slippage                 pgtype.Float8    `json:"slippage"`
+	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
+	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
+	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
+	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
+	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
+	Deadline                 pgtype.Timestamp `json:"deadline"`
+	Paths                    string           `json:"paths"`
+	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
+	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
+	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
+	CreatedAt                pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (GetOrderByIDRow, error) {
 	row := q.db.QueryRow(ctx, getOrderByID, arg.Wallet, arg.ID)
-	var i Order
+	var i GetOrderByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.PoolIds,
-		&i.Paths,
+		&i.ParentID,
 		&i.Wallet,
 		&i.Status,
 		&i.Side,
@@ -245,15 +305,13 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Ord
 		&i.Price,
 		&i.Amount,
 		&i.Slippage,
-		&i.Signature,
-		&i.Nonce,
-		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
 		&i.TwapCurrentExecutedTimes,
 		&i.TwapMinPrice,
 		&i.TwapMaxPrice,
 		&i.Deadline,
+		&i.Paths,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
@@ -264,7 +322,13 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Ord
 }
 
 const getOrdersByWallet = `-- name: GetOrdersByWallet :many
-SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
+SELECT id, pool_ids, parent_id, wallet, status, side, type,
+       price, amount, slippage, twap_interval_seconds,
+       twap_executed_times, twap_current_executed_times,
+       twap_min_price, twap_max_price, deadline,
+       paths, partial_filled_at, filled_at, rejected_at,
+       cancelled_at, created_at
+FROM orders
 WHERE wallet = $1
     AND (
         ARRAY_LENGTH($4::order_status[], 1) IS NULL
@@ -291,7 +355,32 @@ type GetOrdersByWalletParams struct {
 	Side   NullOrderSide `json:"side"`
 }
 
-func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletParams) ([]Order, error) {
+type GetOrdersByWalletRow struct {
+	ID                       int64            `json:"id"`
+	PoolIds                  []string         `json:"poolIds"`
+	ParentID                 pgtype.Int8      `json:"parentId"`
+	Wallet                   pgtype.Text      `json:"wallet"`
+	Status                   OrderStatus      `json:"status"`
+	Side                     OrderSide        `json:"side"`
+	Type                     OrderType        `json:"type"`
+	Price                    pgtype.Numeric   `json:"price"`
+	Amount                   pgtype.Numeric   `json:"amount"`
+	Slippage                 pgtype.Float8    `json:"slippage"`
+	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
+	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
+	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
+	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
+	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
+	Deadline                 pgtype.Timestamp `json:"deadline"`
+	Paths                    string           `json:"paths"`
+	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
+	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
+	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
+	CreatedAt                pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletParams) ([]GetOrdersByWalletRow, error) {
 	rows, err := q.db.Query(ctx, getOrdersByWallet,
 		arg.Wallet,
 		arg.Limit,
@@ -304,13 +393,13 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Order{}
+	items := []GetOrdersByWalletRow{}
 	for rows.Next() {
-		var i Order
+		var i GetOrdersByWalletRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.PoolIds,
-			&i.Paths,
+			&i.ParentID,
 			&i.Wallet,
 			&i.Status,
 			&i.Side,
@@ -318,15 +407,13 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 			&i.Price,
 			&i.Amount,
 			&i.Slippage,
-			&i.Signature,
-			&i.Nonce,
-			&i.ParentID,
 			&i.TwapIntervalSeconds,
 			&i.TwapExecutedTimes,
 			&i.TwapCurrentExecutedTimes,
 			&i.TwapMinPrice,
 			&i.TwapMaxPrice,
 			&i.Deadline,
+			&i.Paths,
 			&i.PartialFilledAt,
 			&i.FilledAt,
 			&i.RejectedAt,
@@ -358,7 +445,13 @@ VALUES ($1, $2, $3, $4, $5, $6,
         $14, $15, $16,
         $17, $18, $19, $20,
         $21, $22)
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+RETURNING
+    id, pool_ids, parent_id, wallet, status, side, type,
+    price, amount, slippage, twap_interval_seconds,
+    twap_executed_times, twap_current_executed_times,
+    twap_min_price, twap_max_price, deadline,
+    paths, partial_filled_at, filled_at, rejected_at,
+    cancelled_at, created_at
 `
 
 type InsertOrderParams struct {
@@ -386,7 +479,32 @@ type InsertOrderParams struct {
 	CreatedAt                pgtype.Timestamp `json:"createdAt"`
 }
 
-func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Order, error) {
+type InsertOrderRow struct {
+	ID                       int64            `json:"id"`
+	PoolIds                  []string         `json:"poolIds"`
+	ParentID                 pgtype.Int8      `json:"parentId"`
+	Wallet                   pgtype.Text      `json:"wallet"`
+	Status                   OrderStatus      `json:"status"`
+	Side                     OrderSide        `json:"side"`
+	Type                     OrderType        `json:"type"`
+	Price                    pgtype.Numeric   `json:"price"`
+	Amount                   pgtype.Numeric   `json:"amount"`
+	Slippage                 pgtype.Float8    `json:"slippage"`
+	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
+	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
+	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
+	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
+	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
+	Deadline                 pgtype.Timestamp `json:"deadline"`
+	Paths                    string           `json:"paths"`
+	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
+	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
+	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
+	CreatedAt                pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (InsertOrderRow, error) {
 	row := q.db.QueryRow(ctx, insertOrder,
 		arg.PoolIds,
 		arg.ParentID,
@@ -411,11 +529,11 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Order
 		arg.CancelledAt,
 		arg.CreatedAt,
 	)
-	var i Order
+	var i InsertOrderRow
 	err := row.Scan(
 		&i.ID,
 		&i.PoolIds,
-		&i.Paths,
+		&i.ParentID,
 		&i.Wallet,
 		&i.Status,
 		&i.Side,
@@ -423,15 +541,13 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Order
 		&i.Price,
 		&i.Amount,
 		&i.Slippage,
-		&i.Signature,
-		&i.Nonce,
-		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
 		&i.TwapCurrentExecutedTimes,
 		&i.TwapMinPrice,
 		&i.TwapMaxPrice,
 		&i.Deadline,
+		&i.Paths,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
