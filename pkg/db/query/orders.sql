@@ -22,12 +22,7 @@ RETURNING
     cancelled_at, created_at;
 
 -- name: GetOrdersByWallet :many
-SELECT id, pool_ids, parent_id, wallet, status, side, type,
-       price, amount, slippage, twap_interval_seconds,
-       twap_executed_times, twap_current_executed_times,
-       twap_min_price, twap_max_price, deadline,
-       paths, partial_filled_at, filled_at, rejected_at,
-       cancelled_at, created_at
+SELECT *
 FROM orders
 WHERE wallet = $1
     AND (
@@ -44,6 +39,25 @@ WHERE wallet = $1
     )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: CountOrdersByWallet :one
+SELECT COUNT(*) AS total_counts
+FROM orders
+WHERE wallet = $1
+    AND (
+        ARRAY_LENGTH(@status::order_status[], 1) IS NULL
+        OR status = ANY(@status)
+    )
+    AND (
+        ARRAY_LENGTH(@types::order_type[], 1) IS NULL
+        OR type = ANY(@types)
+    )
+    AND (
+        sqlc.narg(side)::order_side IS NULL
+        OR side = @side
+    );
+
+
 
 -- name: GetOrderByID :one
 SELECT id, pool_ids, parent_id, wallet, status, side, type,

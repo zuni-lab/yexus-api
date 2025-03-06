@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"errors"
-	"github.com/zuni-lab/dexon-service/internal/orders/services"
 	"net/http"
 	"strconv"
+
+	"github.com/zuni-lab/dexon-service/internal/orders/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
@@ -30,5 +31,5 @@ func Get(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return utils.OkResponse(c, http.StatusOK, order)
+	return c.JSON(http.StatusOK, order)
 }

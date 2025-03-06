@@ -33,10 +33,10 @@ func GetThreadList(c echo.Context) error {
 		return err
 	}
 
-	threads, err := services.GetThreadList(ctx, body)
+	res, err := services.GetThreadList(ctx, body)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, threads)
+	return c.JSON(http.StatusOK, utils.NewListResult(res.Threads, res.Count))
 }

@@ -19,3 +19,8 @@ WHERE user_address = $1
 AND is_deleted = FALSE
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: CountChatThreads :one
+SELECT COUNT(*) FROM chat_threads
+WHERE user_address = $1
+AND is_deleted = FALSE;

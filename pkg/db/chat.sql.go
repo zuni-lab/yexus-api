@@ -9,6 +9,19 @@ import (
 	"context"
 )
 
+const countChatThreads = `-- name: CountChatThreads :one
+SELECT COUNT(*) FROM chat_threads
+WHERE user_address = $1
+AND is_deleted = FALSE
+`
+
+func (q *Queries) CountChatThreads(ctx context.Context, userAddress string) (int64, error) {
+	row := q.db.QueryRow(ctx, countChatThreads, userAddress)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getChatThread = `-- name: GetChatThread :one
 SELECT id, thread_id, user_address, thread_name, created_at, updated_at, is_deleted FROM chat_threads
 WHERE thread_id = $1

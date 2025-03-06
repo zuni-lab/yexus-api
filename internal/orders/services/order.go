@@ -23,7 +23,7 @@ type ListOrdersByWalletQuery struct {
 	Offset int32            `query:"offset" validate:"gte=0"`
 }
 
-func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) ([]db.GetOrdersByWalletRow, error) {
+func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) (*db.ListOrdersByWalletResult, error) {
 	query.Wallet = utils.NormalizeAddress(query.Wallet)
 
 	var params db.GetOrdersByWalletParams
@@ -31,12 +31,12 @@ func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) ([]db
 		return nil, err
 	}
 
-	orders, err := db.DB.GetOrdersByWallet(ctx, params)
+	result, err := db.DB.ListOrdersByWalletTx(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 
-	return orders, nil
+	return result, nil
 }
 
 type GetOrderByIDQuery struct {

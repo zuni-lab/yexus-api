@@ -33,6 +33,9 @@ func ChatDex(ctx context.Context, input ChatParams, w http.ResponseWriter) error
 	}
 
 	log.Info().Any("cryptoData", cryptoData).Msg("crypto data")
+	if len(cryptoData) == 0 {
+		return fmt.Errorf("no crypto data available")
+	}
 
 	for _, crypto := range cryptoData {
 		if crypto.Price == "" {

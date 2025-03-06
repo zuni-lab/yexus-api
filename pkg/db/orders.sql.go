@@ -87,6 +87,43 @@ func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (Cance
 	return i, err
 }
 
+const countOrdersByWallet = `-- name: CountOrdersByWallet :one
+SELECT COUNT(*) AS total_counts
+FROM orders
+WHERE wallet = $1
+    AND (
+        ARRAY_LENGTH($2::order_status[], 1) IS NULL
+        OR status = ANY($2)
+    )
+    AND (
+        ARRAY_LENGTH($3::order_type[], 1) IS NULL
+        OR type = ANY($3)
+    )
+    AND (
+        $4::order_side IS NULL
+        OR side = $4
+    )
+`
+
+type CountOrdersByWalletParams struct {
+	Wallet pgtype.Text   `json:"wallet"`
+	Status []OrderStatus `json:"status"`
+	Types  []OrderType   `json:"types"`
+	Side   NullOrderSide `json:"side"`
+}
+
+func (q *Queries) CountOrdersByWallet(ctx context.Context, arg CountOrdersByWalletParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countOrdersByWallet,
+		arg.Wallet,
+		arg.Status,
+		arg.Types,
+		arg.Side,
+	)
+	var total_counts int64
+	err := row.Scan(&total_counts)
+	return total_counts, err
+}
+
 const fillOrder = `-- name: FillOrder :one
 UPDATE orders
 SET
@@ -322,12 +359,7 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Get
 }
 
 const getOrdersByWallet = `-- name: GetOrdersByWallet :many
-SELECT id, pool_ids, parent_id, wallet, status, side, type,
-       price, amount, slippage, twap_interval_seconds,
-       twap_executed_times, twap_current_executed_times,
-       twap_min_price, twap_max_price, deadline,
-       paths, partial_filled_at, filled_at, rejected_at,
-       cancelled_at, created_at
+SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, signature, nonce, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 FROM orders
 WHERE wallet = $1
     AND (
@@ -355,32 +387,7 @@ type GetOrdersByWalletParams struct {
 	Side   NullOrderSide `json:"side"`
 }
 
-type GetOrdersByWalletRow struct {
-	ID                       int64            `json:"id"`
-	PoolIds                  []string         `json:"poolIds"`
-	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
-	Status                   OrderStatus      `json:"status"`
-	Side                     OrderSide        `json:"side"`
-	Type                     OrderType        `json:"type"`
-	Price                    pgtype.Numeric   `json:"price"`
-	Amount                   pgtype.Numeric   `json:"amount"`
-	Slippage                 pgtype.Float8    `json:"slippage"`
-	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
-	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
-	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
-	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
-	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
-	Deadline                 pgtype.Timestamp `json:"deadline"`
-	Paths                    string           `json:"paths"`
-	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
-	FilledAt                 pgtype.Timestamp `json:"filledAt"`
-	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
-	CancelledAt              pgtype.Timestamp `json:"cancelledAt"`
-	CreatedAt                pgtype.Timestamp `json:"createdAt"`
-}
-
-func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletParams) ([]GetOrdersByWalletRow, error) {
+func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletParams) ([]Order, error) {
 	rows, err := q.db.Query(ctx, getOrdersByWallet,
 		arg.Wallet,
 		arg.Limit,
@@ -393,13 +400,13 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetOrdersByWalletRow{}
+	items := []Order{}
 	for rows.Next() {
-		var i GetOrdersByWalletRow
+		var i Order
 		if err := rows.Scan(
 			&i.ID,
 			&i.PoolIds,
-			&i.ParentID,
+			&i.Paths,
 			&i.Wallet,
 			&i.Status,
 			&i.Side,
@@ -407,13 +414,15 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 			&i.Price,
 			&i.Amount,
 			&i.Slippage,
+			&i.Signature,
+			&i.Nonce,
+			&i.ParentID,
 			&i.TwapIntervalSeconds,
 			&i.TwapExecutedTimes,
 			&i.TwapCurrentExecutedTimes,
 			&i.TwapMinPrice,
 			&i.TwapMaxPrice,
 			&i.Deadline,
-			&i.Paths,
 			&i.PartialFilledAt,
 			&i.FilledAt,
 			&i.RejectedAt,

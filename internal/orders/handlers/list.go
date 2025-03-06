@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/zuni-lab/dexon-service/internal/orders/services"
 	"net/http"
+
+	"github.com/zuni-lab/dexon-service/internal/orders/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
@@ -17,10 +18,10 @@ func List(c echo.Context) error {
 		return err
 	}
 
-	orders, err := services.ListOrderByWallet(ctx, query)
+	results, err := services.ListOrderByWallet(ctx, query)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return utils.OkResponse(c, http.StatusOK, orders)
+	return c.JSON(http.StatusOK, utils.NewListResult(results.Orders, results.Count))
 }

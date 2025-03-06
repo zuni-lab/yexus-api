@@ -78,10 +78,11 @@ type ChatThread struct {
 
 type GetThreadListResponse struct {
 	Threads []ChatThread `json:"threads"`
+	Count   int64        `json:"count"`
 }
 
 func GetThreadList(ctx context.Context, input GetThreadListParams) (*GetThreadListResponse, error) {
-	threads, err := db.DB.GetChatThreads(ctx, db.GetChatThreadsParams{
+	result, err := db.DB.ListThreadsTx(ctx, db.GetChatThreadsParams{
 		Limit:       input.Limit,
 		Offset:      input.Offset,
 		UserAddress: utils.NormalizeAddress(input.UserAddress),
@@ -90,7 +91,7 @@ func GetThreadList(ctx context.Context, input GetThreadListParams) (*GetThreadLi
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	newThreads := utils.Map(threads, func(thread db.ChatThread) ChatThread {
+	newThreads := utils.Map(result.Threads, func(thread db.ChatThread) ChatThread {
 		return ChatThread{
 			ID:          thread.ID,
 			ThreadID:    thread.ThreadID,
@@ -102,6 +103,7 @@ func GetThreadList(ctx context.Context, input GetThreadListParams) (*GetThreadLi
 
 	return &GetThreadListResponse{
 		Threads: newThreads,
+		Count:   result.Count,
 	}, nil
 }
 
