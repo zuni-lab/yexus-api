@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
+	"strconv"
 	"sync"
 	"time"
 
@@ -85,7 +86,7 @@ type CreateOrderBody struct {
 	Slippage  float64      `json:"slippage" validate:"gte=0"`
 	Signature string       `json:"signature" validate:"max=130"`
 	Paths     string       `json:"paths" validate:"max=256"`
-	Nonce     int64        `json:"nonce" validate:"gte=0"`
+	Nonce     string       `json:"nonce"`
 	Deadline  *int64       `json:"deadline" validate:"omitempty,gt=0"`
 
 	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,omitempty,gt=59"`
@@ -97,8 +98,16 @@ type CreateOrderBody struct {
 func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow, error) {
 	body.Wallet = utils.NormalizeAddress(body.Wallet)
 
-	var params db.InsertOrderParams
+	var (
+		params db.InsertOrderParams
+		err    error
+	)
 	if err := copier.Copy(&params, &body); err != nil {
+		return nil, err
+	}
+
+	params.Nonce, err = strconv.ParseInt(body.Nonce, 10, 64)
+	if err != nil {
 		return nil, err
 	}
 
