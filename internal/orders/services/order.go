@@ -84,12 +84,12 @@ type CreateOrderBody struct {
 	Signature string       `json:"signature" validate:"max=130"`
 	Paths     string       `json:"paths" validate:"max=256"`
 	Nonce     int64        `json:"nonce" validate:"gte=0"`
-	Deadline  *time.Time   `json:"deadline" validate:"omitempty,datetime=2006-01-02 15:04:05"`
+	Deadline  *int64       `json:"deadline" validate:"omitempty,gt=0"`
 
-	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,gt=59"`
-	TwapExecutedTimes   *int64  `json:"twapExecutedTimes" validate:"required_if=Type TWAP,gt=0"`
+	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,omitempty,gt=59"`
+	TwapExecutedTimes   *int64  `json:"twapExecutedTimes" validate:"required_if=Type TWAP,omitempty,gt=0"`
 	TwapMinPrice        *string `json:"twapMinPrice" validate:"omitempty,numeric,gte=0"`
-	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,numeric,gtefield=TwapMinPrice"`
+	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,omitempty,numeric,gtefield=TwapMinPrice"`
 }
 
 func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow, error) {
@@ -118,6 +118,14 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 			params.TwapMinPrice.Valid = false
 			params.TwapMaxPrice.Valid = false
 		}
+	}
+
+	if body.Deadline != nil {
+		if now.Unix() >= *body.Deadline {
+			return nil, errors.New("invalid deadline")
+		}
+
+		_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0))
 	}
 
 	pools, err := db.DB.GetPoolsByIDs(ctx, body.PoolIDs)

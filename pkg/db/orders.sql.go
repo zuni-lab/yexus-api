@@ -251,7 +251,7 @@ WHERE (
     )
     AND (
         deadline IS NULL
-        OR deadline >= NOW()
+        OR deadline > NOW()
     )
 ORDER BY created_at ASC
 LIMIT 1
@@ -373,7 +373,14 @@ FROM orders
 WHERE wallet = $1
     AND (
         ARRAY_LENGTH($4::order_status[], 1) IS NULL
-        OR status = ANY($4)
+        OR (
+            status = ANY($4)
+            AND (
+                status <> 'PENDING'
+                OR deadline is NULL
+                OR (status = 'PENDING' AND deadline < NOW()) --Skip expired orders
+            )
+        )
     )
     AND (
         ARRAY_LENGTH($5::order_type[], 1) IS NULL

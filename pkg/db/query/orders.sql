@@ -37,7 +37,7 @@ WHERE wallet = $1
             AND (
                 status <> 'PENDING'
                 OR deadline is NULL
-                OR (status = 'PENDING' AND deadline > NOW()) --Skip expired orders
+                OR (status = 'PENDING' AND deadline < NOW()) --Skip expired orders
             )
         )
     )
