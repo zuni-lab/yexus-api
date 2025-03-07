@@ -171,8 +171,8 @@ type Order struct {
 	Price                    pgtype.Numeric   `json:"price"`
 	Amount                   pgtype.Numeric   `json:"amount"`
 	Slippage                 pgtype.Float8    `json:"slippage"`
-	Signature                pgtype.Text      `json:"signature"`
 	Nonce                    int64            `json:"nonce"`
+	Signature                pgtype.Text      `json:"signature"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
 	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
 	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`

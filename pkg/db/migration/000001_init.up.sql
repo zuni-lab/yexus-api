@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS orders (
     price NUMERIC(78,18) NOT NULL,
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
+    nonce BIGINT NOT NULL UNIQUE,
     signature VARCHAR(130), -- 0x + 64 bytes for r, 64 bytes for s, 2 bytes for v
-    nonce BIGSERIAL NOT NULL,
 
     parent_id BIGINT,
     twap_interval_seconds INT,
@@ -79,7 +79,6 @@ CREATE TABLE IF NOT EXISTS orders (
 
     FOREIGN KEY (parent_id) REFERENCES orders(id) ON DELETE CASCADE
 );
-
 
 --- Seed data ---
 INSERT INTO tokens (id, name, symbol, decimals, is_stable) VALUES

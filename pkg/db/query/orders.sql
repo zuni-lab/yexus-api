@@ -4,7 +4,7 @@ INSERT INTO orders (
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline,
-    signature, paths,
+    signature, paths, nonce,
     partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at)
 VALUES ($1, $2, $3, $4, $5, $6,
@@ -12,22 +12,45 @@ VALUES ($1, $2, $3, $4, $5, $6,
         $11, $12, $13,
         $14, $15, $16,
         $17, $18, $19, $20,
-        $21, $22)
+        $21, $22, $23)
 RETURNING
     id, pool_ids, parent_id, wallet, status, side, type,
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
-    twap_min_price, twap_max_price, deadline,
+    twap_min_price, twap_max_price, deadline, nonce,
     paths, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at;
 
 -- name: GetOrdersByWallet :many
-SELECT *
+SELECT id, pool_ids, parent_id, wallet, status, side, type,
+       price, amount, slippage, twap_interval_seconds,
+       twap_executed_times, twap_current_executed_times,
+       twap_min_price, twap_max_price, deadline, nonce,
+       paths, partial_filled_at, filled_at, rejected_at,
+       cancelled_at, created_at
 FROM orders
 WHERE wallet = $1
     AND (
         ARRAY_LENGTH(@status::order_status[], 1) IS NULL
-        OR status = ANY(@status)
+        OR (
+            status = ANY(@status)
+            AND (
+                status <> 'PENDING'
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
+            )
+        )
+    )
+    AND (
+        ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
+        OR (
+        status <> ANY(@not_status)
+            AND (
+                status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
+            )
+        )
     )
     AND (
         ARRAY_LENGTH(@types::order_type[], 1) IS NULL
@@ -44,26 +67,42 @@ LIMIT $2 OFFSET $3;
 SELECT COUNT(*) AS total_counts
 FROM orders
 WHERE wallet = $1
-    AND (
-        ARRAY_LENGTH(@status::order_status[], 1) IS NULL
-        OR status = ANY(@status)
+  AND (
+    ARRAY_LENGTH(@status::order_status[], 1) IS NULL
+        OR (
+        status = ANY(@status)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
+            )
+        )
     )
-    AND (
-        ARRAY_LENGTH(@types::order_type[], 1) IS NULL
+  AND (
+    ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
+        OR (
+        status <> ANY(@not_status)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
+            )
+        )
+    )
+  AND (
+    ARRAY_LENGTH(@types::order_type[], 1) IS NULL
         OR type = ANY(@types)
     )
-    AND (
-        sqlc.narg(side)::order_side IS NULL
+  AND (
+    sqlc.narg(side)::order_side IS NULL
         OR side = @side
-    );
-
-
+);
 
 -- name: GetOrderByID :one
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
        price, amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
-       twap_min_price, twap_max_price, deadline,
+       twap_min_price, twap_max_price, deadline, nonce,
        paths, partial_filled_at, filled_at, rejected_at,
        cancelled_at, created_at
 FROM orders
@@ -91,7 +130,7 @@ WHERE (
     )
     AND (
         deadline IS NULL
-        OR deadline >= NOW()
+        OR deadline > NOW()
     )
 ORDER BY created_at ASC
 LIMIT 1;
@@ -106,7 +145,7 @@ RETURNING
     id, pool_ids, parent_id, wallet, status, side, type,
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
-    twap_min_price, twap_max_price, deadline,
+    twap_min_price, twap_max_price, deadline, nonce,
     paths, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at;
 

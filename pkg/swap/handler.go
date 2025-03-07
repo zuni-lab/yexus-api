@@ -53,7 +53,10 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 		return fmt.Errorf("failed to calculate price for pool %s", poolAddress)
 	}
 
-	PoolInfo.updateUsdPrice(poolAddress, price.Text('f', -1))
+	err = PoolInfo.updateUsdPrice(poolAddress, price.Text('f', -1))
+	if err != nil {
+		return fmt.Errorf("failed to update usd price for pool %s", poolAddress)
+	}
 
 	_, err = services.MatchOrder(ctx, price)
 	if err != nil {

@@ -43,7 +43,11 @@ type ServerConfig struct {
 	OpenaiAssistantId string `validate:"min=1"`
 
 	// Realtime Manager
-	RealtimeInterval time.Duration `validate:"min=1s"`
+	RealtimeInterval      time.Duration `validate:"min=1s"`
+	RealtimeMinBlockRange uint64        `validate:"min=1"`
+	RealtimeMaxBlockRange uint64        `validate:"min=1"`
+
+	ContractAddress string `validate:"eth_addr"`
 }
 
 // Indexer-specific configuration
@@ -149,7 +153,11 @@ func loadServerConfig() ServerConfig {
 		OpenaiApiKey:      os.Getenv("OPENAI_API_KEY"),
 		OpenaiAssistantId: os.Getenv("OPENAI_ASSISTANT_ID"),
 
-		RealtimeInterval: realtimeInterval,
+		RealtimeInterval:      realtimeInterval,
+		RealtimeMinBlockRange: getEnvUint64("REALTIME_MIN_BLOCK_RANGE", 5),
+		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
+
+		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
 	}
 }
 

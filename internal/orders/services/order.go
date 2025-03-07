@@ -4,7 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -14,13 +18,24 @@ import (
 	"github.com/zuni-lab/dexon-service/pkg/utils"
 )
 
+var (
+	evmManager = sync.OnceValue[*evm.Manager](func() *evm.Manager {
+		manager := evm.NewManager()
+		if err := manager.Connect(); err != nil {
+			panic(err)
+		}
+		return manager
+	})
+)
+
 type ListOrdersByWalletQuery struct {
-	Wallet string           `query:"wallet" validate:"eth_addr"`
-	Status []db.OrderStatus `query:"status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
-	Types  []db.OrderType   `query:"types" validate:"dive,oneof=MARKET LIMIT STOP TWAP"`
-	Side   *string          `query:"side" validate:"omitempty,oneof=BUY SELL"`
-	Limit  int32            `query:"limit" validate:"gt=0"`
-	Offset int32            `query:"offset" validate:"gte=0"`
+	Wallet    string           `query:"wallet" validate:"eth_addr"`
+	Status    []db.OrderStatus `query:"status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
+	NotStatus []db.OrderStatus `query:"not_status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
+	Types     []db.OrderType   `query:"types" validate:"dive,oneof=MARKET LIMIT STOP TWAP"`
+	Side      *string          `query:"side" validate:"omitempty,oneof=BUY SELL"`
+	Limit     int32            `query:"limit" validate:"gt=0"`
+	Offset    int32            `query:"offset" validate:"gte=0"`
 }
 
 func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) (*db.ListOrdersByWalletResult, error) {
@@ -70,12 +85,13 @@ type CreateOrderBody struct {
 	Slippage  float64      `json:"slippage" validate:"gte=0"`
 	Signature string       `json:"signature" validate:"max=130"`
 	Paths     string       `json:"paths" validate:"max=256"`
-	Deadline  *time.Time   `json:"deadline" validate:"omitempty,datetime=2006-01-02 15:04:05"`
+	Nonce     int64        `json:"nonce" validate:"gte=0"`
+	Deadline  *int64       `json:"deadline" validate:"omitempty,gt=0"`
 
-	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,gt=59"`
-	TwapExecutedTimes   *int64  `json:"twapExecutedTimes" validate:"required_if=Type TWAP,gt=0"`
+	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,omitempty,gt=59"`
+	TwapExecutedTimes   *int64  `json:"twapExecutedTimes" validate:"required_if=Type TWAP,omitempty,gt=0"`
 	TwapMinPrice        *string `json:"twapMinPrice" validate:"omitempty,numeric,gte=0"`
-	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,numeric,gtefield=TwapMinPrice"`
+	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,omitempty,numeric,gtefield=TwapMinPrice"`
 }
 
 func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow, error) {
@@ -86,7 +102,7 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 		return nil, err
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	_ = params.CreatedAt.Scan(now)
 	if params.Type == db.OrderTypeMARKET {
 		_ = params.FilledAt.Scan(now)
@@ -104,6 +120,16 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 			params.TwapMinPrice.Valid = false
 			params.TwapMaxPrice.Valid = false
 		}
+	}
+
+	if body.Deadline != nil {
+		fmt.Println(now.Unix(), *body.Deadline)
+
+		if now.Unix() >= *body.Deadline {
+			return nil, errors.New("invalid deadline")
+		}
+
+		_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0).UTC())
 	}
 
 	pools, err := db.DB.GetPoolsByIDs(ctx, body.PoolIDs)
@@ -134,7 +160,7 @@ func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.CancelOrderRow,
 		return nil, err
 	}
 
-	_ = params.CancelledAt.Scan(time.Now())
+	_ = params.CancelledAt.Scan(time.Now().UTC())
 	order, err := db.DB.CancelOrder(ctx, params)
 	if err != nil {
 		return nil, err
@@ -174,19 +200,66 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 }
 
 func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
+	dexonContract, err := evmManager().DexonInstance(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	contractParams := evm.DexonOrder{
+		Account:   common.HexToAddress(order.Wallet.String),
+		Nonce:     new(big.Int).SetInt64(order.Nonce),
+		Path:      []byte(order.Paths),
+		Amount:    new(big.Int).Mul(order.Amount.Int, new(big.Int).Exp(new(big.Int).SetInt64(10), new(big.Int).SetInt64(18), nil)),
+		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e5)),
+		Deadline:  new(big.Int).SetInt64(order.Deadline.Time.Unix()),
+		Signature: []byte(order.Signature.String),
+	}
+	contractParams.OrderType, err = convertOrderTypeToEvmType(order.Type)
+	if err != nil {
+		return nil, err
+	}
+	contractParams.OrderSide, err = convertOrderSideToEvmType(order.Side)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = dexonContract.ExecuteOrder(nil, contractParams)
+	if err != nil {
+		return nil, err
+	}
+
 	params := db.FillOrderParams{
 		ID: order.ID,
 	}
-	_ = params.FilledAt.Scan(time.Now())
-
+	_ = params.FilledAt.Scan(time.Now().UTC())
 	filledOrder, err := db.DB.FillOrder(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Call to contract
-
 	return &filledOrder, nil
+}
+
+func convertOrderTypeToEvmType(orderType db.OrderType) (uint8, error) {
+	switch orderType {
+	case db.OrderTypeLIMIT:
+		return 0, nil
+	case db.OrderTypeSTOP:
+		return 1, nil
+	default:
+		return 0, errors.New("invalid order type")
+	}
+}
+
+func convertOrderSideToEvmType(side db.OrderSide) (uint8, error) {
+	switch side {
+	case db.OrderSideBUY:
+		return 0, nil
+	case db.OrderSideSELL:
+		return 1, nil
+	default:
+		return 0, errors.New("invalid order side")
+	}
 }
 
 func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.Order, error) {
@@ -194,11 +267,11 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		ID:                       order.ID,
 		TwapCurrentExecutedTimes: order.TwapExecutedTimes,
 	}
-	_ = params.FilledAt.Scan(time.Now())
+	_ = params.FilledAt.Scan(time.Now().UTC())
 
 	var err error
 	if order.TwapCurrentExecutedTimes.Int32+1 == order.TwapExecutedTimes.Int32 {
-		_ = params.FilledAt.Scan(time.Now())
+		_ = params.FilledAt.Scan(time.Now().UTC())
 		params.Status = db.OrderStatusFILLED
 	} else {
 		params.Status = db.OrderStatusPARTIALFILLED
@@ -210,7 +283,7 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		return nil, err
 	}
 
-	// TODO: Call to contract
+	// TODO: Call to contract (not implemented yet)
 
 	filledOrder, err := db.DB.FillTwapOrder(ctx, params)
 	if err != nil {
@@ -240,7 +313,7 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
 	_ = params.Amount.Scan(amount.String())
-	_ = params.FilledAt.Scan(time.Now())
+	_ = params.FilledAt.Scan(time.Now().UTC())
 
 	_, err := db.DB.InsertOrder(ctx, params)
 	if err != nil {
