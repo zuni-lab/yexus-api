@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS orders (
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
     nonce BIGINT NOT NULL UNIQUE,
-    signature VARCHAR(130), -- 0x + 64 bytes for r, 64 bytes for s, 2 bytes for v
+    signature VARCHAR(255),
 
     parent_id BIGINT,
     twap_interval_seconds INT,

@@ -84,7 +84,7 @@ type CreateOrderBody struct {
 	Price     *string      `json:"price" validate:"required_unless=Type TWAP,numeric,gt=0"`
 	Amount    string       `json:"amount" validate:"numeric,gt=0"`
 	Slippage  float64      `json:"slippage" validate:"gte=0"`
-	Signature string       `json:"signature" validate:"max=130"`
+	Signature string       `json:"signature"`
 	Paths     string       `json:"paths" validate:"max=256"`
 	Nonce     string       `json:"nonce"`
 	Deadline  *int64       `json:"deadline" validate:"omitempty,gt=0"`
