@@ -198,7 +198,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		Nonce:     new(big.Int).SetInt64(order.Nonce),
 		Path:      []byte(order.Paths),
 		Amount:    new(big.Int).Mul(order.Amount.Int, new(big.Int).Exp(new(big.Int).SetInt64(10), new(big.Int).SetInt64(18), nil)),
-		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e4)),
+		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e5)),
 		Deadline:  new(big.Int).SetInt64(order.Deadline.Time.Unix()),
 		Signature: []byte(order.Signature.String),
 	}
