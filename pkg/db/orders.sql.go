@@ -252,10 +252,10 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 const getMatchedOrder = `-- name: GetMatchedOrder :one
 SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
 WHERE (
-        (side = 'BUY' AND type = 'LIMIT' AND price <= $1)
-        OR (side = 'SELL' AND type = 'LIMIT' AND price >= $1)
-        OR (side = 'BUY' AND type = 'STOP' AND price >= $1)
-        OR (side = 'SELL' AND type = 'STOP' AND price <= $1)
+        (side = 'BUY' AND type = 'LIMIT' AND price >= $1)
+        OR (side = 'SELL' AND type = 'LIMIT' AND price <= $1)
+        OR (side = 'BUY' AND type = 'STOP' AND price <= $1)
+        OR (side = 'SELL' AND type = 'STOP' AND price >= $1)
         OR (type = 'TWAP' AND price BETWEEN twap_min_price AND twap_max_price)
     )
     AND status IN ('PENDING', 'PARTIAL_FILLED')

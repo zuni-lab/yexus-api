@@ -111,10 +111,10 @@ WHERE wallet = $1 AND id = $2;
 -- name: GetMatchedOrder :one
 SELECT * FROM orders
 WHERE (
-        (side = 'BUY' AND type = 'LIMIT' AND price <= $1)
-        OR (side = 'SELL' AND type = 'LIMIT' AND price >= $1)
-        OR (side = 'BUY' AND type = 'STOP' AND price >= $1)
-        OR (side = 'SELL' AND type = 'STOP' AND price <= $1)
+        (side = 'BUY' AND type = 'LIMIT' AND price >= $1)
+        OR (side = 'SELL' AND type = 'LIMIT' AND price <= $1)
+        OR (side = 'BUY' AND type = 'STOP' AND price <= $1)
+        OR (side = 'SELL' AND type = 'STOP' AND price >= $1)
         OR (type = 'TWAP' AND price BETWEEN twap_min_price AND twap_max_price)
     )
     AND status IN ('PENDING', 'PARTIAL_FILLED')
