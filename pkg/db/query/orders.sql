@@ -32,7 +32,14 @@ FROM orders
 WHERE wallet = $1
     AND (
         ARRAY_LENGTH(@status::order_status[], 1) IS NULL
-        OR status = ANY(@status)
+        OR (
+            status = ANY(@status)
+            AND (
+                status <> 'PENDING'
+                OR deadline is NULL
+                OR (status = 'PENDING' AND deadline > NOW()) --Skip expired orders
+            )
+        )
     )
     AND (
         ARRAY_LENGTH(@types::order_type[], 1) IS NULL
@@ -96,7 +103,7 @@ WHERE (
     )
     AND (
         deadline IS NULL
-        OR deadline >= NOW()
+        OR deadline > NOW()
     )
 ORDER BY created_at ASC
 LIMIT 1;
