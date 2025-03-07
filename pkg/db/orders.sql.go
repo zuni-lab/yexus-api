@@ -93,31 +93,51 @@ const countOrdersByWallet = `-- name: CountOrdersByWallet :one
 SELECT COUNT(*) AS total_counts
 FROM orders
 WHERE wallet = $1
-    AND (
-        ARRAY_LENGTH($2::order_status[], 1) IS NULL
-        OR status = ANY($2)
+  AND (
+    ARRAY_LENGTH($2::order_status[], 1) IS NULL
+        OR (
+        status = ANY($2)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
+            )
+        )
     )
-    AND (
-        ARRAY_LENGTH($3::order_type[], 1) IS NULL
-        OR type = ANY($3)
+  AND (
+    ARRAY_LENGTH($3::order_status[], 1) IS NULL
+        OR (
+        status <> ANY($3)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
+            )
+        )
     )
-    AND (
-        $4::order_side IS NULL
-        OR side = $4
+  AND (
+    ARRAY_LENGTH($4::order_type[], 1) IS NULL
+        OR type = ANY($4)
     )
+  AND (
+    $5::order_side IS NULL
+        OR side = $5
+)
 `
 
 type CountOrdersByWalletParams struct {
-	Wallet pgtype.Text   `json:"wallet"`
-	Status []OrderStatus `json:"status"`
-	Types  []OrderType   `json:"types"`
-	Side   NullOrderSide `json:"side"`
+	Wallet    pgtype.Text   `json:"wallet"`
+	Status    []OrderStatus `json:"status"`
+	NotStatus []OrderStatus `json:"notStatus"`
+	Types     []OrderType   `json:"types"`
+	Side      NullOrderSide `json:"side"`
 }
 
 func (q *Queries) CountOrdersByWallet(ctx context.Context, arg CountOrdersByWalletParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countOrdersByWallet,
 		arg.Wallet,
 		arg.Status,
+		arg.NotStatus,
 		arg.Types,
 		arg.Side,
 	)

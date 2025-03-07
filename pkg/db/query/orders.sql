@@ -67,20 +67,36 @@ LIMIT $2 OFFSET $3;
 SELECT COUNT(*) AS total_counts
 FROM orders
 WHERE wallet = $1
-    AND (
-        ARRAY_LENGTH(@status::order_status[], 1) IS NULL
-        OR status = ANY(@status)
+  AND (
+    ARRAY_LENGTH(@status::order_status[], 1) IS NULL
+        OR (
+        status = ANY(@status)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
+            )
+        )
     )
-    AND (
-        ARRAY_LENGTH(@types::order_type[], 1) IS NULL
+  AND (
+    ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
+        OR (
+        status <> ANY(@not_status)
+            AND (
+            status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
+            )
+        )
+    )
+  AND (
+    ARRAY_LENGTH(@types::order_type[], 1) IS NULL
         OR type = ANY(@types)
     )
-    AND (
-        sqlc.narg(side)::order_side IS NULL
+  AND (
+    sqlc.narg(side)::order_side IS NULL
         OR side = @side
-    );
-
-
+);
 
 -- name: GetOrderByID :one
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
