@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
@@ -28,12 +29,13 @@ var (
 )
 
 type ListOrdersByWalletQuery struct {
-	Wallet string           `query:"wallet" validate:"eth_addr"`
-	Status []db.OrderStatus `query:"status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
-	Types  []db.OrderType   `query:"types" validate:"dive,oneof=MARKET LIMIT STOP TWAP"`
-	Side   *string          `query:"side" validate:"omitempty,oneof=BUY SELL"`
-	Limit  int32            `query:"limit" validate:"gt=0"`
-	Offset int32            `query:"offset" validate:"gte=0"`
+	Wallet    string           `query:"wallet" validate:"eth_addr"`
+	Status    []db.OrderStatus `query:"status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
+	NotStatus []db.OrderStatus `query:"not_status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
+	Types     []db.OrderType   `query:"types" validate:"dive,oneof=MARKET LIMIT STOP TWAP"`
+	Side      *string          `query:"side" validate:"omitempty,oneof=BUY SELL"`
+	Limit     int32            `query:"limit" validate:"gt=0"`
+	Offset    int32            `query:"offset" validate:"gte=0"`
 }
 
 func ListOrderByWallet(ctx context.Context, query ListOrdersByWalletQuery) (*db.ListOrdersByWalletResult, error) {
@@ -100,7 +102,7 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 		return nil, err
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	_ = params.CreatedAt.Scan(now)
 	if params.Type == db.OrderTypeMARKET {
 		_ = params.FilledAt.Scan(now)
@@ -121,11 +123,13 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 	}
 
 	if body.Deadline != nil {
+		fmt.Println(now.Unix(), *body.Deadline)
+
 		if now.Unix() >= *body.Deadline {
 			return nil, errors.New("invalid deadline")
 		}
 
-		_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0))
+		_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0).UTC())
 	}
 
 	pools, err := db.DB.GetPoolsByIDs(ctx, body.PoolIDs)
@@ -156,7 +160,7 @@ func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.CancelOrderRow,
 		return nil, err
 	}
 
-	_ = params.CancelledAt.Scan(time.Now())
+	_ = params.CancelledAt.Scan(time.Now().UTC())
 	order, err := db.DB.CancelOrder(ctx, params)
 	if err != nil {
 		return nil, err
@@ -227,7 +231,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 	params := db.FillOrderParams{
 		ID: order.ID,
 	}
-	_ = params.FilledAt.Scan(time.Now())
+	_ = params.FilledAt.Scan(time.Now().UTC())
 	filledOrder, err := db.DB.FillOrder(ctx, params)
 	if err != nil {
 		return nil, err
@@ -263,11 +267,11 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		ID:                       order.ID,
 		TwapCurrentExecutedTimes: order.TwapExecutedTimes,
 	}
-	_ = params.FilledAt.Scan(time.Now())
+	_ = params.FilledAt.Scan(time.Now().UTC())
 
 	var err error
 	if order.TwapCurrentExecutedTimes.Int32+1 == order.TwapExecutedTimes.Int32 {
-		_ = params.FilledAt.Scan(time.Now())
+		_ = params.FilledAt.Scan(time.Now().UTC())
 		params.Status = db.OrderStatusFILLED
 	} else {
 		params.Status = db.OrderStatusPARTIALFILLED
@@ -309,7 +313,7 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
 	_ = params.Amount.Scan(amount.String())
-	_ = params.FilledAt.Scan(time.Now())
+	_ = params.FilledAt.Scan(time.Now().UTC())
 
 	_, err := db.DB.InsertOrder(ctx, params)
 	if err != nil {

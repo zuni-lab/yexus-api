@@ -36,8 +36,19 @@ WHERE wallet = $1
             status = ANY(@status)
             AND (
                 status <> 'PENDING'
-                OR deadline is NULL
-                OR (status = 'PENDING' AND deadline < NOW()) --Skip expired orders
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
+            )
+        )
+    )
+    AND (
+        ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
+        OR (
+        status <> ANY(@not_status)
+            AND (
+                status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
             )
         )
     )

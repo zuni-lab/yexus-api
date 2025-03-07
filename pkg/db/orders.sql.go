@@ -377,30 +377,42 @@ WHERE wallet = $1
             status = ANY($4)
             AND (
                 status <> 'PENDING'
-                OR deadline is NULL
-                OR (status = 'PENDING' AND deadline < NOW()) --Skip expired orders
+                OR deadline IS NULL
+                OR deadline > NOW() --Skip expired orders
             )
         )
     )
     AND (
-        ARRAY_LENGTH($5::order_type[], 1) IS NULL
-        OR type = ANY($5)
+        ARRAY_LENGTH($5::order_status[], 1) IS NULL
+        OR (
+        status <> ANY($5)
+            AND (
+                status <> 'PENDING'
+                OR deadline IS NULL
+                OR (status = 'PENDING' AND deadline <= NOW())
+            )
+        )
     )
     AND (
-        $6::order_side IS NULL
-        OR side = $6
+        ARRAY_LENGTH($6::order_type[], 1) IS NULL
+        OR type = ANY($6)
+    )
+    AND (
+        $7::order_side IS NULL
+        OR side = $7
     )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
 type GetOrdersByWalletParams struct {
-	Wallet pgtype.Text   `json:"wallet"`
-	Limit  int32         `json:"limit"`
-	Offset int32         `json:"offset"`
-	Status []OrderStatus `json:"status"`
-	Types  []OrderType   `json:"types"`
-	Side   NullOrderSide `json:"side"`
+	Wallet    pgtype.Text   `json:"wallet"`
+	Limit     int32         `json:"limit"`
+	Offset    int32         `json:"offset"`
+	Status    []OrderStatus `json:"status"`
+	NotStatus []OrderStatus `json:"notStatus"`
+	Types     []OrderType   `json:"types"`
+	Side      NullOrderSide `json:"side"`
 }
 
 type GetOrdersByWalletRow struct {
@@ -435,6 +447,7 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 		arg.Limit,
 		arg.Offset,
 		arg.Status,
+		arg.NotStatus,
 		arg.Types,
 		arg.Side,
 	)
