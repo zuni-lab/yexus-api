@@ -2,10 +2,11 @@ package db
 
 import (
 	"context"
+	"github.com/jinzhu/copier"
 )
 
 type ListOrdersByWalletResult struct {
-	Orders []Order
+	Orders []GetOrdersByWalletRow
 	Count  int64
 }
 
@@ -13,9 +14,17 @@ func (store *SqlStore) ListOrdersByWalletTx(ctx context.Context, params GetOrder
 	var result *ListOrdersByWalletResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
-		var err error
+		var (
+			err         error
+			countParams CountOrdersByWalletParams
+		)
 
 		orders, err := DB.GetOrdersByWallet(ctx, params)
+		if err != nil {
+			return err
+		}
+
+		err = copier.Copy(&countParams, &params)
 		if err != nil {
 			return err
 		}

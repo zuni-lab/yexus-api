@@ -156,6 +156,8 @@ func loadServerConfig() ServerConfig {
 		RealtimeInterval:      realtimeInterval,
 		RealtimeMinBlockRange: getEnvUint64("REALTIME_MIN_BLOCK_RANGE", 5),
 		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
+
+		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
 	}
 }
 
