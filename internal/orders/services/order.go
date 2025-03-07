@@ -83,6 +83,7 @@ type CreateOrderBody struct {
 	Slippage  float64      `json:"slippage" validate:"gte=0"`
 	Signature string       `json:"signature" validate:"max=130"`
 	Paths     string       `json:"paths" validate:"max=256"`
+	Nonce     int64        `json:"nonce" validate:"gte=0"`
 	Deadline  *time.Time   `json:"deadline" validate:"omitempty,datetime=2006-01-02 15:04:05"`
 
 	TwapIntervalSeconds *int64  `json:"twapIntervalSeconds" validate:"required_if=Type TWAP,gt=59"`
@@ -192,14 +193,9 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	nonce, err := db.DB.IncreaseOrderNonce(ctx, order.Wallet.String)
-	if err != nil {
-		return nil, err
-	}
-
 	contractParams := evm.DexonOrder{
 		Account:   common.HexToAddress(order.Wallet.String),
-		Nonce:     new(big.Int).SetInt64(nonce),
+		Nonce:     new(big.Int).SetInt64(order.Nonce),
 		Path:      []byte(order.Paths),
 		Amount:    new(big.Int).Mul(order.Amount.Int, new(big.Int).Exp(new(big.Int).SetInt64(10), new(big.Int).SetInt64(18), nil)),
 		Slippage:  new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e4)),

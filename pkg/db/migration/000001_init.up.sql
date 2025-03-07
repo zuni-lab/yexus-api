@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS orders (
     price NUMERIC(78,18) NOT NULL,
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
+    nonce BIGINT NOT NULL UNIQUE,
     signature VARCHAR(130), -- 0x + 64 bytes for r, 64 bytes for s, 2 bytes for v
 
     parent_id BIGINT,
@@ -77,13 +78,6 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at TIMESTAMP,
 
     FOREIGN KEY (parent_id) REFERENCES orders(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS order_nonces (
-    wallet VARCHAR(42) PRIMARY KEY,
-    nonce BIGINT NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 --- Seed data ---
