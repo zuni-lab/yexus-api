@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
@@ -132,13 +131,15 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 	}
 
 	if body.Deadline != nil {
-		fmt.Println(now.Unix(), *body.Deadline)
-
 		if now.Unix() >= *body.Deadline {
 			return nil, errors.New("invalid deadline")
 		}
 
 		_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0).UTC())
+	}
+
+	for i, poolID := range body.PoolIDs {
+		body.PoolIDs[i] = utils.NormalizeAddress(poolID)
 	}
 
 	pools, err := db.DB.GetPoolsByIDs(ctx, body.PoolIDs)
