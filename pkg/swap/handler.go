@@ -61,8 +61,7 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 	_, err = services.MatchOrder(ctx, price)
 	if err != nil {
 		log.Error().Any("pool", poolAddress).Any("price", price).Err(err).Msgf("❌ [SwapHandler] Failed to match order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
-
-		// TODO: return
+		return nil
 	}
 
 	log.Info().Any("pool", poolAddress).Msgf("✅ [SwapHandler] Successfully matched order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())

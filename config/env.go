@@ -1,11 +1,14 @@
 package config
 
 import (
+	"crypto/ecdsa"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -41,7 +44,9 @@ type ServerConfig struct {
 	// OpenAI
 	OpenaiApiKey      string `validate:"min=1"`
 	OpenaiAssistantId string `validate:"min=1"`
+}
 
+type RealtimeManagerConfig struct {
 	// Realtime Manager
 	RealtimeInterval      time.Duration `validate:"min=1s"`
 	RealtimeMinBlockRange uint64        `validate:"min=1"`
@@ -49,6 +54,10 @@ type ServerConfig struct {
 
 	ContractAddress string `validate:"eth_addr"`
 	PrivateKey      string `validate:"hexadecimal,len=64"`
+
+	RawPrivKey           *ecdsa.PrivateKey
+	Address              common.Address
+	DexonContractAddress common.Address
 }
 
 // Indexer-specific configuration
@@ -63,7 +72,8 @@ type IndexerConfig struct {
 type ServerEnv struct {
 	CommonConfig
 	ServerConfig
-	IndexerConfig
+	RealtimeManagerConfig
+	// IndexerConfig
 }
 
 var Env ServerEnv
@@ -93,22 +103,42 @@ func LoadEnv() {
 }
 
 func loadEnv() {
-	common := loadCommonConfig()
+	commonConfig := loadCommonConfig()
 
-	server := loadServerConfig()
+	serverConfig := loadServerConfig()
 
-	indexer := loadIndexerConfig()
+	// indexer := loadIndexerConfig()
+
+	managerConfig := loadRealtimeManagerConfig()
 
 	Env = ServerEnv{
-		CommonConfig:  common,
-		ServerConfig:  server,
-		IndexerConfig: indexer,
+		CommonConfig:          commonConfig,
+		ServerConfig:          serverConfig,
+		RealtimeManagerConfig: managerConfig,
+		// IndexerConfig: indexer,
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(Env); err != nil {
 		log.Fatal().Msgf("Error validating env: %s", err)
 	}
+
+	privateKey, err := crypto.HexToECDSA(managerConfig.PrivateKey)
+	if err != nil {
+		panic(err)
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		panic("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+
+	Env.RealtimeManagerConfig.RawPrivKey = privateKey
+	Env.RealtimeManagerConfig.Address = fromAddress
+	Env.DexonContractAddress = common.Address(common.FromHex(managerConfig.ContractAddress))
 }
 
 func loadCommonConfig() CommonConfig {
@@ -143,8 +173,6 @@ func loadServerConfig() ServerConfig {
 		port = "12345"
 	}
 
-	realtimeInterval := getEnvDuration("REALTIME_INTERVAL", "1s")
-
 	return ServerConfig{
 		ApiHost:       os.Getenv("API_HOST"),
 		Port:          port,
@@ -153,7 +181,13 @@ func loadServerConfig() ServerConfig {
 
 		OpenaiApiKey:      os.Getenv("OPENAI_API_KEY"),
 		OpenaiAssistantId: os.Getenv("OPENAI_ASSISTANT_ID"),
+	}
+}
 
+func loadRealtimeManagerConfig() RealtimeManagerConfig {
+	realtimeInterval := getEnvDuration("REALTIME_INTERVAL", "1s")
+
+	return RealtimeManagerConfig{
 		RealtimeInterval:      realtimeInterval,
 		RealtimeMinBlockRange: getEnvUint64("REALTIME_MIN_BLOCK_RANGE", 5),
 		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
@@ -163,14 +197,14 @@ func loadServerConfig() ServerConfig {
 	}
 }
 
-func loadIndexerConfig() IndexerConfig {
-	return IndexerConfig{
-		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
-		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
-		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
-		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
-	}
-}
+// func loadIndexerConfig() IndexerConfig {
+// 	return IndexerConfig{
+// 		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
+// 		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
+// 		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
+// 		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
+// 	}
+// }
 
 // Helper functions for environment variable parsing
 func getEnvDuration(key, defaultValue string) time.Duration {

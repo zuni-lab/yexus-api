@@ -35,6 +35,7 @@ type Querier interface {
 	GetPrices(ctx context.Context, arg GetPricesParams) ([]Price, error)
 	InsertOrder(ctx context.Context, arg InsertOrderParams) (InsertOrderRow, error)
 	PoolDetails(ctx context.Context, id string) (PoolDetailsRow, error)
+	RejectOrder(ctx context.Context, arg RejectOrderParams) (Order, error)
 	UpsertBlockProcessingState(ctx context.Context, arg UpsertBlockProcessingStateParams) error
 	UpsertChatThread(ctx context.Context, arg UpsertChatThreadParams) (ChatThread, error)
 }

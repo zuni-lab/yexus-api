@@ -3,8 +3,10 @@ package evm
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -14,10 +16,12 @@ import (
 )
 
 type Manager struct {
-	client      *ethclient.Client
-	backoff     *backoff.ExponentialBackOff
-	maxAttempts uint64
-	handlers    []SwapHandler
+	client        *ethclient.Client
+	backoff       *backoff.ExponentialBackOff
+	maxAttempts   uint64
+	handlers      []SwapHandler
+	chainID       *big.Int
+	dexonContract *Dexon
 }
 
 func NewManager() *Manager {
@@ -106,6 +110,23 @@ func (m *Manager) Client() *ethclient.Client {
 }
 
 func (m *Manager) DexonInstance(ctx context.Context) (*Dexon, error) {
+	if m.dexonContract != nil {
+		return m.dexonContract, nil
+	}
 	contractAddress := common.HexToAddress(config.Env.ContractAddress)
 	return NewDexon(contractAddress, m.client)
+}
+
+func (m *Manager) ChainID(ctx context.Context) (*big.Int, error) {
+	if m.chainID != nil {
+		return m.chainID, nil
+	}
+
+	chainID, err := m.Client().NetworkID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m.chainID = chainID
+	return chainID, nil
 }

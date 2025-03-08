@@ -182,3 +182,12 @@ SET
     tx_hash = $5
 WHERE id = $6
 RETURNING *;
+
+-- name: RejectOrder :one
+UPDATE orders
+SET
+    status = 'REJECTED',
+    rejected_at = $1,
+    tx_hash = $2
+WHERE id = $3
+RETURNING *;
