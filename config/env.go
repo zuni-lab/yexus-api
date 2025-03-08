@@ -48,7 +48,7 @@ type ServerConfig struct {
 	RealtimeMaxBlockRange uint64        `validate:"min=1"`
 
 	ContractAddress string `validate:"eth_addr"`
-	PrivateKey      string `validate:"min=1"`
+	PrivateKey      string `validate:"hexadecimal,len=64"`
 }
 
 // Indexer-specific configuration
