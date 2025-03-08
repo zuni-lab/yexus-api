@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CancelAllOrders(ctx context.Context, arg CancelAllOrdersParams) error
 	CancelOrder(ctx context.Context, arg CancelOrderParams) (CancelOrderRow, error)
 	CountChatThreads(ctx context.Context, userAddress string) (int64, error)
 	CountOrdersByWallet(ctx context.Context, arg CountOrdersByWalletParams) (int64, error)

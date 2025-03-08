@@ -183,6 +183,27 @@ func CancelOrder(ctx context.Context, body CancelOrderBody) (*db.CancelOrderRow,
 	return &order, nil
 }
 
+type CancelAllOrdersBody struct {
+	Wallet string `json:"wallet" validate:"eth_addr"`
+}
+
+func CancelAllOrders(ctx context.Context, body CancelAllOrdersBody) error {
+	body.Wallet = utils.NormalizeAddress(body.Wallet)
+
+	var params db.CancelAllOrdersParams
+	if err := copier.Copy(&params, &body); err != nil {
+		return err
+	}
+
+	_ = params.CancelledAt.Scan(time.Now().UTC())
+	err := db.DB.CancelAllOrders(ctx, params)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 	numericPrice, err := utils.BigFloatToNumeric(price)
 	if err != nil {

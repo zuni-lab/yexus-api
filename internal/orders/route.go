@@ -21,4 +21,5 @@ func Route(g *echo.Group, path string) {
 	ordersGroup.POST("", handlers.Create)
 	ordersGroup.GET("/:id", handlers.Get)
 	ordersGroup.POST("/:id/cancel", handlers.Cancel)
+	ordersGroup.POST("/cancel/all", handlers.CancelAll)
 }

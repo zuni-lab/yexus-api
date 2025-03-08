@@ -11,6 +11,31 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cancelAllOrders = `-- name: CancelAllOrders :exec
+UPDATE orders
+SET
+    status = 'CANCELLED',
+    cancelled_at = $1
+WHERE wallet = $2 AND status NOT IN ('REJECTED', 'FILLED')
+    RETURNING
+    id, pool_ids, parent_id, wallet, status, side, type,
+    price, amount, slippage, twap_interval_seconds,
+    twap_executed_times, twap_current_executed_times,
+    twap_min_price, twap_max_price, deadline, nonce,
+    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+    cancelled_at, created_at
+`
+
+type CancelAllOrdersParams struct {
+	CancelledAt pgtype.Timestamp `json:"cancelledAt"`
+	Wallet      pgtype.Text      `json:"wallet"`
+}
+
+func (q *Queries) CancelAllOrders(ctx context.Context, arg CancelAllOrdersParams) error {
+	_, err := q.db.Exec(ctx, cancelAllOrders, arg.CancelledAt, arg.Wallet)
+	return err
+}
+
 const cancelOrder = `-- name: CancelOrder :one
 UPDATE orders
 SET
