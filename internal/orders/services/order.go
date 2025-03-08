@@ -2,9 +2,13 @@ package services
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"database/sql"
 	"errors"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/zuni-lab/dexon-service/config"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"math/big"
 	"strconv"
@@ -187,7 +191,7 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 
 	order, err := db.DB.GetMatchedOrder(ctx, numericPrice)
 	if err != nil {
-		if err == sql.ErrNoRows || err == pgx.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.New("no order matched")
 		}
 		return nil, err
@@ -233,7 +237,12 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	_, err = dexonContract.ExecuteOrder(nil, contractParams)
+	txOpts, err := prepareTxOpts()
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := dexonContract.ExecuteOrder(txOpts, contractParams)
 	if err != nil {
 		return nil, err
 	}
@@ -242,6 +251,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		ID: order.ID,
 	}
 	_ = params.FilledAt.Scan(time.Now().UTC())
+	_ = params.TxHash.Scan(tx.Hash().String())
 	filledOrder, err := db.DB.FillOrder(ctx, params)
 	if err != nil {
 		return nil, err
@@ -270,6 +280,47 @@ func convertOrderSideToEvmType(side db.OrderSide) (uint8, error) {
 	default:
 		return 0, errors.New("invalid order side")
 	}
+}
+
+func prepareTxOpts() (*bind.TransactOpts, error) {
+	privateKey, err := crypto.HexToECDSA(config.Env.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, errors.New("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	nonce, err := evmManager().Client().PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	gasPrice, err := evmManager().Client().SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	chainID, err := evmManager().Client().NetworkID(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
+	if err != nil {
+		return nil, err
+	}
+
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0)
+	auth.GasLimit = uint64(300000)
+	auth.GasPrice = gasPrice
+
+	return auth, nil
 }
 
 func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.Order, error) {

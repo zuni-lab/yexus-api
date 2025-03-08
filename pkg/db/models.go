@@ -173,6 +173,7 @@ type Order struct {
 	Slippage                 pgtype.Float8    `json:"slippage"`
 	Nonce                    int64            `json:"nonce"`
 	Signature                pgtype.Text      `json:"signature"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
 	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
 	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`

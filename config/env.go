@@ -48,6 +48,7 @@ type ServerConfig struct {
 	RealtimeMaxBlockRange uint64        `validate:"min=1"`
 
 	ContractAddress string `validate:"eth_addr"`
+	PrivateKey      string `validate:"min=1"`
 }
 
 // Indexer-specific configuration
@@ -158,6 +159,7 @@ func loadServerConfig() ServerConfig {
 		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
 
 		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
+		PrivateKey:      os.Getenv("PRIVATE_KEY"),
 	}
 }
 

@@ -101,6 +101,10 @@ func (m *Manager) processPoolBlockRange(ctx context.Context, contract *UniswapV3
 	return nil
 }
 
+func (m *Manager) Client() *ethclient.Client {
+	return m.client
+}
+
 func (m *Manager) DexonInstance(ctx context.Context) (*Dexon, error) {
 	contractAddress := common.HexToAddress(config.Env.ContractAddress)
 	return NewDexon(contractAddress, m.client)

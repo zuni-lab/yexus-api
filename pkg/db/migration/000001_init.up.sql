@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS orders (
     slippage DOUBLE PRECISION,
     nonce BIGINT NOT NULL UNIQUE,
     signature VARCHAR(255),
+    tx_hash VARCHAR(255),
 
     parent_id BIGINT,
     twap_interval_seconds INT,

@@ -22,7 +22,7 @@ RETURNING
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline, nonce,
-    paths, partial_filled_at, filled_at, rejected_at,
+    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at
 `
 
@@ -51,6 +51,7 @@ type CancelOrderRow struct {
 	Deadline                 pgtype.Timestamp `json:"deadline"`
 	Nonce                    int64            `json:"nonce"`
 	Paths                    string           `json:"paths"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
@@ -80,6 +81,7 @@ func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (Cance
 		&i.Deadline,
 		&i.Nonce,
 		&i.Paths,
+		&i.TxHash,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
@@ -150,18 +152,20 @@ const fillOrder = `-- name: FillOrder :one
 UPDATE orders
 SET
     status = 'FILLED',
-    filled_at = $1
-WHERE id = $2
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+    filled_at = $1,
+    tx_hash = $2
+WHERE id = $3
+RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
 type FillOrderParams struct {
 	FilledAt pgtype.Timestamp `json:"filledAt"`
+	TxHash   pgtype.Text      `json:"txHash"`
 	ID       int64            `json:"id"`
 }
 
 func (q *Queries) FillOrder(ctx context.Context, arg FillOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, fillOrder, arg.FilledAt, arg.ID)
+	row := q.db.QueryRow(ctx, fillOrder, arg.FilledAt, arg.TxHash, arg.ID)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -176,6 +180,7 @@ func (q *Queries) FillOrder(ctx context.Context, arg FillOrderParams) (Order, er
 		&i.Slippage,
 		&i.Nonce,
 		&i.Signature,
+		&i.TxHash,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -198,9 +203,10 @@ SET
     status = $1,
     twap_current_executed_times = $2,
     partial_filled_at = COALESCE($3, partial_filled_atcancelled_at),
-    filled_at = $4
-WHERE id = $5
-RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
+    filled_at = $4,
+    tx_hash = $5
+WHERE id = $6
+RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
 type FillTwapOrderParams struct {
@@ -208,6 +214,7 @@ type FillTwapOrderParams struct {
 	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	ID                       int64            `json:"id"`
 }
 
@@ -217,6 +224,7 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 		arg.TwapCurrentExecutedTimes,
 		arg.PartialFilledAt,
 		arg.FilledAt,
+		arg.TxHash,
 		arg.ID,
 	)
 	var i Order
@@ -233,6 +241,7 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 		&i.Slippage,
 		&i.Nonce,
 		&i.Signature,
+		&i.TxHash,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -250,7 +259,7 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 }
 
 const getMatchedOrder = `-- name: GetMatchedOrder :one
-SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
+SELECT id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
 WHERE (
         (side = 'BUY' AND type = 'LIMIT' AND price >= $1)
         OR (side = 'SELL' AND type = 'LIMIT' AND price <= $1)
@@ -293,6 +302,7 @@ func (q *Queries) GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Or
 		&i.Slippage,
 		&i.Nonce,
 		&i.Signature,
+		&i.TxHash,
 		&i.ParentID,
 		&i.TwapIntervalSeconds,
 		&i.TwapExecutedTimes,
@@ -314,7 +324,7 @@ SELECT id, pool_ids, parent_id, wallet, status, side, type,
        price, amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
        twap_min_price, twap_max_price, deadline, nonce,
-       paths, partial_filled_at, filled_at, rejected_at,
+       paths, tx_hash, partial_filled_at, filled_at, rejected_at,
        cancelled_at, created_at
 FROM orders
 WHERE wallet = $1 AND id = $2
@@ -344,6 +354,7 @@ type GetOrderByIDRow struct {
 	Deadline                 pgtype.Timestamp `json:"deadline"`
 	Nonce                    int64            `json:"nonce"`
 	Paths                    string           `json:"paths"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
@@ -373,6 +384,7 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Get
 		&i.Deadline,
 		&i.Nonce,
 		&i.Paths,
+		&i.TxHash,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
@@ -387,7 +399,7 @@ SELECT id, pool_ids, parent_id, wallet, status, side, type,
        price, amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
        twap_min_price, twap_max_price, deadline, nonce,
-       paths, partial_filled_at, filled_at, rejected_at,
+       paths, tx_hash, partial_filled_at, filled_at, rejected_at,
        cancelled_at, created_at
 FROM orders
 WHERE wallet = $1
@@ -454,6 +466,7 @@ type GetOrdersByWalletRow struct {
 	Deadline                 pgtype.Timestamp `json:"deadline"`
 	Nonce                    int64            `json:"nonce"`
 	Paths                    string           `json:"paths"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
@@ -497,6 +510,7 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 			&i.Deadline,
 			&i.Nonce,
 			&i.Paths,
+			&i.TxHash,
 			&i.PartialFilledAt,
 			&i.FilledAt,
 			&i.RejectedAt,
@@ -519,7 +533,7 @@ INSERT INTO orders (
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline,
-    signature, paths, nonce,
+    signature, paths, nonce, tx_hash,
     partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at)
 VALUES ($1, $2, $3, $4, $5, $6,
@@ -527,13 +541,13 @@ VALUES ($1, $2, $3, $4, $5, $6,
         $11, $12, $13,
         $14, $15, $16,
         $17, $18, $19, $20,
-        $21, $22, $23)
+        $21, $22, $23, $24)
 RETURNING
     id, pool_ids, parent_id, wallet, status, side, type,
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline, nonce,
-    paths, partial_filled_at, filled_at, rejected_at,
+    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at
 `
 
@@ -556,6 +570,7 @@ type InsertOrderParams struct {
 	Signature                pgtype.Text      `json:"signature"`
 	Paths                    string           `json:"paths"`
 	Nonce                    int64            `json:"nonce"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
@@ -582,6 +597,7 @@ type InsertOrderRow struct {
 	Deadline                 pgtype.Timestamp `json:"deadline"`
 	Nonce                    int64            `json:"nonce"`
 	Paths                    string           `json:"paths"`
+	TxHash                   pgtype.Text      `json:"txHash"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
 	RejectedAt               pgtype.Timestamp `json:"rejectedAt"`
@@ -609,6 +625,7 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Inser
 		arg.Signature,
 		arg.Paths,
 		arg.Nonce,
+		arg.TxHash,
 		arg.PartialFilledAt,
 		arg.FilledAt,
 		arg.RejectedAt,
@@ -635,6 +652,7 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Inser
 		&i.Deadline,
 		&i.Nonce,
 		&i.Paths,
+		&i.TxHash,
 		&i.PartialFilledAt,
 		&i.FilledAt,
 		&i.RejectedAt,
