@@ -29,12 +29,7 @@ func (store *SqlStore) ListOrdersByWalletTx(ctx context.Context, params GetOrder
 			return err
 		}
 
-		count, err := DB.CountOrdersByWallet(ctx, CountOrdersByWalletParams{
-			Wallet: params.Wallet,
-			Types:  params.Types,
-			Status: params.Status,
-			Side:   params.Side,
-		})
+		count, err := DB.CountOrdersByWallet(ctx, countParams)
 		if err != nil {
 			return err
 		}

@@ -120,36 +120,36 @@ const countOrdersByWallet = `-- name: CountOrdersByWallet :one
 SELECT COUNT(*) AS total_counts
 FROM orders
 WHERE wallet = $1
-  AND (
-    ARRAY_LENGTH($2::order_status[], 1) IS NULL
+    AND (
+        ARRAY_LENGTH($2::order_status[], 1) IS NULL
         OR (
-        status = ANY($2)
+            status = ANY($2)
             AND (
-            status <> 'PENDING'
+                status <> 'PENDING'
                 OR deadline IS NULL
                 OR deadline > NOW() --Skip expired orders
             )
         )
     )
-  AND (
-    ARRAY_LENGTH($3::order_status[], 1) IS NULL
+    AND (
+        ARRAY_LENGTH($3::order_status[], 1) IS NULL
         OR (
-        status <> ANY($3)
+            status <> ANY($3)
             AND (
-            status <> 'PENDING'
+                status <> 'PENDING'
                 OR deadline IS NULL
                 OR (status = 'PENDING' AND deadline <= NOW())
             )
         )
     )
-  AND (
-    ARRAY_LENGTH($4::order_type[], 1) IS NULL
+    AND (
+        ARRAY_LENGTH($4::order_type[], 1) IS NULL
         OR type = ANY($4)
     )
-  AND (
-    $5::order_side IS NULL
+    AND (
+        $5::order_side IS NULL
         OR side = $5
-)
+    )
 `
 
 type CountOrdersByWalletParams struct {
