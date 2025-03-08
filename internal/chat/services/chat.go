@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/openai"
@@ -34,7 +35,7 @@ func ChatDex(ctx context.Context, input ChatParams, w http.ResponseWriter) error
 
 	log.Info().Any("cryptoData", cryptoData).Msg("crypto data")
 	if len(cryptoData) == 0 {
-		return fmt.Errorf("no crypto data available")
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "no cryptocurrency data is currently available, please try again later.")
 	}
 
 	for _, crypto := range cryptoData {

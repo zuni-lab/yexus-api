@@ -8,7 +8,6 @@ import (
 )
 
 type ErrResponse struct {
-	Ok       bool        `json:"ok"`
 	Message  string      `json:"message"`
 	Metadata interface{} `json:"metadata,omitempty"`
 }

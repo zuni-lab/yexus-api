@@ -23,7 +23,7 @@ type Message struct {
 }
 
 type GetThreadDetailsResponse struct {
-	Message    []Message `json:"message"`
+	Messages   []Message `json:"messages"`
 	ThreadID   string    `json:"thread_id"`
 	ThreadName string    `json:"thread_name"`
 	UpdatedAt  int64     `json:"updated_at"`
@@ -55,7 +55,7 @@ func GetThreadDetails(ctx context.Context, input GetThreadDetailsParams) (*GetTh
 	updatedAt := thread.UpdatedAt.Time.Unix()
 
 	return &GetThreadDetailsResponse{
-		Message:    filtered,
+		Messages:   filtered,
 		ThreadID:   input.ThreadID,
 		ThreadName: thread.ThreadName,
 		UpdatedAt:  updatedAt,
@@ -109,7 +109,8 @@ func GetThreadList(ctx context.Context, input GetThreadListParams) (*GetThreadLi
 
 func processMessage(messages []openai.Message) []Message {
 	var result []Message
-	for _, message := range messages {
+	for i := len(messages) - 1; i >= 0; i-- {
+		message := messages[i]
 		content := ""
 		if len(message.Content) > 0 {
 			content = message.Content[0].Text.Value
@@ -120,5 +121,6 @@ func processMessage(messages []openai.Message) []Message {
 			CreatedAt: message.CreatedAt,
 		})
 	}
+
 	return result
 }
