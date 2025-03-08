@@ -53,15 +53,10 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	txManager, err := evm.NewTxManager(evmManager().Client())
-	if err != nil {
-		return nil, err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
-	auth, err := bind.NewKeyedTransactorWithChainID(config.Env.RawPrivKey, txManager.ChainID())
+	auth, err := bind.NewKeyedTransactorWithChainID(config.Env.RawPrivKey, txManager().ChainID())
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +71,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	receipt, err := txManager.SendAndWaitForTx(
+	receipt, err := txManager().SendAndWaitForTx(
 		ctx,
 		auth,
 		common.HexToAddress("contract_address"),
