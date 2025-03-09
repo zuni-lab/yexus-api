@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS orders (
     pool_ids VARCHAR(42)[] NOT NULL,
     paths VARCHAR(256) NOT NULL,
 
-    wallet VARCHAR(42),
+    wallet VARCHAR(42) NOT NULL,
     status ORDER_STATUS NOT NULL DEFAULT 'PENDING',
     
     side ORDER_SIDE NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS orders (
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
     nonce BIGINT NOT NULL UNIQUE,
-    signature VARCHAR(255),
+    signature VARCHAR(255) NOT NULL,
     tx_hash VARCHAR(255),
 
     parent_id BIGINT,
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS orders (
     filled_at TIMESTAMP,
     rejected_at TIMESTAMP,
     cancelled_at TIMESTAMP,
-    created_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (parent_id) REFERENCES orders(id) ON DELETE CASCADE
 );

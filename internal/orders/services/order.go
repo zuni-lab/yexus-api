@@ -4,35 +4,11 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"sync"
 	"time"
 
-	"github.com/zuni-lab/dexon-service/pkg/evm"
-
 	"github.com/jinzhu/copier"
-	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
-)
-
-var (
-	evmManager = sync.OnceValue(func() *evm.Manager {
-		log.Info().Msg("Connecting to EVM manager")
-		manager := evm.NewManager()
-		if err := manager.Connect(); err != nil {
-			panic(err)
-		}
-		return manager
-	})
-
-	txManager = sync.OnceValue(func() *evm.TxManager {
-		log.Info().Msg("Creating transaction manager")
-		manager, err := evm.NewTxManager(evmManager().Client())
-		if err != nil {
-			panic(err)
-		}
-		return manager
-	})
 )
 
 type ListOrdersByWalletQuery struct {

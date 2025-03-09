@@ -197,15 +197,6 @@ func loadRealtimeManagerConfig() RealtimeManagerConfig {
 	}
 }
 
-// func loadIndexerConfig() IndexerConfig {
-// 	return IndexerConfig{
-// 		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
-// 		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
-// 		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
-// 		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
-// 	}
-// }
-
 // Helper functions for environment variable parsing
 func getEnvDuration(key, defaultValue string) time.Duration {
 	value := os.Getenv(key)
@@ -231,14 +222,23 @@ func getEnvUint64(key string, defaultValue uint64) uint64 {
 	return parsed
 }
 
-func getEnvInt(key string, defaultValue int) int {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		log.Fatal().Msgf("Error parsing %s: %s", key, err)
-	}
-	return parsed
-}
+// func getEnvInt(key string, defaultValue int) int {
+// 	value := os.Getenv(key)
+// 	if value == "" {
+// 		return defaultValue
+// 	}
+// 	parsed, err := strconv.Atoi(value)
+// 	if err != nil {
+// 		log.Fatal().Msgf("Error parsing %s: %s", key, err)
+// 	}
+// 	return parsed
+// }
+
+// func loadIndexerConfig() IndexerConfig {
+// 	return IndexerConfig{
+// 		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
+// 		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
+// 		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
+// 		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
+// 	}
+// }

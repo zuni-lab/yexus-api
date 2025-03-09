@@ -5,16 +5,36 @@ import (
 	"database/sql"
 	"errors"
 	"math/big"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/config"
 	"github.com/zuni-lab/dexon-service/pkg/db"
 	"github.com/zuni-lab/dexon-service/pkg/evm"
 	"github.com/zuni-lab/dexon-service/pkg/utils"
+)
+
+var (
+	evmManager = sync.OnceValue(func() *evm.Manager {
+		log.Info().Msg("Connecting to EVM manager")
+		manager := evm.NewManager()
+		if err := manager.Connect(); err != nil {
+			panic(err)
+		}
+		return manager
+	})
+
+	txManager = sync.OnceValue(func() *evm.TxManager {
+		log.Info().Msg("Creating transaction manager")
+		manager, err := evm.NewTxManager(evmManager().Client())
+		if err != nil {
+			panic(err)
+		}
+		return manager
+	})
 )
 
 func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
@@ -74,7 +94,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 	receipt, err := txManager().SendAndWaitForTx(
 		ctx,
 		auth,
-		common.HexToAddress("contract_address"),
+		config.Env.DexonContractAddress,
 		data,
 	)
 
@@ -109,7 +129,9 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 }
 
 func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
-	userAddress, err := evm.NormalizeAddress(order.Wallet.String)
+	log.Info().Any("order", order).Msg("Mapping order to EVM order")
+
+	userAddress, err := evm.NormalizeAddress(order.Wallet)
 	if err != nil {
 		return nil, err
 	}
@@ -123,13 +145,15 @@ func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
 
 	amount := order.Amount.Int
 
+	log.Info().Any("price int", order.Price.Int).Any("price float", order.Price.Exp).Msg("Mapping order to EVM order")
+
 	triggerPrice := new(big.Int).Mul(order.Price.Int, new(big.Int).Exp(new(big.Int).SetInt64(10), new(big.Int).SetInt64(18), nil))
 
 	slippage := new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e5))
 
 	deadline := new(big.Int).SetInt64(order.Deadline.Time.Unix())
 
-	signature, err := evm.NormalizeHex(order.Signature.String)
+	signature, err := evm.NormalizeHex(order.Signature)
 	if err != nil {
 		return nil, err
 	}

@@ -28,7 +28,7 @@ WHERE wallet = $2 AND status NOT IN ('REJECTED', 'FILLED')
 
 type CancelAllOrdersParams struct {
 	CancelledAt pgtype.Timestamp `json:"cancelledAt"`
-	Wallet      pgtype.Text      `json:"wallet"`
+	Wallet      string           `json:"wallet"`
 }
 
 func (q *Queries) CancelAllOrders(ctx context.Context, arg CancelAllOrdersParams) error {
@@ -54,14 +54,14 @@ RETURNING
 type CancelOrderParams struct {
 	CancelledAt pgtype.Timestamp `json:"cancelledAt"`
 	ID          int64            `json:"id"`
-	Wallet      pgtype.Text      `json:"wallet"`
+	Wallet      string           `json:"wallet"`
 }
 
 type CancelOrderRow struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
@@ -153,7 +153,7 @@ WHERE wallet = $1
 `
 
 type CountOrdersByWalletParams struct {
-	Wallet    pgtype.Text   `json:"wallet"`
+	Wallet    string        `json:"wallet"`
 	Status    []OrderStatus `json:"status"`
 	NotStatus []OrderStatus `json:"notStatus"`
 	Types     []OrderType   `json:"types"`
@@ -356,15 +356,15 @@ WHERE wallet = $1 AND id = $2
 `
 
 type GetOrderByIDParams struct {
-	Wallet pgtype.Text `json:"wallet"`
-	ID     int64       `json:"id"`
+	Wallet string `json:"wallet"`
+	ID     int64  `json:"id"`
 }
 
 type GetOrderByIDRow struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
@@ -463,7 +463,7 @@ LIMIT $2 OFFSET $3
 `
 
 type GetOrdersByWalletParams struct {
-	Wallet    pgtype.Text   `json:"wallet"`
+	Wallet    string        `json:"wallet"`
 	Limit     int32         `json:"limit"`
 	Offset    int32         `json:"offset"`
 	Status    []OrderStatus `json:"status"`
@@ -476,7 +476,7 @@ type GetOrdersByWalletRow struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
@@ -579,7 +579,7 @@ RETURNING
 type InsertOrderParams struct {
 	PoolIds                  []string         `json:"poolIds"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
@@ -592,7 +592,7 @@ type InsertOrderParams struct {
 	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
 	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
 	Deadline                 pgtype.Timestamp `json:"deadline"`
-	Signature                pgtype.Text      `json:"signature"`
+	Signature                string           `json:"signature"`
 	Paths                    string           `json:"paths"`
 	Nonce                    int64            `json:"nonce"`
 	TxHash                   pgtype.Text      `json:"txHash"`
@@ -607,7 +607,7 @@ type InsertOrderRow struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`

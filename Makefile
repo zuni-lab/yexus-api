@@ -49,4 +49,9 @@ migrate-down:
 new-migration:
 	migrate create -ext sql -dir pkg/db/migration -seq $(name)
 
-
+#### Contract ####
+.PHONY: dexon uniswap
+dexon:
+	abigen --abi assets/DexonABI.json --pkg evm --type Dexon --out pkg/evm/dexon.contract.go
+uniswap:
+	abigen --abi assets/UniswapV3PoolABI.json --pkg evm --type UniswapV3 --out pkg/evm/uniswapv3.contract.go

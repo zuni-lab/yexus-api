@@ -20,6 +20,8 @@ func NewSwapHandler() *swapHandler {
 }
 
 func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) error {
+	defer utils.Recover("SwapHandler", event, "Failed to handle Swap event")
+
 	poolAddress := utils.NormalizeAddress(event.Raw.Address.Hex())
 
 	// Get or load token info
@@ -60,7 +62,7 @@ func (h *swapHandler) HandleSwap(ctx context.Context, event *evm.UniswapV3Swap) 
 
 	_, err = services.MatchOrder(ctx, price)
 	if err != nil {
-		log.Error().Any("pool", poolAddress).Any("price", price).Err(err).Msgf("❌ [SwapHandler] Failed to match order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
+		log.Warn().Any("pool", poolAddress).Err(err).Msgf("⚠️ [SwapHandler] Failed to match order for pool %s, at price %s", event.Raw.Address.Hex(), price.String())
 		return nil
 	}
 

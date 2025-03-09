@@ -164,7 +164,7 @@ type Order struct {
 	ID                       int64            `json:"id"`
 	PoolIds                  []string         `json:"poolIds"`
 	Paths                    string           `json:"paths"`
-	Wallet                   pgtype.Text      `json:"wallet"`
+	Wallet                   string           `json:"wallet"`
 	Status                   OrderStatus      `json:"status"`
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
@@ -172,7 +172,7 @@ type Order struct {
 	Amount                   pgtype.Numeric   `json:"amount"`
 	Slippage                 pgtype.Float8    `json:"slippage"`
 	Nonce                    int64            `json:"nonce"`
-	Signature                pgtype.Text      `json:"signature"`
+	Signature                string           `json:"signature"`
 	TxHash                   pgtype.Text      `json:"txHash"`
 	ParentID                 pgtype.Int8      `json:"parentId"`
 	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`

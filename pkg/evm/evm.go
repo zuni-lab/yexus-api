@@ -6,8 +6,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -113,8 +111,7 @@ func (m *Manager) DexonInstance(ctx context.Context) (*Dexon, error) {
 	if m.dexonContract != nil {
 		return m.dexonContract, nil
 	}
-	contractAddress := common.HexToAddress(config.Env.ContractAddress)
-	return NewDexon(contractAddress, m.client)
+	return NewDexon(config.Env.DexonContractAddress, m.client)
 }
 
 func (m *Manager) ChainID(ctx context.Context) (*big.Int, error) {
