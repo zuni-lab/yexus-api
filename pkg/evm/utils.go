@@ -97,13 +97,21 @@ func ConvertDecimalsToWei(num *pgtype.Numeric) (*big.Int, error) {
 	return ConvertNumericToDecimals(num, 18)
 }
 
-func ConvertFloat8ToWei(num pgtype.Float8) (*big.Int, error) {
+func ConvertFloat8ToDecimals(num pgtype.Float8, decimals uint64) (*big.Int, error) {
 	if !num.Valid {
 		return nil, fmt.Errorf("invalid float8 value")
 	}
 
 	bigFloat := new(big.Float).SetFloat64(num.Float64)
-	bigFloat.Mul(bigFloat, big.NewFloat(1e18))
+
+	multiplier := new(big.Int).Exp(
+		big.NewInt(10),
+		big.NewInt(int64(decimals)),
+		nil,
+	)
+
+	bigFloat.Mul(bigFloat, new(big.Float).SetInt(multiplier))
+
 
 	result := new(big.Int)
 	bigFloat.Int(result)

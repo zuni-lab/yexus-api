@@ -95,7 +95,7 @@ func TestFloatToWei(t *testing.T) {
 		Valid:   true,
 	}
 
-	result, err := evm.ConvertFloat8ToWei(float)
+	result, err := evm.ConvertFloat8ToDecimals(float, 6)
 	if err != nil {
 		t.Fatalf("ConvertFloat8ToWei failed: %v", err)
 	}

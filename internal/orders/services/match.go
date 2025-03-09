@@ -153,7 +153,7 @@ func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
 		return nil, fmt.Errorf("failed to convert price to wei: %w", err)
 	}
 
-	slippage, err := evm.ConvertFloat8ToWei(order.Slippage)
+	slippage, err := evm.ConvertFloat8ToDecimals(order.Slippage, 6)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert slippage to wei: %w", err)
 	}
