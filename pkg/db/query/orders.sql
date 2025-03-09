@@ -23,7 +23,7 @@ RETURNING
 
 -- name: GetOrdersByWallet :many
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
-       price, amount, slippage, twap_interval_seconds,
+       price, amount, actual_amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
        twap_min_price, twap_max_price, deadline, nonce,
        paths, tx_hash, partial_filled_at, filled_at, rejected_at,

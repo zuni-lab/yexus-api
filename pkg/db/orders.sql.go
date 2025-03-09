@@ -431,7 +431,7 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Get
 
 const getOrdersByWallet = `-- name: GetOrdersByWallet :many
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
-       price, amount, slippage, twap_interval_seconds,
+       price, amount, actual_amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
        twap_min_price, twap_max_price, deadline, nonce,
        paths, tx_hash, partial_filled_at, filled_at, rejected_at,
@@ -492,6 +492,7 @@ type GetOrdersByWalletRow struct {
 	Type                     OrderType        `json:"type"`
 	Price                    pgtype.Numeric   `json:"price"`
 	Amount                   pgtype.Numeric   `json:"amount"`
+	ActualAmount             pgtype.Numeric   `json:"actualAmount"`
 	Slippage                 pgtype.Float8    `json:"slippage"`
 	TwapIntervalSeconds      pgtype.Int4      `json:"twapIntervalSeconds"`
 	TwapExecutedTimes        pgtype.Int4      `json:"twapExecutedTimes"`
@@ -536,6 +537,7 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 			&i.Type,
 			&i.Price,
 			&i.Amount,
+			&i.ActualAmount,
 			&i.Slippage,
 			&i.TwapIntervalSeconds,
 			&i.TwapExecutedTimes,
