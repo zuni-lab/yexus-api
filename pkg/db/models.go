@@ -169,6 +169,7 @@ type Order struct {
 	Side                     OrderSide        `json:"side"`
 	Type                     OrderType        `json:"type"`
 	Price                    pgtype.Numeric   `json:"price"`
+	ActualAmount             pgtype.Numeric   `json:"actualAmount"`
 	Amount                   pgtype.Numeric   `json:"amount"`
 	Slippage                 pgtype.Float8    `json:"slippage"`
 	Nonce                    int64            `json:"nonce"`

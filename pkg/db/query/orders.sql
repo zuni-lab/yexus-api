@@ -168,8 +168,9 @@ UPDATE orders
 SET
     status = 'FILLED',
     filled_at = $1,
-    tx_hash = $2
-WHERE id = $3
+    tx_hash = $2,
+    actual_amount = $3
+WHERE id = $4
 RETURNING *;
 
 -- name: FillTwapOrder :one

@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/dexon-service/config"
 	"github.com/zuni-lab/dexon-service/pkg/db"
@@ -99,15 +100,28 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		data,
 	)
 
+	var rejected *db.RejectOrderParams
+
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to send and wait for transaction")
 
-		params := db.RejectOrderParams{
+		rejected = &db.RejectOrderParams{
 			ID: order.ID,
 		}
 
-		_ = params.RejectedAt.Scan(time.Now().UTC())
-		rejectedOrder, err := db.DB.RejectOrder(ctx, params)
+		_ = rejected.RejectedAt.Scan(time.Now().UTC())
+	}
+
+	event, err := evm.ParseOrderExecutedEvent(&contract.DexonFilterer, receipt)
+	if err != nil {
+		rejected = &db.RejectOrderParams{
+			ID: order.ID,
+		}
+		_ = rejected.RejectedAt.Scan(time.Now().UTC())
+	}
+
+	if rejected != nil {
+		rejectedOrder, err := db.DB.RejectOrder(ctx, *rejected)
 		if err != nil {
 			return nil, err
 		}
@@ -115,8 +129,15 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return &rejectedOrder, nil
 	}
 
+	actualAmount := pgtype.Numeric{
+		Int:   event.ActualSwapAmount,
+		Exp:   -6, // TODO: fix this hardcoded value, this is decimals of USDC
+		Valid: true,
+	}
+
 	params := db.FillOrderParams{
-		ID: order.ID,
+		ID:           order.ID,
+		ActualAmount: actualAmount,
 	}
 	_ = params.FilledAt.Scan(time.Now().UTC())
 	_ = params.TxHash.Scan(receipt.TxHash.String())

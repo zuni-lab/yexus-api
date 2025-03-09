@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS orders (
     type ORDER_TYPE NOT NULL,
     
     price NUMERIC(78,18) NOT NULL,
+    -- Actual USD amount after swap
+    actual_amount NUMERIC(78,18),
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
     nonce BIGINT NOT NULL UNIQUE,

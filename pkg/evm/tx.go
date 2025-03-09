@@ -234,34 +234,3 @@ func (tm *TxManager) getRevertReason(ctx context.Context, txHash common.Hash) (s
 
 	return hex.EncodeToString(result), nil
 }
-
-func CreateTxData(contract *DexonTransactor, method string, args ...interface{}) ([]byte, error) {
-	parsed, err := DexonMetaData.GetAbi()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get ABI: %w", err)
-	}
-
-	data, err := parsed.Pack(method, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to pack data: %w", err)
-	}
-
-	return data, nil
-}
-
-type Order struct {
-	Account      common.Address
-	Nonce        *big.Int
-	Path         []byte
-	Amount       *big.Int
-	TriggerPrice *big.Int
-	Slippage     *big.Int
-	OrderType    uint8
-	OrderSide    uint8
-	Deadline     *big.Int
-	Signature    []byte
-}
-
-func ExecuteOrderData(contract *DexonTransactor, order *Order) ([]byte, error) {
-	return CreateTxData(contract, "executeOrder", order)
-}
