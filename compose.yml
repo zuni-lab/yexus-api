@@ -17,8 +17,10 @@ services:
     restart: unless-stopped
     container_name: dexon-openobserve
     environment:
-      ZO_ROOT_USER_EMAIL: "root@gmail.com"
-      ZO_ROOT_USER_PASSWORD: "helloworld"
+      ZO_ROOT_USER_EMAIL: ${ZO_ROOT_USER_EMAIL}
+      ZO_ROOT_USER_PASSWORD: ${ZO_ROOT_USER_PASSWORD}
+      ZO_HTTP_AUTH_BASIC_USER: ${ZO_ROOT_USER_EMAIL}
+      ZO_HTTP_AUTH_BASIC_PASSWORD: ${ZO_ROOT_USER_PASSWORD}
     ports:
       - "5080:5080"
     volumes:
