@@ -187,7 +187,6 @@ RETURNING *;
 UPDATE orders
 SET
     status = 'REJECTED',
-    rejected_at = $1,
-    tx_hash = $2
-WHERE id = $3
+    rejected_at = $1
+WHERE id = $2
 RETURNING *;

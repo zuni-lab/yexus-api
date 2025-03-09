@@ -691,20 +691,18 @@ const rejectOrder = `-- name: RejectOrder :one
 UPDATE orders
 SET
     status = 'REJECTED',
-    rejected_at = $1,
-    tx_hash = $2
-WHERE id = $3
+    rejected_at = $1
+WHERE id = $2
 RETURNING id, pool_ids, paths, wallet, status, side, type, price, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
 type RejectOrderParams struct {
 	RejectedAt pgtype.Timestamp `json:"rejectedAt"`
-	TxHash     pgtype.Text      `json:"txHash"`
 	ID         int64            `json:"id"`
 }
 
 func (q *Queries) RejectOrder(ctx context.Context, arg RejectOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, rejectOrder, arg.RejectedAt, arg.TxHash, arg.ID)
+	row := q.db.QueryRow(ctx, rejectOrder, arg.RejectedAt, arg.ID)
 	var i Order
 	err := row.Scan(
 		&i.ID,

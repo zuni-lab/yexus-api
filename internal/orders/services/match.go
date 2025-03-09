@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"math/big"
 	"sync"
 	"time"
@@ -99,13 +100,13 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 	)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to send and wait for transaction")
+
 		params := db.RejectOrderParams{
 			ID: order.ID,
 		}
 
 		_ = params.RejectedAt.Scan(time.Now().UTC())
-		_ = params.TxHash.Scan(receipt.TxHash.String())
-
 		rejectedOrder, err := db.DB.RejectOrder(ctx, params)
 		if err != nil {
 			return nil, err
@@ -129,8 +130,6 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 }
 
 func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
-	log.Info().Any("order", order).Msg("Mapping order to EVM order")
-
 	userAddress, err := evm.NormalizeAddress(order.Wallet)
 	if err != nil {
 		return nil, err
@@ -143,13 +142,21 @@ func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
 		return nil, err
 	}
 
-	amount := order.Amount.Int
+	// Not need to convert to wei because the input of the client is already in wei
+	amount, err := evm.ConvertNumericToDecimals(&order.Amount, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert amount to decimals: %w", err)
+	}
 
-	log.Info().Any("price int", order.Price.Int).Any("price float", order.Price.Exp).Msg("Mapping order to EVM order")
+	price, err := evm.ConvertDecimalsToWei(&order.Price)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert price to wei: %w", err)
+	}
 
-	triggerPrice := new(big.Int).Mul(order.Price.Int, new(big.Int).Exp(new(big.Int).SetInt64(10), new(big.Int).SetInt64(18), nil))
-
-	slippage := new(big.Int).SetInt64(int64(order.Slippage.Float64 * 10e5))
+	slippage, err := evm.ConvertFloat8ToWei(order.Slippage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert slippage to wei: %w", err)
+	}
 
 	deadline := new(big.Int).SetInt64(order.Deadline.Time.Unix())
 
@@ -162,23 +169,28 @@ func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	orderSide, err := convertOrderSideToEvmType(order.Side)
 	if err != nil {
 		return nil, err
 	}
 
-	return &evm.Order{
+	mapped := &evm.Order{
 		Account:      userAddress,
 		Nonce:        nonce,
 		Path:         path,
 		Amount:       amount,
-		TriggerPrice: triggerPrice,
+		TriggerPrice: price,
 		Slippage:     slippage,
 		OrderType:    orderType,
 		OrderSide:    orderSide,
 		Deadline:     deadline,
 		Signature:    signature,
-	}, nil
+	}
+
+	log.Info().Any("mapped order", mapped).Msg("Mapped order")
+
+	return mapped, nil
 }
 
 func convertOrderTypeToEvmType(orderType db.OrderType) (uint8, error) {

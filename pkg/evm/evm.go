@@ -96,9 +96,11 @@ func (m *Manager) processPoolBlockRange(ctx context.Context, contract *UniswapV3
 		i += 1
 	}
 
-	log.Info().
-		Uint64("Number of events", i).
-		Msg("processPoolBlockRange")
+	if i > 1 {
+		log.Info().
+			Uint64("Handle number of events: ", i).
+			Msg("processPoolBlockRange")
+	}
 
 	return nil
 }
