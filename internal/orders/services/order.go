@@ -104,7 +104,7 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 
 		if params.Type == db.OrderTypeTWAP {
 			_ = params.Price.Scan("0")
-			_ = params.Slippage.Scan("0")
+			_ = params.Slippage.Scan(nil)
 		} else {
 			params.TwapIntervalSeconds.Valid = false
 			params.TwapExecutedTimes.Valid = false
@@ -113,7 +113,7 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 		}
 	}
 
-	if body.Deadline != nil {
+	if body.Deadline != nil && body.Type != db.OrderTypeTWAP {
 		if now.Unix() >= *body.Deadline {
 			return nil, errors.New("invalid deadline")
 		}

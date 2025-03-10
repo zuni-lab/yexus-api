@@ -235,7 +235,7 @@ UPDATE orders
 SET
     status = $1,
     twap_current_executed_times = $2,
-    partial_filled_at = COALESCE($3, partial_filled_atcancelled_at),
+    partial_filled_at = COALESCE($3, partial_filled_at),
     filled_at = $4,
     tx_hash = $5
 WHERE id = $6
@@ -352,6 +352,65 @@ func (q *Queries) GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Or
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getMatchedTwapOrder = `-- name: GetMatchedTwapOrder :many
+SELECT id, pool_ids, paths, wallet, status, side, type, price, actual_amount, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
+WHERE type = 'TWAP'
+  AND twap_min_price is NULL
+  AND status IN ('PENDING', 'PARTIAL_FILLED')
+  AND twap_current_executed_times < twap_executed_times
+  AND (
+        partial_filled_at IS NULL
+        OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+  )
+`
+
+func (q *Queries) GetMatchedTwapOrder(ctx context.Context) ([]Order, error) {
+	rows, err := q.db.Query(ctx, getMatchedTwapOrder)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Order{}
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.ID,
+			&i.PoolIds,
+			&i.Paths,
+			&i.Wallet,
+			&i.Status,
+			&i.Side,
+			&i.Type,
+			&i.Price,
+			&i.ActualAmount,
+			&i.Amount,
+			&i.Slippage,
+			&i.Nonce,
+			&i.Signature,
+			&i.TxHash,
+			&i.ParentID,
+			&i.TwapIntervalSeconds,
+			&i.TwapExecutedTimes,
+			&i.TwapCurrentExecutedTimes,
+			&i.TwapMinPrice,
+			&i.TwapMaxPrice,
+			&i.Deadline,
+			&i.PartialFilledAt,
+			&i.FilledAt,
+			&i.RejectedAt,
+			&i.CancelledAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getOrderByID = `-- name: GetOrderByID :one

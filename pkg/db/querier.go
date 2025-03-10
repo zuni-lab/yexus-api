@@ -25,6 +25,7 @@ type Querier interface {
 	GetChatThreads(ctx context.Context, arg GetChatThreadsParams) ([]ChatThread, error)
 	GetMarketData(ctx context.Context, arg GetMarketDataParams) ([]GetMarketDataRow, error)
 	GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Order, error)
+	GetMatchedTwapOrder(ctx context.Context) ([]Order, error)
 	GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (GetOrderByIDRow, error)
 	GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletParams) ([]GetOrdersByWalletRow, error)
 	GetPool(ctx context.Context, id string) (Pool, error)

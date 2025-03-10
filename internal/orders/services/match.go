@@ -69,6 +69,27 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 	return filledOrder, nil
 }
 
+func MatchTwapOrders() {
+	orders, err := db.DB.GetMatchedTwapOrder(context.Background())
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, pgx.ErrNoRows) {
+			log.Warn().Err(err).Msg("⚠️ [SwapHandler] No matched TWAP orders")
+		}
+		log.Warn().Err(err).Msg("⚠️ [SwapHandler] Failed to get matched TWAP orders")
+	}
+
+	fmt.Println("hello", orders)
+
+	for _, order := range orders {
+		_, err = fillTwapOrder(context.Background(), &order, new(big.Float).SetFloat64(0))
+		if err != nil {
+			log.Warn().Any("id", order.ID).Err(err).Msg("⚠️ [SwapHandler] Failed to match TWAP order")
+		} else {
+			log.Info().Any("id", order.ID).Msg("✅ [SwapHandler] Successfully matched TWAP order")
+		}
+	}
+}
+
 func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 	contract, err := evmManager().DexonInstance(ctx)
 	if err != nil {
@@ -237,22 +258,26 @@ func convertOrderSideToEvmType(side db.OrderSide) (uint8, error) {
 }
 
 func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.Order, error) {
-	params := db.FillTwapOrderParams{
-		ID:                       order.ID,
-		TwapCurrentExecutedTimes: order.TwapExecutedTimes,
-	}
-	_ = params.FilledAt.Scan(time.Now().UTC())
+	var (
+		params = db.FillTwapOrderParams{
+			ID: order.ID,
+		}
+		now = time.Now().UTC()
+		err error
+	)
 
-	var err error
+	_ = params.FilledAt.Scan(now)
+	_ = params.TwapCurrentExecutedTimes.Scan(order.TwapCurrentExecutedTimes.Int32 + 1)
 	if order.TwapCurrentExecutedTimes.Int32+1 == order.TwapExecutedTimes.Int32 {
-		_ = params.FilledAt.Scan(time.Now().UTC())
 		params.Status = db.OrderStatusFILLED
+		_ = params.FilledAt.Scan(now)
 	} else {
 		params.Status = db.OrderStatusPARTIALFILLED
+		_ = params.PartialFilledAt.Scan(now)
 	}
 
 	amount := calculateTwapAmount(order)
-	err = fillPartialOrder(ctx, order, price, amount)
+	err = fillPartialOrder(ctx, order, price, amount, now)
 	if err != nil {
 		return nil, err
 	}
@@ -266,26 +291,28 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 }
 
 func calculateTwapAmount(order *db.Order) *big.Float {
-	divisor := big.NewFloat(float64(order.TwapCurrentExecutedTimes.Int32))
+	divisor := big.NewFloat(float64(order.TwapExecutedTimes.Int32))
 	f64Amount, _ := order.Amount.Float64Value()
 	bigAmount := big.NewFloat(f64Amount.Float64)
 
 	return new(big.Float).Quo(bigAmount, divisor)
 }
 
-func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float) error {
+func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float, now time.Time) error {
 	params := db.InsertOrderParams{
 		PoolIds: parent.PoolIds,
 		Wallet:  parent.Wallet,
 		Status:  db.OrderStatusFILLED,
 		Side:    parent.Side,
 		Type:    db.OrderTypeTWAP,
-		Amount:  parent.Amount,
+		Paths:   parent.Paths,
 	}
+
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
 	_ = params.Amount.Scan(amount.String())
-	_ = params.FilledAt.Scan(time.Now().UTC())
+	_ = params.FilledAt.Scan(now)
+	params.CreatedAt = params.FilledAt
 
 	_, err := db.DB.InsertOrder(ctx, params)
 	if err != nil {

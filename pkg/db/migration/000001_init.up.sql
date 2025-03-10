@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS orders (
     parent_id BIGINT,
     twap_interval_seconds INT,
     twap_executed_times INT,
-    twap_current_executed_times INT,
+    twap_current_executed_times INT DEFAULT 0,
     twap_min_price NUMERIC(78,18),
     twap_max_price NUMERIC(78,18),
 
