@@ -296,25 +296,115 @@ func calculateTwapAmount(order *db.Order) *big.Float {
 	return new(big.Float).Quo(bigAmount, divisor)
 }
 
+func mapOrderToEvmTwapOrder(order *db.Order) (*evm.TwapOrder, error) {
+	userAddress, err := evm.NormalizeAddress(order.Wallet)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce := new(big.Int).SetUint64(uint64(order.Nonce))
+	interval := new(big.Int).SetUint64(uint64(order.TwapIntervalSeconds.Int32))
+	totalOrders := new(big.Int).SetUint64(uint64(order.TwapCurrentExecutedTimes.Int32))
+
+	path, err := evm.NormalizeHex(order.Paths)
+	if err != nil {
+		return nil, err
+	}
+
+	amount, err := evm.ConvertNumericToDecimals(&order.Amount, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert amount to decimals: %w", err)
+	}
+
+	signature, err := evm.NormalizeHex(order.Signature)
+	if err != nil {
+		return nil, err
+	}
+
+	orderSide, err := convertOrderSideToEvmType(order.Side)
+	if err != nil {
+		return nil, err
+	}
+
+	mapped := &evm.TwapOrder{
+		Account:        userAddress,
+		Nonce:          nonce,
+		Path:           path,
+		Amount:         amount,
+		OrderSide:      orderSide,
+		Signature:      signature,
+		Interval:       interval,
+		TotalOrders:    totalOrders,
+		StartTimestamp: nil,
+	}
+
+	log.Info().Any("mapped TWAP order", mapped).Msg("Mapped TWAP order")
+
+	return mapped, nil
+}
+
 func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float, now time.Time) error {
+	contract, err := evmManager().DexonInstance(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	auth, err := bind.NewKeyedTransactorWithChainID(config.Env.RawPrivKey, txManager().ChainID())
+	if err != nil {
+		return err
+	}
+
+	mappedOrder, err := mapOrderToEvmTwapOrder(parent)
+	if err != nil {
+		return err
+	}
+
+	data, err := evm.ExecuteTwapOrderData(&contract.DexonTransactor, mappedOrder)
+	if err != nil {
+		return err
+	}
+
+	receipt, err := txManager().SendAndWaitForTx(
+		ctx,
+		auth,
+		config.Env.DexonContractAddress,
+		data,
+	)
+
+	event, err := evm.ParseOrderExecutedEvent(&contract.DexonFilterer, receipt)
+	if err != nil {
+		return err
+	}
+
+	actualAmount := pgtype.Numeric{
+		Int:   event.ActualSwapAmount,
+		Exp:   -6, // TODO: fix this hardcoded value, this is decimals of USDC
+		Valid: true,
+	}
+
 	params := db.InsertOrderParams{
-		PoolIds:   parent.PoolIds,
-		Wallet:    parent.Wallet,
-		Status:    db.OrderStatusFILLED,
-		Side:      parent.Side,
-		Type:      db.OrderTypeTWAP,
-		Paths:     parent.Paths,
-		Signature: parent.Signature,
+		PoolIds:      parent.PoolIds,
+		Wallet:       parent.Wallet,
+		Status:       db.OrderStatusFILLED,
+		Side:         parent.Side,
+		Type:         db.OrderTypeTWAP,
+		Paths:        parent.Paths,
+		Signature:    parent.Signature,
+		Nonce:        parent.Nonce,
+		ActualAmount: actualAmount,
 	}
 
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
 	_ = params.Amount.Scan(amount.String())
-	_ = params.TxHash.Scan("xxxxxx")
+	_ = params.TxHash.Scan(receipt.TxHash.String())
 	_ = params.FilledAt.Scan(now)
 	params.CreatedAt = params.FilledAt
 
-	_, err := db.DB.InsertOrder(ctx, params)
+	_, err = db.DB.InsertOrder(ctx, params)
 	if err != nil {
 		return err
 	}

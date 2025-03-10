@@ -181,6 +181,7 @@ type Order struct {
 	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
 	TwapMinPrice             pgtype.Numeric   `json:"twapMinPrice"`
 	TwapMaxPrice             pgtype.Numeric   `json:"twapMaxPrice"`
+	TwapStartedAt            pgtype.Timestamp `json:"twapStartedAt"`
 	Deadline                 pgtype.Timestamp `json:"deadline"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`

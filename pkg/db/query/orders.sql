@@ -3,8 +3,8 @@ INSERT INTO orders (
     pool_ids, parent_id, wallet, status, side, type,
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
-    twap_min_price, twap_max_price, deadline,
-    signature, paths, nonce, tx_hash,
+    twap_min_price, twap_max_price, twap_started_at, deadline,
+    signature, paths, nonce, tx_hash, actual_amount,
     partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at)
 VALUES ($1, $2, $3, $4, $5, $6,
@@ -12,21 +12,21 @@ VALUES ($1, $2, $3, $4, $5, $6,
         $11, $12, $13,
         $14, $15, $16,
         $17, $18, $19, $20,
-        $21, $22, $23, $24)
+        $21, $22, $23, $24, $25, $26)
 RETURNING
     id, pool_ids, parent_id, wallet, status, side, type,
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
-    twap_min_price, twap_max_price, deadline, nonce,
-    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+    twap_min_price, twap_max_price, twap_started_at, deadline, nonce,
+    paths, tx_hash, actual_amount, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at;
 
 -- name: GetOrdersByWallet :many
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
        price, amount, actual_amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
-       twap_min_price, twap_max_price, deadline, nonce,
-       paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+       twap_min_price, twap_max_price, twap_started_at, deadline, nonce,
+       paths, tx_hash, actual_amount, partial_filled_at, filled_at, rejected_at,
        cancelled_at, created_at
 FROM orders
 WHERE wallet = $1
@@ -102,8 +102,8 @@ WHERE wallet = $1
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
        price, amount, slippage, twap_interval_seconds,
        twap_executed_times, twap_current_executed_times,
-       twap_min_price, twap_max_price, deadline, nonce,
-       paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+       twap_min_price, twap_max_price, twap_started_at, deadline, nonce,
+       paths, tx_hash, actual_amount, partial_filled_at, filled_at, rejected_at,
        cancelled_at, created_at
 FROM orders
 WHERE wallet = $1 AND id = $2;
@@ -123,6 +123,10 @@ WHERE (
         OR ( -- Check TWAP condition
             twap_current_executed_times < twap_executed_times
             AND (
+                twap_started_at IS NULL
+                OR twap_started_at >= NOW()
+            )
+            AND (
                 partial_filled_at IS NULL
                 OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval < NOW()
             )
@@ -139,6 +143,10 @@ LIMIT 1;
 SELECT * FROM orders
 WHERE type = 'TWAP'
   AND twap_min_price IS NULL
+  AND (
+    twap_started_at IS NULL
+    OR twap_started_at >= NOW()
+  )
   AND status IN ('PENDING', 'PARTIAL_FILLED')
   AND twap_current_executed_times < twap_executed_times
   AND (
@@ -157,7 +165,7 @@ RETURNING
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline, nonce,
-    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+    paths, tx_hash, actual_amount, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at;
 
 -- name: CancelAllOrders :exec
@@ -171,7 +179,7 @@ WHERE wallet = $2 AND status NOT IN ('REJECTED', 'FILLED')
     price, amount, slippage, twap_interval_seconds,
     twap_executed_times, twap_current_executed_times,
     twap_min_price, twap_max_price, deadline, nonce,
-    paths, tx_hash, partial_filled_at, filled_at, rejected_at,
+    paths, tx_hash, actual_amount, partial_filled_at, filled_at, rejected_at,
     cancelled_at, created_at;
 
 -- name: FillOrder :one
