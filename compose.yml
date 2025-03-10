@@ -11,8 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - dexon_timescaledb_data:/var/lib/postgresql/data
-    networks:
-      - dexon-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   openobserve:
     image: public.ecr.aws/zinclabs/openobserve:latest
@@ -31,8 +34,4 @@ services:
 volumes:
   dexon_timescaledb_data:
   dexon_openobserve_data:
-  dexon_api_data:
 
-networks:
-  dexon-network:
-    driver: bridge
