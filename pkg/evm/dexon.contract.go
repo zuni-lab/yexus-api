@@ -50,15 +50,15 @@ type DexonTwapOrder struct {
 	Path           []byte
 	Amount         *big.Int
 	OrderSide      uint8
-	StartTimestamp *big.Int
 	Interval       *big.Int
-	Orders         *big.Int
+	TotalOrders    *big.Int
+	StartTimestamp *big.Int
 	Signature      []byte
 }
 
 // DexonMetaData contains all meta data concerning the Dexon contract.
 var DexonMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"NAME\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ONE_HUNDRED_PERCENT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"TWAP_ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_FACTORY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_ROUTER\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"USDC\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH_USDC_POOL\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"eip712Domain\",\"inputs\":[],\"outputs\":[{\"name\":\"fields\",\"type\":\"bytes1\",\"internalType\":\"bytes1\"},{\"name\":\"name\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"version\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"extensions\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"executeOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.Order\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"deadline\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"executeTwapOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.TwapOrder\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"interval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orders\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getTokenPriceOnUsdc\",\"inputs\":[{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nonces\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"used\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"twapCounts\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"twapCount\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"event\",\"name\":\"EIP712DomainChanged\",\"inputs\":[],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"actualSwapAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TwapOrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"orderNth\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"interval\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"executedTime\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignature\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureLength\",\"inputs\":[{\"name\":\"length\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureS\",\"inputs\":[{\"name\":\"s\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidShortString\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"SafeCastOverflowedUintDowncast\",\"inputs\":[{\"name\":\"bits\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"SafeERC20FailedOperation\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StringTooLong\",\"inputs\":[{\"name\":\"str\",\"type\":\"string\",\"internalType\":\"string\"}]}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"NAME\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ONE_HUNDRED_PERCENT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"TWAP_ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_FACTORY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_ROUTER\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"USDC\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH_USDC_POOL\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"eip712Domain\",\"inputs\":[],\"outputs\":[{\"name\":\"fields\",\"type\":\"bytes1\",\"internalType\":\"bytes1\"},{\"name\":\"name\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"version\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"extensions\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"executeOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.Order\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"deadline\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"executeTwapOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.TwapOrder\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"interval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getTokenPriceOnUsdc\",\"inputs\":[{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nonces\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"used\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"twapCounts\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"twapCount\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"event\",\"name\":\"EIP712DomainChanged\",\"inputs\":[],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TwapOrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"orderNth\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"executedTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"totalBaseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"interval\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignature\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureLength\",\"inputs\":[{\"name\":\"length\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureS\",\"inputs\":[{\"name\":\"s\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidShortString\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"SafeCastOverflowedUintDowncast\",\"inputs\":[{\"name\":\"bits\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"SafeERC20FailedOperation\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StringTooLong\",\"inputs\":[{\"name\":\"str\",\"type\":\"string\",\"internalType\":\"string\"}]}]",
 }
 
 // DexonABI is the input ABI used to generate the binding from.
@@ -924,21 +924,21 @@ func (it *DexonOrderExecutedIterator) Close() error {
 
 // DexonOrderExecuted represents a OrderExecuted event raised by the Dexon contract.
 type DexonOrderExecuted struct {
-	Account          common.Address
-	Nonce            *big.Int
-	Path             []byte
-	Amount           *big.Int
-	ActualSwapAmount *big.Int
-	TriggerPrice     *big.Int
-	Slippage         *big.Int
-	OrderType        uint8
-	OrderSide        uint8
-	Raw              types.Log // Blockchain specific contextual infos
+	Account      common.Address
+	Nonce        *big.Int
+	Path         []byte
+	BaseAmount   *big.Int
+	QuoteAmount  *big.Int
+	TriggerPrice *big.Int
+	Slippage     *big.Int
+	OrderType    uint8
+	OrderSide    uint8
+	Raw          types.Log // Blockchain specific contextual infos
 }
 
 // FilterOrderExecuted is a free log retrieval operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
-// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 amount, uint256 actualSwapAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
+// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
 func (_Dexon *DexonFilterer) FilterOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int) (*DexonOrderExecutedIterator, error) {
 
 	var accountRule []interface{}
@@ -959,7 +959,7 @@ func (_Dexon *DexonFilterer) FilterOrderExecuted(opts *bind.FilterOpts, account 
 
 // WatchOrderExecuted is a free log subscription operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
-// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 amount, uint256 actualSwapAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
+// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
 func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<- *DexonOrderExecuted, account []common.Address, nonce []*big.Int) (event.Subscription, error) {
 
 	var accountRule []interface{}
@@ -1005,7 +1005,7 @@ func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<
 
 // ParseOrderExecuted is a log parse operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
-// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 amount, uint256 actualSwapAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
+// Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
 func (_Dexon *DexonFilterer) ParseOrderExecuted(log types.Log) (*DexonOrderExecuted, error) {
 	event := new(DexonOrderExecuted)
 	if err := _Dexon.contract.UnpackLog(event, "OrderExecuted", log); err != nil {
@@ -1084,23 +1084,24 @@ func (it *DexonTwapOrderExecutedIterator) Close() error {
 
 // DexonTwapOrderExecuted represents a TwapOrderExecuted event raised by the Dexon contract.
 type DexonTwapOrderExecuted struct {
-	Account        common.Address
-	Nonce          *big.Int
-	OrderNth       *big.Int
-	Path           []byte
-	Amount         *big.Int
-	OrderSide      uint8
-	StartTimestamp *big.Int
-	Interval       *big.Int
-	TotalOrders    *big.Int
-	ExecutedTime   *big.Int
-	Signature      []byte
-	Raw            types.Log // Blockchain specific contextual infos
+	Account           common.Address
+	Nonce             *big.Int
+	OrderNth          *big.Int
+	BaseAmount        *big.Int
+	QuoteAmount       *big.Int
+	ExecutedTimestamp *big.Int
+	Path              []byte
+	OrderSide         uint8
+	TotalBaseAmount   *big.Int
+	Interval          *big.Int
+	TotalOrders       *big.Int
+	StartTimestamp    *big.Int
+	Raw               types.Log // Blockchain specific contextual infos
 }
 
-// FilterTwapOrderExecuted is a free log retrieval operation binding the contract event 0x26e37f6eb642b4d8e8e49ed060d551aafaf2a69c6013c056c34fdb58ebe71069.
+// FilterTwapOrderExecuted is a free log retrieval operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
-// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, bytes path, uint256 amount, uint8 orderSide, uint256 startTimestamp, uint256 interval, uint256 totalOrders, uint256 executedTime, bytes signature)
+// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
 func (_Dexon *DexonFilterer) FilterTwapOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (*DexonTwapOrderExecutedIterator, error) {
 
 	var accountRule []interface{}
@@ -1123,9 +1124,9 @@ func (_Dexon *DexonFilterer) FilterTwapOrderExecuted(opts *bind.FilterOpts, acco
 	return &DexonTwapOrderExecutedIterator{contract: _Dexon.contract, event: "TwapOrderExecuted", logs: logs, sub: sub}, nil
 }
 
-// WatchTwapOrderExecuted is a free log subscription operation binding the contract event 0x26e37f6eb642b4d8e8e49ed060d551aafaf2a69c6013c056c34fdb58ebe71069.
+// WatchTwapOrderExecuted is a free log subscription operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
-// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, bytes path, uint256 amount, uint8 orderSide, uint256 startTimestamp, uint256 interval, uint256 totalOrders, uint256 executedTime, bytes signature)
+// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
 func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink chan<- *DexonTwapOrderExecuted, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (event.Subscription, error) {
 
 	var accountRule []interface{}
@@ -1173,9 +1174,9 @@ func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink c
 	}), nil
 }
 
-// ParseTwapOrderExecuted is a log parse operation binding the contract event 0x26e37f6eb642b4d8e8e49ed060d551aafaf2a69c6013c056c34fdb58ebe71069.
+// ParseTwapOrderExecuted is a log parse operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
-// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, bytes path, uint256 amount, uint8 orderSide, uint256 startTimestamp, uint256 interval, uint256 totalOrders, uint256 executedTime, bytes signature)
+// Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
 func (_Dexon *DexonFilterer) ParseTwapOrderExecuted(log types.Log) (*DexonTwapOrderExecuted, error) {
 	event := new(DexonTwapOrderExecuted)
 	if err := _Dexon.contract.UnpackLog(event, "TwapOrderExecuted", log); err != nil {

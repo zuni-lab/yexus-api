@@ -68,3 +68,16 @@ func ParseOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*
 	}
 	return nil, fmt.Errorf("failed to parse OrderExecuted event")
 }
+
+func ParseTwapOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*DexonTwapOrderExecuted, error) {
+	for _, log := range receipt.Logs {
+		if log.Address == config.Env.DexonContractAddress {
+			event, err := filterer.ParseTwapOrderExecuted(*log)
+			if err != nil {
+				continue
+			}
+			return event, nil
+		}
+	}
+	return nil, fmt.Errorf("failed to parse TwapOrderExecuted event")
+}

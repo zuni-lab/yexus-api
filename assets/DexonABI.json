@@ -124,9 +124,9 @@
           { "name": "path", "type": "bytes", "internalType": "bytes" },
           { "name": "amount", "type": "uint256", "internalType": "uint256" },
           { "name": "orderSide", "type": "uint8", "internalType": "enum Dexon.OrderSide" },
-          { "name": "startTimestamp", "type": "uint256", "internalType": "uint256" },
           { "name": "interval", "type": "uint256", "internalType": "uint256" },
-          { "name": "orders", "type": "uint256", "internalType": "uint256" },
+          { "name": "totalOrders", "type": "uint256", "internalType": "uint256" },
+          { "name": "startTimestamp", "type": "uint256", "internalType": "uint256" },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
         ]
       }
@@ -169,8 +169,8 @@
       { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
       { "name": "nonce", "type": "uint256", "indexed": true, "internalType": "uint256" },
       { "name": "path", "type": "bytes", "indexed": false, "internalType": "bytes" },
-      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" },
-      { "name": "actualSwapAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "baseAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "quoteAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "triggerPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "slippage", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "orderType", "type": "uint8", "indexed": false, "internalType": "enum Dexon.OrderType" },
@@ -185,14 +185,15 @@
       { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
       { "name": "nonce", "type": "uint256", "indexed": true, "internalType": "uint256" },
       { "name": "orderNth", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "baseAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "quoteAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "executedTimestamp", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "path", "type": "bytes", "indexed": false, "internalType": "bytes" },
-      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "orderSide", "type": "uint8", "indexed": false, "internalType": "enum Dexon.OrderSide" },
-      { "name": "startTimestamp", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "totalBaseAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "interval", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "totalOrders", "type": "uint256", "indexed": false, "internalType": "uint256" },
-      { "name": "executedTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
-      { "name": "signature", "type": "bytes", "indexed": false, "internalType": "bytes" }
+      { "name": "startTimestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
     ],
     "anonymous": false
   },
