@@ -40,6 +40,22 @@ func ExecuteOrderData(contract *DexonTransactor, order *Order) ([]byte, error) {
 	return CreateTxData(contract, "executeOrder", order)
 }
 
+type TwapOrder struct {
+	Account        common.Address
+	Nonce          *big.Int
+	Path           []byte
+	Amount         *big.Int
+	OrderSide      uint8
+	Signature      []byte
+	Interval       *big.Int
+	TotalOrders    *big.Int
+	StartTimestamp *big.Int
+}
+
+func ExecuteTwapOrderData(contract *DexonTransactor, order *TwapOrder) ([]byte, error) {
+	return CreateTxData(contract, "executeTwapOrder", order)
+}
+
 func ParseOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*DexonOrderExecuted, error) {
 	for _, log := range receipt.Logs {
 		if log.Address == config.Env.DexonContractAddress {
@@ -51,4 +67,17 @@ func ParseOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*
 		}
 	}
 	return nil, fmt.Errorf("failed to parse OrderExecuted event")
+}
+
+func ParseTwapOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*DexonTwapOrderExecuted, error) {
+	for _, log := range receipt.Logs {
+		if log.Address == config.Env.DexonContractAddress {
+			event, err := filterer.ParseTwapOrderExecuted(*log)
+			if err != nil {
+				continue
+			}
+			return event, nil
+		}
+	}
+	return nil, fmt.Errorf("failed to parse TwapOrderExecuted event")
 }

@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS orders (
     actual_amount NUMERIC(78,18),
     amount NUMERIC(78,18) NOT NULL,
     slippage DOUBLE PRECISION,
-    nonce BIGINT NOT NULL UNIQUE,
+    nonce BIGINT NOT NULL,
     signature VARCHAR(255) NOT NULL,
     tx_hash VARCHAR(255),
 
@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS orders (
     twap_current_executed_times INT,
     twap_min_price NUMERIC(78,18),
     twap_max_price NUMERIC(78,18),
+    twap_started_at TIMESTAMP,
 
     deadline TIMESTAMP,
     partial_filled_at TIMESTAMP,

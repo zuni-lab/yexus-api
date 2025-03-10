@@ -75,6 +75,7 @@ type CreateOrderBody struct {
 	TwapExecutedTimes   *int64  `json:"twapExecutedTimes" validate:"required_if=Type TWAP,omitempty,gt=0"`
 	TwapMinPrice        *string `json:"twapMinPrice" validate:"omitempty,numeric,gte=0"`
 	TwapMaxPrice        *string `json:"twapMaxPrice" validate:"required_with=TwapMinPrice,omitempty,numeric,gtefield=TwapMinPrice"`
+	TwapStartedAt       *int64  `json:"twapStartedAt" validate:"required_if=Type TWAP,omitempty,gt=0"`
 }
 
 func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow, error) {
@@ -104,16 +105,20 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 
 		if params.Type == db.OrderTypeTWAP {
 			_ = params.Price.Scan("0")
-			_ = params.Slippage.Scan("0")
+			_ = params.Slippage.Scan(nil)
+			_ = params.TwapCurrentExecutedTimes.Scan(int64(0))
+			_ = params.TwapStartedAt.Scan(time.Unix(*body.TwapStartedAt, 0).UTC())
 		} else {
 			params.TwapIntervalSeconds.Valid = false
 			params.TwapExecutedTimes.Valid = false
 			params.TwapMinPrice.Valid = false
 			params.TwapMaxPrice.Valid = false
+			params.TwapStartedAt.Valid = false
+			_ = params.Deadline.Scan(time.Unix(*body.Deadline, 0).UTC())
 		}
 	}
 
-	if body.Deadline != nil {
+	if body.Deadline != nil && body.Type != db.OrderTypeTWAP {
 		if now.Unix() >= *body.Deadline {
 			return nil, errors.New("invalid deadline")
 		}

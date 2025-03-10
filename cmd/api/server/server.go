@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/zuni-lab/dexon-service/internal/orders/services"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/labstack/echo/v4"
@@ -73,6 +75,7 @@ func (s *Server) Start() error {
 	}
 
 	s.printRoutes()
+	s.startTwapMatcher()
 
 	log.Info().Msgf("🥪 Environment loaded: %+v", config.Env)
 
@@ -115,6 +118,15 @@ func (s *Server) startRealtimeManager() error {
 	}()
 
 	return nil
+}
+
+func (s *Server) startTwapMatcher() {
+	go func() {
+		for {
+			services.MatchTwapOrders()
+			time.Sleep(6 * time.Second)
+		}
+	}()
 }
 
 func (s *Server) Close() {
