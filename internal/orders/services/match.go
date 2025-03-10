@@ -266,7 +266,6 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		err error
 	)
 
-	_ = params.FilledAt.Scan(now)
 	_ = params.TwapCurrentExecutedTimes.Scan(order.TwapCurrentExecutedTimes.Int32 + 1)
 	if order.TwapCurrentExecutedTimes.Int32+1 == order.TwapExecutedTimes.Int32 {
 		params.Status = db.OrderStatusFILLED
