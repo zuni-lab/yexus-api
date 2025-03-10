@@ -105,6 +105,7 @@ func CreateOrder(ctx context.Context, body CreateOrderBody) (*db.InsertOrderRow,
 		if params.Type == db.OrderTypeTWAP {
 			_ = params.Price.Scan("0")
 			_ = params.Slippage.Scan(nil)
+			_ = params.TwapCurrentExecutedTimes.Scan(int64(0))
 		} else {
 			params.TwapIntervalSeconds.Valid = false
 			params.TwapExecutedTimes.Valid = false

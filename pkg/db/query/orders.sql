@@ -124,7 +124,7 @@ WHERE (
             twap_current_executed_times < twap_executed_times
             AND (
                 partial_filled_at IS NULL
-                OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+                OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval < NOW()
             )
         )
     )
@@ -138,12 +138,12 @@ LIMIT 1;
 -- name: GetMatchedTwapOrder :many
 SELECT * FROM orders
 WHERE type = 'TWAP'
-  AND twap_min_price is NULL
+  AND twap_min_price IS NULL
   AND status IN ('PENDING', 'PARTIAL_FILLED')
   AND twap_current_executed_times < twap_executed_times
   AND (
         partial_filled_at IS NULL
-        OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+        OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval < NOW()
   );
 
 -- name: CancelOrder :one
@@ -190,9 +190,8 @@ SET
     status = $1,
     twap_current_executed_times = $2,
     partial_filled_at = COALESCE($3, partial_filled_at),
-    filled_at = $4,
-    tx_hash = $5
-WHERE id = $6
+    filled_at = $4
+WHERE id = $5
 RETURNING *;
 
 -- name: RejectOrder :one

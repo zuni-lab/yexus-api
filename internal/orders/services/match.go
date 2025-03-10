@@ -72,13 +72,12 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 func MatchTwapOrders() {
 	orders, err := db.DB.GetMatchedTwapOrder(context.Background())
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, pgx.ErrNoRows) {
-			log.Warn().Err(err).Msg("⚠️ [SwapHandler] No matched TWAP orders")
-		}
 		log.Warn().Err(err).Msg("⚠️ [SwapHandler] Failed to get matched TWAP orders")
 	}
 
-	fmt.Println("hello", orders)
+	if len(orders) == 0 {
+		log.Warn().Err(err).Msg("⚠️ [SwapHandler] No matched TWAP orders")
+	}
 
 	for _, order := range orders {
 		_, err = fillTwapOrder(context.Background(), &order, new(big.Float).SetFloat64(0))
@@ -266,7 +265,7 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 		err error
 	)
 
-	_ = params.TwapCurrentExecutedTimes.Scan(order.TwapCurrentExecutedTimes.Int32 + 1)
+	_ = params.TwapCurrentExecutedTimes.Scan(int64(order.TwapCurrentExecutedTimes.Int32 + 1))
 	if order.TwapCurrentExecutedTimes.Int32+1 == order.TwapExecutedTimes.Int32 {
 		params.Status = db.OrderStatusFILLED
 		_ = params.FilledAt.Scan(now)
@@ -299,17 +298,19 @@ func calculateTwapAmount(order *db.Order) *big.Float {
 
 func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float, now time.Time) error {
 	params := db.InsertOrderParams{
-		PoolIds: parent.PoolIds,
-		Wallet:  parent.Wallet,
-		Status:  db.OrderStatusFILLED,
-		Side:    parent.Side,
-		Type:    db.OrderTypeTWAP,
-		Paths:   parent.Paths,
+		PoolIds:   parent.PoolIds,
+		Wallet:    parent.Wallet,
+		Status:    db.OrderStatusFILLED,
+		Side:      parent.Side,
+		Type:      db.OrderTypeTWAP,
+		Paths:     parent.Paths,
+		Signature: parent.Signature,
 	}
 
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
 	_ = params.Amount.Scan(amount.String())
+	_ = params.TxHash.Scan("xxxxxx")
 	_ = params.FilledAt.Scan(now)
 	params.CreatedAt = params.FilledAt
 

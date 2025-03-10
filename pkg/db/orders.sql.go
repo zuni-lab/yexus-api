@@ -236,9 +236,8 @@ SET
     status = $1,
     twap_current_executed_times = $2,
     partial_filled_at = COALESCE($3, partial_filled_at),
-    filled_at = $4,
-    tx_hash = $5
-WHERE id = $6
+    filled_at = $4
+WHERE id = $5
 RETURNING id, pool_ids, paths, wallet, status, side, type, price, actual_amount, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
@@ -247,7 +246,6 @@ type FillTwapOrderParams struct {
 	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
-	TxHash                   pgtype.Text      `json:"txHash"`
 	ID                       int64            `json:"id"`
 }
 
@@ -257,7 +255,6 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 		arg.TwapCurrentExecutedTimes,
 		arg.PartialFilledAt,
 		arg.FilledAt,
-		arg.TxHash,
 		arg.ID,
 	)
 	var i Order
@@ -308,7 +305,7 @@ WHERE (
             twap_current_executed_times < twap_executed_times
             AND (
                 partial_filled_at IS NULL
-                OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+                OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval < NOW()
             )
         )
     )
@@ -357,12 +354,12 @@ func (q *Queries) GetMatchedOrder(ctx context.Context, price pgtype.Numeric) (Or
 const getMatchedTwapOrder = `-- name: GetMatchedTwapOrder :many
 SELECT id, pool_ids, paths, wallet, status, side, type, price, actual_amount, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at FROM orders
 WHERE type = 'TWAP'
-  AND twap_min_price is NULL
+  AND twap_min_price IS NULL
   AND status IN ('PENDING', 'PARTIAL_FILLED')
   AND twap_current_executed_times < twap_executed_times
   AND (
         partial_filled_at IS NULL
-        OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval > NOW()
+        OR partial_filled_at + (twap_interval_seconds || ' seconds')::interval < NOW()
   )
 `
 
