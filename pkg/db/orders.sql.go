@@ -152,7 +152,12 @@ WHERE wallet = $1
         $5::order_side IS NULL
         OR side = $5
     )
-    AND parent_id = $6::bigint
+    AND (
+        CASE
+            WHEN $6::bigint IS NULL THEN parent_id IS NULL
+            ELSE parent_id = $6
+        END
+    )
 `
 
 type CountOrdersByWalletParams struct {
@@ -548,7 +553,12 @@ WHERE wallet = $1
         $7::order_side IS NULL
         OR side = $7
     )
-    AND parent_id = $8::bigint
+    AND (
+        CASE
+            WHEN $8::bigint IS NULL THEN parent_id IS NULL
+            ELSE parent_id = $8
+        END
+    )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `

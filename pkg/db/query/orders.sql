@@ -60,7 +60,12 @@ WHERE wallet = $1
         sqlc.narg(side)::order_side IS NULL
         OR side = @side
     )
-    AND parent_id = sqlc.narg(parent_id)::bigint
+    AND (
+        CASE
+            WHEN sqlc.narg(parent_id)::bigint IS NULL THEN parent_id IS NULL
+            ELSE parent_id = @parent_id
+        END
+    )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
 
@@ -98,7 +103,12 @@ WHERE wallet = $1
         sqlc.narg(side)::order_side IS NULL
         OR side = @side
     )
-    AND parent_id = sqlc.narg(parent_id)::bigint;
+    AND (
+        CASE
+            WHEN sqlc.narg(parent_id)::bigint IS NULL THEN parent_id IS NULL
+            ELSE parent_id = @parent_id
+        END
+    );
 
 -- name: GetOrderByID :one
 SELECT id, pool_ids, parent_id, wallet, status, side, type,
