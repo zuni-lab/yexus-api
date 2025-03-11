@@ -47,7 +47,7 @@ func (f *OrderFiller) executeTransaction(data []byte) (*types.Receipt, error) {
 	ctx, cancel := context.WithTimeout(f.ctx, 2*time.Minute)
 	defer cancel()
 
-	return txManager().SendAndWaitForTx(
+	return txManager().SendAndWaitForTxWithNonceRetry(
 		ctx,
 		f.auth,
 		config.Env.DexonContractAddress,

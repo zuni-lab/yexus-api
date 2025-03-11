@@ -18,11 +18,12 @@ import (
 )
 
 type TxManager struct {
-	client        *ethclient.Client
-	chainID       *big.Int
-	nonceCache    sync.Map // thread-safe map for nonce caching
-	gasMultiplier float64
-	maxGasPrice   *big.Int
+	client          *ethclient.Client
+	chainID         *big.Int
+	nonceCache      sync.Map // thread-safe map for nonce caching
+	gasMultiplier   float64
+	maxGasPrice     *big.Int
+	maxNonceRetries int
 }
 
 func NewTxManager(client *ethclient.Client) (*TxManager, error) {
@@ -32,10 +33,11 @@ func NewTxManager(client *ethclient.Client) (*TxManager, error) {
 	}
 
 	return &TxManager{
-		client:        client,
-		chainID:       chainID,
-		gasMultiplier: 1.1,               // 10% buffer for gas estimation
-		maxGasPrice:   big.NewInt(500e9), // 500 gwei max
+		client:          client,
+		chainID:         chainID,
+		gasMultiplier:   1.1,               // 10% buffer for gas estimation
+		maxGasPrice:     big.NewInt(500e9), // 500 gwei max
+		maxNonceRetries: 5,
 	}, nil
 }
 
@@ -43,16 +45,46 @@ func (tm *TxManager) ChainID() *big.Int {
 	return tm.chainID
 }
 
-func (tm *TxManager) SendAndWaitForTx(ctx context.Context, opts *bind.TransactOpts, to common.Address, data []byte) (*types.Receipt, error) {
+func (m *TxManager) SendAndWaitForTxWithNonceRetry(ctx context.Context, auth *bind.TransactOpts, to common.Address, data []byte) (*types.Receipt, error) {
+	var (
+		receipt *types.Receipt
+		err     error
+	)
+
+	for attempt := 0; attempt < m.maxNonceRetries; attempt++ {
+		if attempt > 0 {
+			if err := m.refreshNonce(ctx, auth.From); err != nil {
+				log.Error().Err(err).Msg("failed to refresh nonce")
+				continue
+			}
+		}
+
+		receipt, err = m.sendAndWaitForTx(ctx, auth, to, data)
+		if err == nil {
+			return receipt, nil
+		}
+
+		if !strings.Contains(err.Error(), "nonce too low") {
+			return nil, err
+		}
+
+		log.Warn().
+			Err(err).
+			Int("attempt", attempt+1).
+			Msg("nonce too low, retrying with new nonce")
+	}
+
+	return nil, fmt.Errorf("failed after %d nonce retry attempts: %w", m.maxNonceRetries, err)
+}
+
+func (tm *TxManager) sendAndWaitForTx(ctx context.Context, opts *bind.TransactOpts, to common.Address, data []byte) (*types.Receipt, error) {
 	var err error
 
-	// 1. Get or update nonce
 	nonce, err := tm.getNonce(ctx, opts.From)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get nonce: %w", err)
 	}
 
-	// 2. Estimate gas with buffer
 	gasLimit, err := tm.estimateGas(ctx, opts, to, data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to estimate gas: %w", err)
@@ -101,6 +133,16 @@ func (tm *TxManager) SendAndWaitForTx(ctx context.Context, opts *bind.TransactOp
 	tm.nonceCache.Store(opts.From, nonce+1)
 
 	return receipt, nil
+}
+
+func (m *TxManager) refreshNonce(ctx context.Context, address common.Address) error {
+	nonce, err := m.client.PendingNonceAt(ctx, address)
+	if err != nil {
+		return fmt.Errorf("failed to refresh nonce: %w", err)
+	}
+
+	m.nonceCache.Store(address, nonce)
+	return nil
 }
 
 func (tm *TxManager) getNonce(ctx context.Context, from common.Address) (uint64, error) {
