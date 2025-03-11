@@ -106,12 +106,14 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 
 	receipt, err := filler.executeTransaction(data)
 	if err != nil {
-		return filler.handleRejection(order.ID, err)
+		log.Error().Err(err).Msg("Failed to send and wait for transaction")
+		return filler.handleRejection(order.ID)
 	}
 
 	event, err := evm.ParseOrderExecutedEvent(&filler.contract.DexonFilterer, receipt)
 	if err != nil {
-		return filler.handleRejection(order.ID, err)
+		log.Error().Err(err).Msg("Failed to parse order executed event")
+		return filler.handleRejection(order.ID)
 	}
 
 	params := db.FillOrderParams{
@@ -172,15 +174,21 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 
 	receipt, err := filler.executeTransaction(data)
 	if err != nil {
-		// TODO: handle rejected order
 		log.Error().Err(err).Msg("Failed to send and wait for twap transaction")
+		_, rejectionErr := filler.handleRejection(parent.ID)
+		if rejectionErr != nil {
+			log.Error().Err(rejectionErr).Msg("Failed to reject twap order")
+		}
 		return actualAmount, err
 	}
 
 	event, err := evm.ParseTwapOrderExecutedEvent(&filler.contract.DexonFilterer, receipt)
 	if err != nil {
-		// TODO: handle rejected order
 		log.Error().Err(err).Msg("Failed to parse twap order executed event")
+		_, rejectionErr := filler.handleRejection(parent.ID)
+		if rejectionErr != nil {
+			log.Error().Err(rejectionErr).Msg("Failed to reject twap order")
+		}
 		return actualAmount, err
 	}
 

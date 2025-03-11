@@ -55,9 +55,7 @@ func (f *OrderFiller) executeTransaction(data []byte) (*types.Receipt, error) {
 	)
 }
 
-func (f *OrderFiller) handleRejection(orderID int64, err error) (*db.Order, error) {
-	log.Error().Err(err).Msg("Failed to execute order")
-
+func (f *OrderFiller) handleRejection(orderID int64) (*db.Order, error) {
 	rejected := &db.RejectOrderParams{
 		ID: orderID,
 	}
