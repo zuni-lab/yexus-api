@@ -163,9 +163,6 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 	if err != nil {
 		return actualAmount, err
 	}
-	if err != nil {
-		return actualAmount, err
-	}
 
 	data, err := evm.ExecuteTwapOrderData(&filler.contract.DexonTransactor, mappedOrder)
 	if err != nil {
