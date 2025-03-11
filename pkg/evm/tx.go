@@ -64,7 +64,7 @@ func (m *TxManager) SendAndWaitForTxWithNonceRetry(ctx context.Context, auth *bi
 			return receipt, nil
 		}
 
-		if !strings.Contains(err.Error(), "nonce too low") {
+		if !strings.Contains(strings.ToLower(err.Error()), "nonce too low") {
 			return nil, err
 		}
 

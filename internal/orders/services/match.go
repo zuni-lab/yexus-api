@@ -45,7 +45,7 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 	order, err := db.DB.GetMatchedOrder(ctx, numericPrice)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("no order matched")
+			return nil, errors.New("no new orders to match")
 		}
 		return nil, err
 	}
@@ -69,12 +69,12 @@ func MatchOrder(ctx context.Context, price *big.Float) (*db.Order, error) {
 func MatchTwapOrders() {
 	orders, err := db.DB.GetMatchedTwapOrder(context.Background())
 	if err != nil {
-		log.Warn().Err(err).Msg("⚠️ [SwapHandler] Failed to get matched TWAP orders")
+		log.Warn().Err(err).Msg("⚠️ [SwapHandler] failed to get matched TWAP orders")
 		return
 	}
 
 	if len(orders) == 0 {
-		log.Warn().Err(err).Msg("⚠️ [SwapHandler] No matched TWAP orders")
+		log.Warn().Err(err).Msg("⚠️ [SwapHandler] no new TWAP orders to match")
 		return
 	}
 
