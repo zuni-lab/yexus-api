@@ -152,6 +152,10 @@ WHERE wallet = $1
         $5::order_side IS NULL
         OR side = $5
     )
+    AND (
+        $6::bigint IS NULL
+        OR parent_id = $6
+    )
 `
 
 type CountOrdersByWalletParams struct {
@@ -160,6 +164,7 @@ type CountOrdersByWalletParams struct {
 	NotStatus []OrderStatus `json:"notStatus"`
 	Types     []OrderType   `json:"types"`
 	Side      NullOrderSide `json:"side"`
+	ParentID  pgtype.Int8   `json:"parentId"`
 }
 
 func (q *Queries) CountOrdersByWallet(ctx context.Context, arg CountOrdersByWalletParams) (int64, error) {
@@ -169,6 +174,7 @@ func (q *Queries) CountOrdersByWallet(ctx context.Context, arg CountOrdersByWall
 		arg.NotStatus,
 		arg.Types,
 		arg.Side,
+		arg.ParentID,
 	)
 	var total_counts int64
 	err := row.Scan(&total_counts)
@@ -542,6 +548,10 @@ WHERE wallet = $1
         $7::order_side IS NULL
         OR side = $7
     )
+    AND (
+        $8::bigint IS NULL
+        OR parent_id = $8
+    )
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
@@ -554,6 +564,7 @@ type GetOrdersByWalletParams struct {
 	NotStatus []OrderStatus `json:"notStatus"`
 	Types     []OrderType   `json:"types"`
 	Side      NullOrderSide `json:"side"`
+	ParentID  pgtype.Int8   `json:"parentId"`
 }
 
 type GetOrdersByWalletRow struct {
@@ -595,6 +606,7 @@ func (q *Queries) GetOrdersByWallet(ctx context.Context, arg GetOrdersByWalletPa
 		arg.NotStatus,
 		arg.Types,
 		arg.Side,
+		arg.ParentID,
 	)
 	if err != nil {
 		return nil, err
