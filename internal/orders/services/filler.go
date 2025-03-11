@@ -166,7 +166,9 @@ func mapOrderToEvmTwapOrder(order *db.Order) (*evm.TwapOrder, error) {
 
 	interval := new(big.Int).SetUint64(uint64(order.TwapIntervalSeconds.Int32))
 
-	totalOrders := new(big.Int).SetUint64(uint64(order.TwapCurrentExecutedTimes.Int32))
+	totalOrders := new(big.Int).SetUint64(uint64(order.TwapExecutedTimes.Int32))
+
+	startTimestamp := new(big.Int).SetInt64(order.TwapStartedAt.Time.Unix())
 
 	mapped := &evm.TwapOrder{
 		Account:        userAddress,
@@ -177,7 +179,7 @@ func mapOrderToEvmTwapOrder(order *db.Order) (*evm.TwapOrder, error) {
 		Signature:      signature,
 		Interval:       interval,
 		TotalOrders:    totalOrders,
-		StartTimestamp: nil,
+		StartTimestamp: startTimestamp,
 	}
 
 	log.Info().Any("mapped TWAP order", mapped).Msg("Mapped TWAP order")

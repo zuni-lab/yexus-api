@@ -70,10 +70,12 @@ func MatchTwapOrders() {
 	orders, err := db.DB.GetMatchedTwapOrder(context.Background())
 	if err != nil {
 		log.Warn().Err(err).Msg("⚠️ [SwapHandler] Failed to get matched TWAP orders")
+		return
 	}
 
 	if len(orders) == 0 {
 		log.Warn().Err(err).Msg("⚠️ [SwapHandler] No matched TWAP orders")
+		return
 	}
 
 	for _, order := range orders {

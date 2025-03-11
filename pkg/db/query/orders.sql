@@ -145,7 +145,7 @@ WHERE type = 'TWAP'
   AND twap_min_price IS NULL
   AND (
     twap_started_at IS NULL
-    OR twap_started_at >= NOW()
+    OR twap_started_at <= NOW()
   )
   AND status IN ('PENDING', 'PARTIAL_FILLED')
   AND twap_current_executed_times < twap_executed_times
