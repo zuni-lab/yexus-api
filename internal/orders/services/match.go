@@ -221,9 +221,9 @@ func createPartialOrderParams(parent *db.Order, price, amount *big.Float, txHash
 
 	_ = params.ParentID.Scan(parent.ID)
 	_ = params.Price.Scan(price.String())
-	_ = params.Amount.Scan(amount.String())
 	_ = params.TxHash.Scan(txHash)
 	_ = params.FilledAt.Scan(now)
+	params.Amount, _ = utils.BigFloatToNumeric(amount)
 	params.CreatedAt = params.FilledAt
 
 	return params
