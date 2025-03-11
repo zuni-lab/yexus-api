@@ -44,11 +44,11 @@ WHERE wallet = $1
     AND (
         ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
         OR (
-        status <> ANY(@not_status)
+            NOT status = ANY(@not_status)
             AND (
                 status <> 'PENDING'
                 OR deadline IS NULL
-                OR (status = 'PENDING' AND deadline <= NOW())
+                OR deadline <= NOW()
             )
         )
     )
@@ -81,11 +81,11 @@ WHERE wallet = $1
     AND (
         ARRAY_LENGTH(@not_status::order_status[], 1) IS NULL
         OR (
-            status <> ANY(@not_status)
+            NOT status = ANY(@not_status)
             AND (
                 status <> 'PENDING'
                 OR deadline IS NULL
-                OR (status = 'PENDING' AND deadline <= NOW())
+                OR deadline <= NOW()
             )
         )
     )

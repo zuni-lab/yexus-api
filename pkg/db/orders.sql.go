@@ -136,11 +136,11 @@ WHERE wallet = $1
     AND (
         ARRAY_LENGTH($3::order_status[], 1) IS NULL
         OR (
-            status <> ANY($3)
+            NOT status = ANY($3)
             AND (
                 status <> 'PENDING'
                 OR deadline IS NULL
-                OR (status = 'PENDING' AND deadline <= NOW())
+                OR deadline <= NOW()
             )
         )
     )
@@ -526,11 +526,11 @@ WHERE wallet = $1
     AND (
         ARRAY_LENGTH($5::order_status[], 1) IS NULL
         OR (
-        status <> ANY($5)
+            NOT status = ANY($5)
             AND (
                 status <> 'PENDING'
                 OR deadline IS NULL
-                OR (status = 'PENDING' AND deadline <= NOW())
+                OR deadline <= NOW()
             )
         )
     )
