@@ -17,7 +17,7 @@ type ListOrdersByWalletQuery struct {
 	NotStatus []db.OrderStatus `query:"not_status" validate:"dive,oneof=PENDING PARTIAL_FILLED FILLED REJECTED CANCELLED"`
 	Types     []db.OrderType   `query:"types" validate:"dive,oneof=MARKET LIMIT STOP TWAP"`
 	Side      *string          `query:"side" validate:"omitempty,oneof=BUY SELL"`
-	ParentID  *int64           `query:"parentId" validate:"omitempty,gt=0"`
+	ParentID  *int64           `query:"parent_id" validate:"omitempty,gt=0"`
 	Limit     int32            `query:"limit" validate:"gt=0"`
 	Offset    int32            `query:"offset" validate:"gte=0"`
 }
