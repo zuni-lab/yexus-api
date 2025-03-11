@@ -242,8 +242,9 @@ SET
     status = $1,
     twap_current_executed_times = $2,
     partial_filled_at = COALESCE($3, partial_filled_at),
-    filled_at = $4
-WHERE id = $5
+    filled_at = $4,
+    actual_amount = COALESCE(actual_amount, 0) + $5
+WHERE id = $6
 RETURNING id, pool_ids, paths, wallet, status, side, type, price, actual_amount, amount, slippage, nonce, signature, tx_hash, parent_id, twap_interval_seconds, twap_executed_times, twap_current_executed_times, twap_min_price, twap_max_price, twap_started_at, deadline, partial_filled_at, filled_at, rejected_at, cancelled_at, created_at
 `
 
@@ -252,6 +253,7 @@ type FillTwapOrderParams struct {
 	TwapCurrentExecutedTimes pgtype.Int4      `json:"twapCurrentExecutedTimes"`
 	PartialFilledAt          pgtype.Timestamp `json:"partialFilledAt"`
 	FilledAt                 pgtype.Timestamp `json:"filledAt"`
+	ActualAmount             pgtype.Numeric   `json:"actualAmount"`
 	ID                       int64            `json:"id"`
 }
 
@@ -261,6 +263,7 @@ func (q *Queries) FillTwapOrder(ctx context.Context, arg FillTwapOrderParams) (O
 		arg.TwapCurrentExecutedTimes,
 		arg.PartialFilledAt,
 		arg.FilledAt,
+		arg.ActualAmount,
 		arg.ID,
 	)
 	var i Order

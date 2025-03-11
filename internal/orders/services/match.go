@@ -135,7 +135,8 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 	params := createTwapFillParams(order, now)
 	amount := calculateTwapAmount(order)
 
-	err := fillPartialOrder(ctx, order, price, amount, now)
+	var err error
+	params.ActualAmount, err = fillPartialOrder(ctx, order, price, amount, now)
 	if err != nil {
 		return nil, err
 	}
@@ -148,41 +149,46 @@ func fillTwapOrder(ctx context.Context, order *db.Order, price *big.Float) (*db.
 	return &filledOrder, nil
 }
 
-func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float, now time.Time) error {
+func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.Float, now time.Time) (pgtype.Numeric, error) {
+	var actualAmount pgtype.Numeric
+
 	filler, err := newOrderFiller(ctx, parent)
 	if err != nil {
-		return err
+		return actualAmount, err
 	}
 
 	mappedOrder, err := mapOrderToEvmTwapOrder(parent)
 	if err != nil {
-		return err
+		return actualAmount, err
+	}
+	if err != nil {
+		return actualAmount, err
 	}
 
 	data, err := evm.ExecuteTwapOrderData(&filler.contract.DexonTransactor, mappedOrder)
 	if err != nil {
-		return err
+		return actualAmount, err
 	}
 
 	receipt, err := filler.executeTransaction(data)
 	if err != nil {
 		// TODO: handle rejected order
 		log.Error().Err(err).Msg("Failed to send and wait for twap transaction")
-		return err
+		return actualAmount, err
 	}
 
 	event, err := evm.ParseTwapOrderExecutedEvent(&filler.contract.DexonFilterer, receipt)
 	if err != nil {
 		// TODO: handle rejected order
 		log.Error().Err(err).Msg("Failed to parse twap order executed event")
-		return err
+		return actualAmount, err
 	}
 
-	params := createPartialOrderParams(parent, price, amount, receipt.TxHash.String(),
-		filler.createActualQuoteAmount(event.QuoteAmount), now)
+	actualAmount = filler.createActualQuoteAmount(event.QuoteAmount)
+	params := createPartialOrderParams(parent, price, amount, receipt.TxHash.String(), actualAmount, now)
 
 	_, err = db.DB.InsertOrder(ctx, params)
-	return err
+	return actualAmount, err
 }
 
 func createTwapFillParams(order *db.Order, now time.Time) db.FillTwapOrderParams {
