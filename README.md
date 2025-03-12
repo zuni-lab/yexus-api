@@ -1,4 +1,4 @@
-# Dexon service
+# Yexus API 
 
 ## Table of Contents
 
@@ -29,22 +29,22 @@ Structure of the project:
 ┣ 📦 constants                    # Constants: errors, mail, ...
 ┣ 📦 docs                         # Documents
 ┣ 📦 internal                     # Internal packages
-┃    ┣ 📂 health                 # Health module
-┃    ┃   ┣ 📜 health.go          # Health check handler
-┃    ┃   ┗ 📜 route.go           # Health check route
-┃    ┣ 📂 user
-┃    ┃    ┣ 📂 services
-┃    ┃    ┃   ┣ 📜 user.go       # User service
-┃    ┃    ┃   ┗ 📜 user_test.go  # User service test
-┃    ┃    ┗ 📂 handler
-┃    ┃        ┣ 📜 user.go       # User handler
-┃    ┃        ┗ 📜 user_test.go  # User handler test
-┃    ┗ 📂 middlleware            # Middlewares
+┃    ┣ 📂 chat                    # Chat module (AI bot)
+┃    ┣ 📂 orders                  # Order module (limit/stop/twap logic)
+┃    ┣ 📂 pools                   # Pool module  (in development)
 ┣ 📦 pkg                          # Public packages
 ┃    ┣ 📂 db
-┃    ┃   ┣ 📂 models             # Database models
-┃    ┃   ┗ 📜 init.go            # Database connection
-┃    ┣ 📂 openobserve            # Openobserve
+┃    ┃   ┣ 📂 migratation        # Database migrations
+┃    ┃   ┗ 📂 query              # Database queries
+┃    ┣ 📜 *.sql.go               # SQLC generated go file
+┃    ┣ 📜 *.go                   # Transactions or additional logic
+┃    ┣ 📂 evm                    # EVM based services
+┃    ┃ ┣ 📜 *.contract.go        # SOLC generated contract interfaces
+┃    ┃ ┗ 📜 real_time_manager.go # Listen swap event to handle matching
+┃    ┃ ┗ 📜 tx.go                # Call transaction
+┃    ┣ 📂 openai                 # Open AI service, support chat
+┃    ┣ 📂 openobserve            # Observability: traces, logs...
+┃    ┣ 📂 swap                   # Swap handler (interfaces)
 ┃    ┗ 📂 utils                  # Utilities
 ┃
 ┣ 📜 .air.toml                    # Air configuration
@@ -94,7 +94,7 @@ Structure of the project:
 - Update the logger configuration in `config/logger.go`
 - Update the environment setup in `config/env.go`
 - Update the database connection in `pkg/db/init.go`
-- Update the database models in `pkg/db/models`
+- Update the database models in `pkg/db/migration`
 - Add new routes in `cmd/api/server/routes.go`
 - Add new services in `internal/<module>/services`
 - Add new handlers in `internal/<module>/handlers`
