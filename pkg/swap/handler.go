@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/internal/orders/services"
-	"github.com/zuni-lab/dexon-service/pkg/evm"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/internal/orders/services"
+	"github.com/zuni-lab/yexus-api/pkg/evm"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type swapHandler struct {

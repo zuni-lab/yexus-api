@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/zuni-lab/dexon-service/cmd/api/server"
+	"github.com/zuni-lab/yexus-api/cmd/api/server"
 )
 
 func main() {

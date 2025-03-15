@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/openai/openai-go"
-	"github.com/zuni-lab/dexon-service/config"
+	"github.com/zuni-lab/yexus-api/config"
 )
 
 const (

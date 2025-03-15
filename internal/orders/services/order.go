@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/db"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type ListOrdersByWalletQuery struct {

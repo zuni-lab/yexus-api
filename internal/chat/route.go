@@ -2,7 +2,7 @@ package chat
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/zuni-lab/dexon-service/internal/chat/handlers"
+	"github.com/zuni-lab/yexus-api/internal/chat/handlers"
 )
 
 func Route(g *echo.Group, path string) {

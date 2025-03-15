@@ -1,4 +1,4 @@
-module github.com/zuni-lab/dexon-service
+module github.com/zuni-lab/yexus-api
 
 go 1.22.0
 

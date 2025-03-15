@@ -11,20 +11,17 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/config"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/config"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type RealtimeManager struct {
 	*Manager
-	pollingInterval time.Duration
 }
 
 func NewRealtimeManager() *RealtimeManager {
 	return &RealtimeManager{
-		Manager:         NewManager(),
-		pollingInterval: config.Env.RealtimeInterval,
+		Manager: NewManager(),
 	}
 }
 
@@ -90,10 +87,8 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 		return fmt.Errorf("failed to create contract instance: %w", err)
 	}
 
-	ticker := time.NewTicker(m.pollingInterval)
+	ticker := time.NewTicker(config.Env.RealtimeInterval)
 	defer ticker.Stop()
-
-	poolAddress := utils.NormalizeAddress(pool.Hex())
 
 	var lastProcessedBlock uint64 = 0
 
@@ -146,16 +141,6 @@ func (m *RealtimeManager) watchPoolPolling(ctx context.Context, pool common.Addr
 						Str("pool", pool.Hex()).
 						Msg("Error processing block range")
 				}
-			}
-
-			if err := db.DB.UpsertBlockProcessingState(ctx, db.UpsertBlockProcessingStateParams{
-				PoolAddress:        poolAddress,
-				IsBackfill:         false,
-				LastProcessedBlock: int64(currentBlock),
-			}); err != nil {
-				log.Error().
-					Err(err).
-					Msg("Failed to update block processing state")
 			}
 
 			lastProcessedBlock = currentBlock

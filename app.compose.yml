@@ -1,18 +1,18 @@
 services:
-  dexon_db:
+  db:
     image: postgres:latest
     restart: unless-stopped
-    container_name: dexon_db
+    container_name: yexus-db
     environment:
-      POSTGRES_USER: postgres 
-      POSTGRES_PASSWORD: 4mIcGa6kyxuM1tAF6PnEprSuIQ52qGQyI6OtOnhnGZIcNb7G25
-      POSTGRES_DB: dexon
+      POSTGRES_USER: ${POSTGRES_USER} 
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
-      - dexon_db:/var/lib/postgresql/data
+      - yexus_db:/var/lib/postgresql/data
     networks:
-      - dexon-network
+      - yexus-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -22,7 +22,7 @@ services:
   openobserve:
     image: public.ecr.aws/zinclabs/openobserve:latest
     restart: unless-stopped
-    container_name: dexon-openobserve
+    container_name: yexus-openobserve
     environment:
       ZO_ROOT_USER_EMAIL: ${ZO_ROOT_USER_EMAIL}
       ZO_ROOT_USER_PASSWORD: ${ZO_ROOT_USER_PASSWORD}
@@ -31,12 +31,12 @@ services:
     ports:
       - "5080:5080"
     volumes:
-      - dexon_openobserve_data:/data
+      - yexus_openobserve_data:/data
     networks:
-      - dexon-network
+      - yexus-network
   api:
-    image: dexon-api
-    container_name: dexon-api
+    image: yexus-api
+    container_name: yexus-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -45,7 +45,7 @@ services:
     volumes:
       - ./.env:/app/.env
     depends_on:
-      dexon_db:
+      yexus_db:
         condition: service_healthy
       openobserve:
         condition: service_started
@@ -56,13 +56,13 @@ services:
       retries: 5
     restart: always
     networks:
-      - dexon-network
+      - yexus-network
     init: true
 
 volumes:
-  dexon_db:
-  dexon_openobserve_data:
+  yexus_db:
+  yexus_openobserve_data:
 
 networks:
-  dexon-network:
+  yexus-network:
     driver: bridge

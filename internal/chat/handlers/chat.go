@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/zuni-lab/dexon-service/internal/chat/services"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/internal/chat/services"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 func ChatDex(c echo.Context) error {
@@ -21,4 +21,3 @@ func ChatDex(c echo.Context) error {
 
 	return services.ChatDex(ctx, body, c.Response().Writer)
 }
-

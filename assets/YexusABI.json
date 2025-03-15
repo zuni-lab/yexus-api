@@ -92,7 +92,7 @@
       {
         "name": "order",
         "type": "tuple",
-        "internalType": "struct Dexon.Order",
+        "internalType": "struct Yexus.Order",
         "components": [
           { "name": "account", "type": "address", "internalType": "address" },
           { "name": "nonce", "type": "uint256", "internalType": "uint256" },
@@ -100,8 +100,8 @@
           { "name": "amount", "type": "uint256", "internalType": "uint256" },
           { "name": "triggerPrice", "type": "uint256", "internalType": "uint256" },
           { "name": "slippage", "type": "uint256", "internalType": "uint256" },
-          { "name": "orderType", "type": "uint8", "internalType": "enum Dexon.OrderType" },
-          { "name": "orderSide", "type": "uint8", "internalType": "enum Dexon.OrderSide" },
+          { "name": "orderType", "type": "uint8", "internalType": "enum Yexus.OrderType" },
+          { "name": "orderSide", "type": "uint8", "internalType": "enum Yexus.OrderSide" },
           { "name": "deadline", "type": "uint256", "internalType": "uint256" },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
         ]
@@ -117,13 +117,13 @@
       {
         "name": "order",
         "type": "tuple",
-        "internalType": "struct Dexon.TwapOrder",
+        "internalType": "struct Yexus.TwapOrder",
         "components": [
           { "name": "account", "type": "address", "internalType": "address" },
           { "name": "nonce", "type": "uint256", "internalType": "uint256" },
           { "name": "path", "type": "bytes", "internalType": "bytes" },
           { "name": "amount", "type": "uint256", "internalType": "uint256" },
-          { "name": "orderSide", "type": "uint8", "internalType": "enum Dexon.OrderSide" },
+          { "name": "orderSide", "type": "uint8", "internalType": "enum Yexus.OrderSide" },
           { "name": "interval", "type": "uint256", "internalType": "uint256" },
           { "name": "totalOrders", "type": "uint256", "internalType": "uint256" },
           { "name": "startTimestamp", "type": "uint256", "internalType": "uint256" },
@@ -173,8 +173,8 @@
       { "name": "quoteAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "triggerPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "slippage", "type": "uint256", "indexed": false, "internalType": "uint256" },
-      { "name": "orderType", "type": "uint8", "indexed": false, "internalType": "enum Dexon.OrderType" },
-      { "name": "orderSide", "type": "uint8", "indexed": false, "internalType": "enum Dexon.OrderSide" }
+      { "name": "orderType", "type": "uint8", "indexed": false, "internalType": "enum Yexus.OrderType" },
+      { "name": "orderSide", "type": "uint8", "indexed": false, "internalType": "enum Yexus.OrderSide" }
     ],
     "anonymous": false
   },
@@ -189,7 +189,7 @@
       { "name": "quoteAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "executedTimestamp", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "path", "type": "bytes", "indexed": false, "internalType": "bytes" },
-      { "name": "orderSide", "type": "uint8", "indexed": false, "internalType": "enum Dexon.OrderSide" },
+      { "name": "orderSide", "type": "uint8", "indexed": false, "internalType": "enum Yexus.OrderSide" },
       { "name": "totalBaseAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "interval", "type": "uint256", "indexed": false, "internalType": "uint256" },
       { "name": "totalOrders", "type": "uint256", "indexed": false, "internalType": "uint256" },

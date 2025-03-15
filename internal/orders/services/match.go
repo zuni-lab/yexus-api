@@ -11,9 +11,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	"github.com/zuni-lab/dexon-service/pkg/evm"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/db"
+	"github.com/zuni-lab/yexus-api/pkg/evm"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 var (
@@ -99,7 +99,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return nil, err
 	}
 
-	data, err := evm.ExecuteOrderData(&filler.contract.DexonTransactor, mappedOrder)
+	data, err := evm.ExecuteOrderData(&filler.contract.YexusTransactor, mappedOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func fillOrder(ctx context.Context, order *db.Order) (*db.Order, error) {
 		return filler.handleRejection(order.ID)
 	}
 
-	event, err := evm.ParseOrderExecutedEvent(&filler.contract.DexonFilterer, receipt)
+	event, err := evm.ParseOrderExecutedEvent(&filler.contract.YexusFilterer, receipt)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to parse order executed event")
 		return filler.handleRejection(order.ID)
@@ -164,7 +164,7 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 		return actualAmount, err
 	}
 
-	data, err := evm.ExecuteTwapOrderData(&filler.contract.DexonTransactor, mappedOrder)
+	data, err := evm.ExecuteTwapOrderData(&filler.contract.YexusTransactor, mappedOrder)
 	if err != nil {
 		return actualAmount, err
 	}
@@ -179,7 +179,7 @@ func fillPartialOrder(ctx context.Context, parent *db.Order, price, amount *big.
 		return actualAmount, err
 	}
 
-	event, err := evm.ParseTwapOrderExecutedEvent(&filler.contract.DexonFilterer, receipt)
+	event, err := evm.ParseTwapOrderExecutedEvent(&filler.contract.YexusFilterer, receipt)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to parse twap order executed event")
 		_, rejectionErr := filler.handleRejection(parent.ID)

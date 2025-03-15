@@ -2,7 +2,7 @@ package orders
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/zuni-lab/dexon-service/internal/orders/handlers"
+	"github.com/zuni-lab/yexus-api/internal/orders/handlers"
 )
 
 func Route(g *echo.Group, path string) {

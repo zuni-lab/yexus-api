@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 // Common configuration shared between server and indexer
@@ -38,7 +39,6 @@ type CommonConfig struct {
 type ServerConfig struct {
 	ApiHost       string `validate:"min=1"`
 	Port          string `validate:"number"`
-	JwtSecret     string `validate:"min=10"`
 	CorsWhiteList []string
 
 	// OpenAI
@@ -47,17 +47,11 @@ type ServerConfig struct {
 }
 
 type RealtimeManagerConfig struct {
-	// Realtime Manager
-	RealtimeInterval      time.Duration `validate:"min=1s"`
-	RealtimeMinBlockRange uint64        `validate:"min=1"`
-	RealtimeMaxBlockRange uint64        `validate:"min=1"`
+	RealtimeInterval time.Duration `validate:"min=1s"`
 
-	ContractAddress string `validate:"eth_addr"`
-	PrivateKey      string `validate:"hexadecimal,len=64"`
-
-	RawPrivKey           *ecdsa.PrivateKey
-	Address              common.Address
-	DexonContractAddress common.Address
+	PrivateKey      *ecdsa.PrivateKey
+	ContractAddress common.Address
+	Address         common.Address
 }
 
 // Indexer-specific configuration
@@ -73,7 +67,6 @@ type ServerEnv struct {
 	CommonConfig
 	ServerConfig
 	RealtimeManagerConfig
-	// IndexerConfig
 }
 
 var Env ServerEnv
@@ -107,38 +100,18 @@ func loadEnv() {
 
 	serverConfig := loadServerConfig()
 
-	// indexer := loadIndexerConfig()
-
 	managerConfig := loadRealtimeManagerConfig()
 
 	Env = ServerEnv{
 		CommonConfig:          commonConfig,
 		ServerConfig:          serverConfig,
 		RealtimeManagerConfig: managerConfig,
-		// IndexerConfig: indexer,
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(Env); err != nil {
 		log.Fatal().Msgf("Error validating env: %s", err)
 	}
-
-	privateKey, err := crypto.HexToECDSA(managerConfig.PrivateKey)
-	if err != nil {
-		panic(err)
-	}
-
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		panic("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
-	}
-
-	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-
-	Env.RealtimeManagerConfig.RawPrivKey = privateKey
-	Env.RealtimeManagerConfig.Address = fromAddress
-	Env.DexonContractAddress = common.Address(common.FromHex(managerConfig.ContractAddress))
 }
 
 func loadCommonConfig() CommonConfig {
@@ -176,7 +149,6 @@ func loadServerConfig() ServerConfig {
 	return ServerConfig{
 		ApiHost:       os.Getenv("API_HOST"),
 		Port:          port,
-		JwtSecret:     os.Getenv("JWT_SECRET"),
 		CorsWhiteList: corsWhiteList,
 
 		OpenaiApiKey:      os.Getenv("OPENAI_API_KEY"),
@@ -185,15 +157,25 @@ func loadServerConfig() ServerConfig {
 }
 
 func loadRealtimeManagerConfig() RealtimeManagerConfig {
-	realtimeInterval := getEnvDuration("REALTIME_INTERVAL", "1s")
+	realtimeInterval := getEnvDuration("REALTIME_INTERVAL", "5s")
+
+	priv := getEnvPrivateKey("PRIVATE_KEY")
+	publicKey := priv.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal().Msg("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	}
+
+	contractAddress, err := utils.HexToAddress(os.Getenv("CONTRACT_ADDRESS"))
+	if err != nil {
+		log.Fatal().Msgf("Error parsing CONTRACT_ADDRESS: %s", err)
+	}
 
 	return RealtimeManagerConfig{
-		RealtimeInterval:      realtimeInterval,
-		RealtimeMinBlockRange: getEnvUint64("REALTIME_MIN_BLOCK_RANGE", 5),
-		RealtimeMaxBlockRange: getEnvUint64("REALTIME_MAX_BLOCK_RANGE", 25),
-
-		ContractAddress: os.Getenv("CONTRACT_ADDRESS"),
-		PrivateKey:      os.Getenv("PRIVATE_KEY"),
+		RealtimeInterval: realtimeInterval,
+		ContractAddress:  contractAddress,
+		PrivateKey:       priv,
+		Address:          crypto.PubkeyToAddress(*publicKeyECDSA),
 	}
 }
 
@@ -222,23 +204,14 @@ func getEnvUint64(key string, defaultValue uint64) uint64 {
 	return parsed
 }
 
-// func getEnvInt(key string, defaultValue int) int {
-// 	value := os.Getenv(key)
-// 	if value == "" {
-// 		return defaultValue
-// 	}
-// 	parsed, err := strconv.Atoi(value)
-// 	if err != nil {
-// 		log.Fatal().Msgf("Error parsing %s: %s", key, err)
-// 	}
-// 	return parsed
-// }
-
-// func loadIndexerConfig() IndexerConfig {
-// 	return IndexerConfig{
-// 		ChunkSize:     getEnvUint64("INDEXER_CHUNK_SIZE", 900),
-// 		Concurrency:   getEnvInt("INDEXER_CONCURRENCY", 10),
-// 		StartBlock:    getEnvUint64("INDEXER_START_BLOCK", 1),
-// 		FetchInterval: getEnvDuration("INDEXER_FETCH_INTERVAL", "1s"),
-// 	}
-// }
+func getEnvPrivateKey(key string) *ecdsa.PrivateKey {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatal().Msgf("Error parsing %s: %s", key, "empty")
+	}
+	privateKey, err := crypto.HexToECDSA(value)
+	if err != nil {
+		log.Fatal().Msgf("Error parsing %s: %s", key, err)
+	}
+	return privateKey
+}

@@ -6,11 +6,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/zuni-lab/dexon-service/config"
+	"github.com/zuni-lab/yexus-api/config"
 )
 
-func CreateTxData(contract *DexonTransactor, method string, args ...interface{}) ([]byte, error) {
-	parsed, err := DexonMetaData.GetAbi()
+func CreateTxData(contract *YexusTransactor, method string, args ...interface{}) ([]byte, error) {
+	parsed, err := YexusMetaData.GetAbi()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ABI: %w", err)
 	}
@@ -36,7 +36,7 @@ type Order struct {
 	Signature    []byte
 }
 
-func ExecuteOrderData(contract *DexonTransactor, order *Order) ([]byte, error) {
+func ExecuteOrderData(contract *YexusTransactor, order *Order) ([]byte, error) {
 	return CreateTxData(contract, "executeOrder", order)
 }
 
@@ -52,13 +52,13 @@ type TwapOrder struct {
 	StartTimestamp *big.Int
 }
 
-func ExecuteTwapOrderData(contract *DexonTransactor, order *TwapOrder) ([]byte, error) {
+func ExecuteTwapOrderData(contract *YexusTransactor, order *TwapOrder) ([]byte, error) {
 	return CreateTxData(contract, "executeTwapOrder", order)
 }
 
-func ParseOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*DexonOrderExecuted, error) {
+func ParseOrderExecutedEvent(filterer *YexusFilterer, receipt *types.Receipt) (*YexusOrderExecuted, error) {
 	for _, log := range receipt.Logs {
-		if log.Address == config.Env.DexonContractAddress {
+		if log.Address == config.Env.ContractAddress {
 			event, err := filterer.ParseOrderExecuted(*log)
 			if err != nil {
 				continue
@@ -69,9 +69,9 @@ func ParseOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*
 	return nil, fmt.Errorf("failed to parse OrderExecuted event")
 }
 
-func ParseTwapOrderExecutedEvent(filterer *DexonFilterer, receipt *types.Receipt) (*DexonTwapOrderExecuted, error) {
+func ParseTwapOrderExecutedEvent(filterer *YexusFilterer, receipt *types.Receipt) (*YexusTwapOrderExecuted, error) {
 	for _, log := range receipt.Logs {
-		if log.Address == config.Env.DexonContractAddress {
+		if log.Address == config.Env.ContractAddress {
 			event, err := filterer.ParseTwapOrderExecuted(*log)
 			if err != nil {
 				continue

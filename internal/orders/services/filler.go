@@ -12,25 +12,26 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/config"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	"github.com/zuni-lab/dexon-service/pkg/evm"
+	"github.com/zuni-lab/yexus-api/config"
+	"github.com/zuni-lab/yexus-api/pkg/db"
+	"github.com/zuni-lab/yexus-api/pkg/evm"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type OrderFiller struct {
 	ctx      context.Context
-	contract *evm.Dexon
+	contract *evm.Yexus
 	auth     *bind.TransactOpts
 	order    *db.Order
 }
 
 func newOrderFiller(ctx context.Context, order *db.Order) (*OrderFiller, error) {
-	contract, err := evmManager().DexonInstance(ctx)
+	contract, err := evmManager().YexusInstance(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	auth, err := bind.NewKeyedTransactorWithChainID(config.Env.RawPrivKey, txManager().ChainID())
+	auth, err := bind.NewKeyedTransactorWithChainID(config.Env.PrivateKey, txManager().ChainID())
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (f *OrderFiller) executeTransaction(data []byte) (*types.Receipt, error) {
 	return txManager().SendAndWaitForTxWithNonceRetry(
 		ctx,
 		f.auth,
-		config.Env.DexonContractAddress,
+		config.Env.ContractAddress,
 		data,
 	)
 }
@@ -82,25 +83,25 @@ type orderMapper struct {
 }
 
 func (m *orderMapper) getBaseFields() (userAddress common.Address, nonce *big.Int, path []byte, amount *big.Int, signature []byte, orderSide uint8, err error) {
-	userAddress, err = evm.NormalizeAddress(m.order.Wallet)
+	userAddress, err = utils.HexToAddress(m.order.Wallet)
 	if err != nil {
 		return
 	}
 
 	nonce = new(big.Int).SetUint64(uint64(m.order.Nonce))
 
-	path, err = evm.NormalizeHex(m.order.Paths)
+	path, err = utils.NormalizeHex(m.order.Paths)
 	if err != nil {
 		return
 	}
 
-	amount, err = evm.ConvertNumericToDecimals(&m.order.Amount, 0)
+	amount, err = utils.ConvertNumericToDecimals(&m.order.Amount, 0)
 	if err != nil {
 		err = fmt.Errorf("failed to convert amount to decimals: %w", err)
 		return
 	}
 
-	signature, err = evm.NormalizeHex(m.order.Signature)
+	signature, err = utils.NormalizeHex(m.order.Signature)
 	if err != nil {
 		return
 	}
@@ -120,12 +121,12 @@ func mapOrderToEvmOrder(order *db.Order) (*evm.Order, error) {
 		return nil, err
 	}
 
-	price, err := evm.ConvertDecimalsToWei(&order.Price)
+	price, err := utils.ConvertDecimalsToWei(&order.Price)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert price to wei: %w", err)
 	}
 
-	slippage, err := evm.ConvertFloat8ToDecimals(order.Slippage, 6)
+	slippage, err := utils.ConvertFloat8ToDecimals(order.Slippage, 6)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert slippage to wei: %w", err)
 	}

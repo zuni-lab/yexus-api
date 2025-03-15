@@ -6,9 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/openai/openai-go"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	openAI "github.com/zuni-lab/dexon-service/pkg/openai"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/db"
+	openAI "github.com/zuni-lab/yexus-api/pkg/openai"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type GetThreadDetailsParams struct {

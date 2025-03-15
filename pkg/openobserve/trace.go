@@ -23,7 +23,7 @@ import (
 const (
 	tracerKey = "tracer"
 	// ScopeName is the instrumentation scope name.
-	ScopeName = "github.com/zuni-lab/dexon-service"
+	ScopeName = "github.com/zuni-lab/yexus-api"
 )
 
 var Tracer oteltrace.Tracer

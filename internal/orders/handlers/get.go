@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/zuni-lab/dexon-service/internal/orders/services"
+	"github.com/zuni-lab/yexus-api/internal/orders/services"
 
 	"github.com/labstack/echo/v4"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 func Get(c echo.Context) error {

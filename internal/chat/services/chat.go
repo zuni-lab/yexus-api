@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/pkg/db"
-	"github.com/zuni-lab/dexon-service/pkg/openai"
-	"github.com/zuni-lab/dexon-service/pkg/swap"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/db"
+	"github.com/zuni-lab/yexus-api/pkg/openai"
+	"github.com/zuni-lab/yexus-api/pkg/swap"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type ChatParams struct {

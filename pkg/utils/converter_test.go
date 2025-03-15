@@ -1,29 +1,12 @@
-package evm_test
+package utils_test
 
 import (
 	"math/big"
-	"os"
-	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/zuni-lab/dexon-service/pkg/evm"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
-
-func TestAbi(t *testing.T) {
-	abiJson, err := os.ReadFile("../../assets/DexonABI.json")
-	if err != nil {
-		t.Errorf("Error reading abi.json: %v", err)
-	}
-
-	contractAbi, err := abi.JSON(strings.NewReader(string(abiJson)))
-	if err != nil {
-		t.Errorf("Error parsing abi.json: %v", err)
-	}
-
-	_ = contractAbi
-}
 
 func TestNumericConversion(t *testing.T) {
 	testCases := []struct {
@@ -75,7 +58,7 @@ func TestNumericConversion(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := evm.ConvertNumericToDecimals(&tc.input, tc.decimals)
+			result, err := utils.ConvertNumericToDecimals(&tc.input, tc.decimals)
 			if err != nil {
 				t.Fatalf("ConvertNumericToDecimals failed: %v", err)
 			}
@@ -95,7 +78,7 @@ func TestFloatToWei(t *testing.T) {
 		Valid:   true,
 	}
 
-	result, err := evm.ConvertFloat8ToDecimals(float, 6)
+	result, err := utils.ConvertFloat8ToDecimals(float, 6)
 	if err != nil {
 		t.Fatalf("ConvertFloat8ToWei failed: %v", err)
 	}

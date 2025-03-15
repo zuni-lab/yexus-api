@@ -29,8 +29,8 @@ var (
 	_ = abi.ConvertType
 )
 
-// DexonOrder is an auto generated low-level Go binding around an user-defined struct.
-type DexonOrder struct {
+// YexusOrder is an auto generated low-level Go binding around an user-defined struct.
+type YexusOrder struct {
 	Account      common.Address
 	Nonce        *big.Int
 	Path         []byte
@@ -43,8 +43,8 @@ type DexonOrder struct {
 	Signature    []byte
 }
 
-// DexonTwapOrder is an auto generated low-level Go binding around an user-defined struct.
-type DexonTwapOrder struct {
+// YexusTwapOrder is an auto generated low-level Go binding around an user-defined struct.
+type YexusTwapOrder struct {
 	Account        common.Address
 	Nonce          *big.Int
 	Path           []byte
@@ -56,113 +56,113 @@ type DexonTwapOrder struct {
 	Signature      []byte
 }
 
-// DexonMetaData contains all meta data concerning the Dexon contract.
-var DexonMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"NAME\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ONE_HUNDRED_PERCENT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"TWAP_ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_FACTORY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_ROUTER\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"USDC\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH_USDC_POOL\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"eip712Domain\",\"inputs\":[],\"outputs\":[{\"name\":\"fields\",\"type\":\"bytes1\",\"internalType\":\"bytes1\"},{\"name\":\"name\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"version\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"extensions\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"executeOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.Order\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"deadline\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"executeTwapOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structDexon.TwapOrder\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"interval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getTokenPriceOnUsdc\",\"inputs\":[{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nonces\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"used\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"twapCounts\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"twapCount\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"event\",\"name\":\"EIP712DomainChanged\",\"inputs\":[],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TwapOrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"orderNth\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"executedTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumDexon.OrderSide\"},{\"name\":\"totalBaseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"interval\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignature\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureLength\",\"inputs\":[{\"name\":\"length\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureS\",\"inputs\":[{\"name\":\"s\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidShortString\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"SafeCastOverflowedUintDowncast\",\"inputs\":[{\"name\":\"bits\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"SafeERC20FailedOperation\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StringTooLong\",\"inputs\":[{\"name\":\"str\",\"type\":\"string\",\"internalType\":\"string\"}]}]",
+// YexusMetaData contains all meta data concerning the Yexus contract.
+var YexusMetaData = &bind.MetaData{
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"NAME\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ONE_HUNDRED_PERCENT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"TWAP_ORDER_TYPEHASH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_FACTORY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UNISWAP_V3_ROUTER\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"USDC\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"VERSION\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"WETH_USDC_POOL\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"eip712Domain\",\"inputs\":[],\"outputs\":[{\"name\":\"fields\",\"type\":\"bytes1\",\"internalType\":\"bytes1\"},{\"name\":\"name\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"version\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"extensions\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"executeOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structYexus.Order\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"internalType\":\"enumYexus.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumYexus.OrderSide\"},{\"name\":\"deadline\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"executeTwapOrder\",\"inputs\":[{\"name\":\"order\",\"type\":\"tuple\",\"internalType\":\"structYexus.TwapOrder\",\"components\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"internalType\":\"enumYexus.OrderSide\"},{\"name\":\"interval\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getTokenPriceOnUsdc\",\"inputs\":[{\"name\":\"path\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nonces\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"used\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"twapCounts\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"twapCount\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"event\",\"name\":\"EIP712DomainChanged\",\"inputs\":[],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"triggerPrice\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"slippage\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"orderType\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumYexus.OrderType\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumYexus.OrderSide\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TwapOrderExecuted\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"orderNth\",\"type\":\"uint256\",\"indexed\":true,\"internalType\":\"uint256\"},{\"name\":\"baseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"quoteAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"executedTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"path\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"orderSide\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumYexus.OrderSide\"},{\"name\":\"totalBaseAmount\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"interval\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"totalOrders\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"},{\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignature\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureLength\",\"inputs\":[{\"name\":\"length\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"ECDSAInvalidSignatureS\",\"inputs\":[{\"name\":\"s\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"InvalidShortString\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"SafeCastOverflowedUintDowncast\",\"inputs\":[{\"name\":\"bits\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"SafeERC20FailedOperation\",\"inputs\":[{\"name\":\"token\",\"type\":\"address\",\"internalType\":\"address\"}]},{\"type\":\"error\",\"name\":\"StringTooLong\",\"inputs\":[{\"name\":\"str\",\"type\":\"string\",\"internalType\":\"string\"}]}]",
 }
 
-// DexonABI is the input ABI used to generate the binding from.
-// Deprecated: Use DexonMetaData.ABI instead.
-var DexonABI = DexonMetaData.ABI
+// YexusABI is the input ABI used to generate the binding from.
+// Deprecated: Use YexusMetaData.ABI instead.
+var YexusABI = YexusMetaData.ABI
 
-// Dexon is an auto generated Go binding around an Ethereum contract.
-type Dexon struct {
-	DexonCaller     // Read-only binding to the contract
-	DexonTransactor // Write-only binding to the contract
-	DexonFilterer   // Log filterer for contract events
+// Yexus is an auto generated Go binding around an Ethereum contract.
+type Yexus struct {
+	YexusCaller     // Read-only binding to the contract
+	YexusTransactor // Write-only binding to the contract
+	YexusFilterer   // Log filterer for contract events
 }
 
-// DexonCaller is an auto generated read-only Go binding around an Ethereum contract.
-type DexonCaller struct {
+// YexusCaller is an auto generated read-only Go binding around an Ethereum contract.
+type YexusCaller struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// DexonTransactor is an auto generated write-only Go binding around an Ethereum contract.
-type DexonTransactor struct {
+// YexusTransactor is an auto generated write-only Go binding around an Ethereum contract.
+type YexusTransactor struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// DexonFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
-type DexonFilterer struct {
+// YexusFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type YexusFilterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// DexonSession is an auto generated Go binding around an Ethereum contract,
+// YexusSession is an auto generated Go binding around an Ethereum contract,
 // with pre-set call and transact options.
-type DexonSession struct {
-	Contract     *Dexon            // Generic contract binding to set the session for
+type YexusSession struct {
+	Contract     *Yexus            // Generic contract binding to set the session for
 	CallOpts     bind.CallOpts     // Call options to use throughout this session
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
 
-// DexonCallerSession is an auto generated read-only Go binding around an Ethereum contract,
+// YexusCallerSession is an auto generated read-only Go binding around an Ethereum contract,
 // with pre-set call options.
-type DexonCallerSession struct {
-	Contract *DexonCaller  // Generic contract caller binding to set the session for
+type YexusCallerSession struct {
+	Contract *YexusCaller  // Generic contract caller binding to set the session for
 	CallOpts bind.CallOpts // Call options to use throughout this session
 }
 
-// DexonTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
+// YexusTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
 // with pre-set transact options.
-type DexonTransactorSession struct {
-	Contract     *DexonTransactor  // Generic contract transactor binding to set the session for
+type YexusTransactorSession struct {
+	Contract     *YexusTransactor  // Generic contract transactor binding to set the session for
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
 
-// DexonRaw is an auto generated low-level Go binding around an Ethereum contract.
-type DexonRaw struct {
-	Contract *Dexon // Generic contract binding to access the raw methods on
+// YexusRaw is an auto generated low-level Go binding around an Ethereum contract.
+type YexusRaw struct {
+	Contract *Yexus // Generic contract binding to access the raw methods on
 }
 
-// DexonCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
-type DexonCallerRaw struct {
-	Contract *DexonCaller // Generic read-only contract binding to access the raw methods on
+// YexusCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
+type YexusCallerRaw struct {
+	Contract *YexusCaller // Generic read-only contract binding to access the raw methods on
 }
 
-// DexonTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
-type DexonTransactorRaw struct {
-	Contract *DexonTransactor // Generic write-only contract binding to access the raw methods on
+// YexusTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
+type YexusTransactorRaw struct {
+	Contract *YexusTransactor // Generic write-only contract binding to access the raw methods on
 }
 
-// NewDexon creates a new instance of Dexon, bound to a specific deployed contract.
-func NewDexon(address common.Address, backend bind.ContractBackend) (*Dexon, error) {
-	contract, err := bindDexon(address, backend, backend, backend)
+// NewYexus creates a new instance of Yexus, bound to a specific deployed contract.
+func NewYexus(address common.Address, backend bind.ContractBackend) (*Yexus, error) {
+	contract, err := bindYexus(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &Dexon{DexonCaller: DexonCaller{contract: contract}, DexonTransactor: DexonTransactor{contract: contract}, DexonFilterer: DexonFilterer{contract: contract}}, nil
+	return &Yexus{YexusCaller: YexusCaller{contract: contract}, YexusTransactor: YexusTransactor{contract: contract}, YexusFilterer: YexusFilterer{contract: contract}}, nil
 }
 
-// NewDexonCaller creates a new read-only instance of Dexon, bound to a specific deployed contract.
-func NewDexonCaller(address common.Address, caller bind.ContractCaller) (*DexonCaller, error) {
-	contract, err := bindDexon(address, caller, nil, nil)
+// NewYexusCaller creates a new read-only instance of Yexus, bound to a specific deployed contract.
+func NewYexusCaller(address common.Address, caller bind.ContractCaller) (*YexusCaller, error) {
+	contract, err := bindYexus(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &DexonCaller{contract: contract}, nil
+	return &YexusCaller{contract: contract}, nil
 }
 
-// NewDexonTransactor creates a new write-only instance of Dexon, bound to a specific deployed contract.
-func NewDexonTransactor(address common.Address, transactor bind.ContractTransactor) (*DexonTransactor, error) {
-	contract, err := bindDexon(address, nil, transactor, nil)
+// NewYexusTransactor creates a new write-only instance of Yexus, bound to a specific deployed contract.
+func NewYexusTransactor(address common.Address, transactor bind.ContractTransactor) (*YexusTransactor, error) {
+	contract, err := bindYexus(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &DexonTransactor{contract: contract}, nil
+	return &YexusTransactor{contract: contract}, nil
 }
 
-// NewDexonFilterer creates a new log filterer instance of Dexon, bound to a specific deployed contract.
-func NewDexonFilterer(address common.Address, filterer bind.ContractFilterer) (*DexonFilterer, error) {
-	contract, err := bindDexon(address, nil, nil, filterer)
+// NewYexusFilterer creates a new log filterer instance of Yexus, bound to a specific deployed contract.
+func NewYexusFilterer(address common.Address, filterer bind.ContractFilterer) (*YexusFilterer, error) {
+	contract, err := bindYexus(address, nil, nil, filterer)
 	if err != nil {
 		return nil, err
 	}
-	return &DexonFilterer{contract: contract}, nil
+	return &YexusFilterer{contract: contract}, nil
 }
 
-// bindDexon binds a generic wrapper to an already deployed contract.
-func bindDexon(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := DexonMetaData.GetAbi()
+// bindYexus binds a generic wrapper to an already deployed contract.
+func bindYexus(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
+	parsed, err := YexusMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
@@ -173,46 +173,46 @@ func bindDexon(address common.Address, caller bind.ContractCaller, transactor bi
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Dexon *DexonRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Dexon.Contract.DexonCaller.contract.Call(opts, result, method, params...)
+func (_Yexus *YexusRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _Yexus.Contract.YexusCaller.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Dexon *DexonRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Dexon.Contract.DexonTransactor.contract.Transfer(opts)
+func (_Yexus *YexusRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Yexus.Contract.YexusTransactor.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Dexon *DexonRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Dexon.Contract.DexonTransactor.contract.Transact(opts, method, params...)
+func (_Yexus *YexusRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _Yexus.Contract.YexusTransactor.contract.Transact(opts, method, params...)
 }
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Dexon *DexonCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Dexon.Contract.contract.Call(opts, result, method, params...)
+func (_Yexus *YexusCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _Yexus.Contract.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Dexon *DexonTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Dexon.Contract.contract.Transfer(opts)
+func (_Yexus *YexusTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _Yexus.Contract.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Dexon *DexonTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Dexon.Contract.contract.Transact(opts, method, params...)
+func (_Yexus *YexusTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _Yexus.Contract.contract.Transact(opts, method, params...)
 }
 
 // NAME is a free data retrieval call binding the contract method 0xa3f4df7e.
 //
 // Solidity: function NAME() view returns(string)
-func (_Dexon *DexonCaller) NAME(opts *bind.CallOpts) (string, error) {
+func (_Yexus *YexusCaller) NAME(opts *bind.CallOpts) (string, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "NAME")
+	err := _Yexus.contract.Call(opts, &out, "NAME")
 
 	if err != nil {
 		return *new(string), err
@@ -227,23 +227,23 @@ func (_Dexon *DexonCaller) NAME(opts *bind.CallOpts) (string, error) {
 // NAME is a free data retrieval call binding the contract method 0xa3f4df7e.
 //
 // Solidity: function NAME() view returns(string)
-func (_Dexon *DexonSession) NAME() (string, error) {
-	return _Dexon.Contract.NAME(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) NAME() (string, error) {
+	return _Yexus.Contract.NAME(&_Yexus.CallOpts)
 }
 
 // NAME is a free data retrieval call binding the contract method 0xa3f4df7e.
 //
 // Solidity: function NAME() view returns(string)
-func (_Dexon *DexonCallerSession) NAME() (string, error) {
-	return _Dexon.Contract.NAME(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) NAME() (string, error) {
+	return _Yexus.Contract.NAME(&_Yexus.CallOpts)
 }
 
 // ONEHUNDREDPERCENT is a free data retrieval call binding the contract method 0xdd0081c7.
 //
 // Solidity: function ONE_HUNDRED_PERCENT() view returns(uint256)
-func (_Dexon *DexonCaller) ONEHUNDREDPERCENT(opts *bind.CallOpts) (*big.Int, error) {
+func (_Yexus *YexusCaller) ONEHUNDREDPERCENT(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "ONE_HUNDRED_PERCENT")
+	err := _Yexus.contract.Call(opts, &out, "ONE_HUNDRED_PERCENT")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -258,23 +258,23 @@ func (_Dexon *DexonCaller) ONEHUNDREDPERCENT(opts *bind.CallOpts) (*big.Int, err
 // ONEHUNDREDPERCENT is a free data retrieval call binding the contract method 0xdd0081c7.
 //
 // Solidity: function ONE_HUNDRED_PERCENT() view returns(uint256)
-func (_Dexon *DexonSession) ONEHUNDREDPERCENT() (*big.Int, error) {
-	return _Dexon.Contract.ONEHUNDREDPERCENT(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) ONEHUNDREDPERCENT() (*big.Int, error) {
+	return _Yexus.Contract.ONEHUNDREDPERCENT(&_Yexus.CallOpts)
 }
 
 // ONEHUNDREDPERCENT is a free data retrieval call binding the contract method 0xdd0081c7.
 //
 // Solidity: function ONE_HUNDRED_PERCENT() view returns(uint256)
-func (_Dexon *DexonCallerSession) ONEHUNDREDPERCENT() (*big.Int, error) {
-	return _Dexon.Contract.ONEHUNDREDPERCENT(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) ONEHUNDREDPERCENT() (*big.Int, error) {
+	return _Yexus.Contract.ONEHUNDREDPERCENT(&_Yexus.CallOpts)
 }
 
 // ORDERTYPEHASH is a free data retrieval call binding the contract method 0xf973a209.
 //
 // Solidity: function ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonCaller) ORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, error) {
+func (_Yexus *YexusCaller) ORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "ORDER_TYPEHASH")
+	err := _Yexus.contract.Call(opts, &out, "ORDER_TYPEHASH")
 
 	if err != nil {
 		return *new([32]byte), err
@@ -289,23 +289,23 @@ func (_Dexon *DexonCaller) ORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, error) 
 // ORDERTYPEHASH is a free data retrieval call binding the contract method 0xf973a209.
 //
 // Solidity: function ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonSession) ORDERTYPEHASH() ([32]byte, error) {
-	return _Dexon.Contract.ORDERTYPEHASH(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) ORDERTYPEHASH() ([32]byte, error) {
+	return _Yexus.Contract.ORDERTYPEHASH(&_Yexus.CallOpts)
 }
 
 // ORDERTYPEHASH is a free data retrieval call binding the contract method 0xf973a209.
 //
 // Solidity: function ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonCallerSession) ORDERTYPEHASH() ([32]byte, error) {
-	return _Dexon.Contract.ORDERTYPEHASH(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) ORDERTYPEHASH() ([32]byte, error) {
+	return _Yexus.Contract.ORDERTYPEHASH(&_Yexus.CallOpts)
 }
 
 // TWAPORDERTYPEHASH is a free data retrieval call binding the contract method 0x75225a34.
 //
 // Solidity: function TWAP_ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonCaller) TWAPORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, error) {
+func (_Yexus *YexusCaller) TWAPORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "TWAP_ORDER_TYPEHASH")
+	err := _Yexus.contract.Call(opts, &out, "TWAP_ORDER_TYPEHASH")
 
 	if err != nil {
 		return *new([32]byte), err
@@ -320,23 +320,23 @@ func (_Dexon *DexonCaller) TWAPORDERTYPEHASH(opts *bind.CallOpts) ([32]byte, err
 // TWAPORDERTYPEHASH is a free data retrieval call binding the contract method 0x75225a34.
 //
 // Solidity: function TWAP_ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonSession) TWAPORDERTYPEHASH() ([32]byte, error) {
-	return _Dexon.Contract.TWAPORDERTYPEHASH(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) TWAPORDERTYPEHASH() ([32]byte, error) {
+	return _Yexus.Contract.TWAPORDERTYPEHASH(&_Yexus.CallOpts)
 }
 
 // TWAPORDERTYPEHASH is a free data retrieval call binding the contract method 0x75225a34.
 //
 // Solidity: function TWAP_ORDER_TYPEHASH() view returns(bytes32)
-func (_Dexon *DexonCallerSession) TWAPORDERTYPEHASH() ([32]byte, error) {
-	return _Dexon.Contract.TWAPORDERTYPEHASH(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) TWAPORDERTYPEHASH() ([32]byte, error) {
+	return _Yexus.Contract.TWAPORDERTYPEHASH(&_Yexus.CallOpts)
 }
 
 // UNISWAPV3FACTORY is a free data retrieval call binding the contract method 0xf73e5aab.
 //
 // Solidity: function UNISWAP_V3_FACTORY() view returns(address)
-func (_Dexon *DexonCaller) UNISWAPV3FACTORY(opts *bind.CallOpts) (common.Address, error) {
+func (_Yexus *YexusCaller) UNISWAPV3FACTORY(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "UNISWAP_V3_FACTORY")
+	err := _Yexus.contract.Call(opts, &out, "UNISWAP_V3_FACTORY")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -351,23 +351,23 @@ func (_Dexon *DexonCaller) UNISWAPV3FACTORY(opts *bind.CallOpts) (common.Address
 // UNISWAPV3FACTORY is a free data retrieval call binding the contract method 0xf73e5aab.
 //
 // Solidity: function UNISWAP_V3_FACTORY() view returns(address)
-func (_Dexon *DexonSession) UNISWAPV3FACTORY() (common.Address, error) {
-	return _Dexon.Contract.UNISWAPV3FACTORY(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) UNISWAPV3FACTORY() (common.Address, error) {
+	return _Yexus.Contract.UNISWAPV3FACTORY(&_Yexus.CallOpts)
 }
 
 // UNISWAPV3FACTORY is a free data retrieval call binding the contract method 0xf73e5aab.
 //
 // Solidity: function UNISWAP_V3_FACTORY() view returns(address)
-func (_Dexon *DexonCallerSession) UNISWAPV3FACTORY() (common.Address, error) {
-	return _Dexon.Contract.UNISWAPV3FACTORY(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) UNISWAPV3FACTORY() (common.Address, error) {
+	return _Yexus.Contract.UNISWAPV3FACTORY(&_Yexus.CallOpts)
 }
 
 // UNISWAPV3ROUTER is a free data retrieval call binding the contract method 0x41c64a2f.
 //
 // Solidity: function UNISWAP_V3_ROUTER() view returns(address)
-func (_Dexon *DexonCaller) UNISWAPV3ROUTER(opts *bind.CallOpts) (common.Address, error) {
+func (_Yexus *YexusCaller) UNISWAPV3ROUTER(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "UNISWAP_V3_ROUTER")
+	err := _Yexus.contract.Call(opts, &out, "UNISWAP_V3_ROUTER")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -382,23 +382,23 @@ func (_Dexon *DexonCaller) UNISWAPV3ROUTER(opts *bind.CallOpts) (common.Address,
 // UNISWAPV3ROUTER is a free data retrieval call binding the contract method 0x41c64a2f.
 //
 // Solidity: function UNISWAP_V3_ROUTER() view returns(address)
-func (_Dexon *DexonSession) UNISWAPV3ROUTER() (common.Address, error) {
-	return _Dexon.Contract.UNISWAPV3ROUTER(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) UNISWAPV3ROUTER() (common.Address, error) {
+	return _Yexus.Contract.UNISWAPV3ROUTER(&_Yexus.CallOpts)
 }
 
 // UNISWAPV3ROUTER is a free data retrieval call binding the contract method 0x41c64a2f.
 //
 // Solidity: function UNISWAP_V3_ROUTER() view returns(address)
-func (_Dexon *DexonCallerSession) UNISWAPV3ROUTER() (common.Address, error) {
-	return _Dexon.Contract.UNISWAPV3ROUTER(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) UNISWAPV3ROUTER() (common.Address, error) {
+	return _Yexus.Contract.UNISWAPV3ROUTER(&_Yexus.CallOpts)
 }
 
 // USDC is a free data retrieval call binding the contract method 0x89a30271.
 //
 // Solidity: function USDC() view returns(address)
-func (_Dexon *DexonCaller) USDC(opts *bind.CallOpts) (common.Address, error) {
+func (_Yexus *YexusCaller) USDC(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "USDC")
+	err := _Yexus.contract.Call(opts, &out, "USDC")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -413,23 +413,23 @@ func (_Dexon *DexonCaller) USDC(opts *bind.CallOpts) (common.Address, error) {
 // USDC is a free data retrieval call binding the contract method 0x89a30271.
 //
 // Solidity: function USDC() view returns(address)
-func (_Dexon *DexonSession) USDC() (common.Address, error) {
-	return _Dexon.Contract.USDC(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) USDC() (common.Address, error) {
+	return _Yexus.Contract.USDC(&_Yexus.CallOpts)
 }
 
 // USDC is a free data retrieval call binding the contract method 0x89a30271.
 //
 // Solidity: function USDC() view returns(address)
-func (_Dexon *DexonCallerSession) USDC() (common.Address, error) {
-	return _Dexon.Contract.USDC(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) USDC() (common.Address, error) {
+	return _Yexus.Contract.USDC(&_Yexus.CallOpts)
 }
 
 // VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
 //
 // Solidity: function VERSION() view returns(string)
-func (_Dexon *DexonCaller) VERSION(opts *bind.CallOpts) (string, error) {
+func (_Yexus *YexusCaller) VERSION(opts *bind.CallOpts) (string, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "VERSION")
+	err := _Yexus.contract.Call(opts, &out, "VERSION")
 
 	if err != nil {
 		return *new(string), err
@@ -444,23 +444,23 @@ func (_Dexon *DexonCaller) VERSION(opts *bind.CallOpts) (string, error) {
 // VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
 //
 // Solidity: function VERSION() view returns(string)
-func (_Dexon *DexonSession) VERSION() (string, error) {
-	return _Dexon.Contract.VERSION(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) VERSION() (string, error) {
+	return _Yexus.Contract.VERSION(&_Yexus.CallOpts)
 }
 
 // VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
 //
 // Solidity: function VERSION() view returns(string)
-func (_Dexon *DexonCallerSession) VERSION() (string, error) {
-	return _Dexon.Contract.VERSION(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) VERSION() (string, error) {
+	return _Yexus.Contract.VERSION(&_Yexus.CallOpts)
 }
 
 // WETH is a free data retrieval call binding the contract method 0xad5c4648.
 //
 // Solidity: function WETH() view returns(address)
-func (_Dexon *DexonCaller) WETH(opts *bind.CallOpts) (common.Address, error) {
+func (_Yexus *YexusCaller) WETH(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "WETH")
+	err := _Yexus.contract.Call(opts, &out, "WETH")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -475,23 +475,23 @@ func (_Dexon *DexonCaller) WETH(opts *bind.CallOpts) (common.Address, error) {
 // WETH is a free data retrieval call binding the contract method 0xad5c4648.
 //
 // Solidity: function WETH() view returns(address)
-func (_Dexon *DexonSession) WETH() (common.Address, error) {
-	return _Dexon.Contract.WETH(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) WETH() (common.Address, error) {
+	return _Yexus.Contract.WETH(&_Yexus.CallOpts)
 }
 
 // WETH is a free data retrieval call binding the contract method 0xad5c4648.
 //
 // Solidity: function WETH() view returns(address)
-func (_Dexon *DexonCallerSession) WETH() (common.Address, error) {
-	return _Dexon.Contract.WETH(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) WETH() (common.Address, error) {
+	return _Yexus.Contract.WETH(&_Yexus.CallOpts)
 }
 
 // WETHUSDCPOOL is a free data retrieval call binding the contract method 0xe492288f.
 //
 // Solidity: function WETH_USDC_POOL() view returns(address)
-func (_Dexon *DexonCaller) WETHUSDCPOOL(opts *bind.CallOpts) (common.Address, error) {
+func (_Yexus *YexusCaller) WETHUSDCPOOL(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "WETH_USDC_POOL")
+	err := _Yexus.contract.Call(opts, &out, "WETH_USDC_POOL")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -506,21 +506,21 @@ func (_Dexon *DexonCaller) WETHUSDCPOOL(opts *bind.CallOpts) (common.Address, er
 // WETHUSDCPOOL is a free data retrieval call binding the contract method 0xe492288f.
 //
 // Solidity: function WETH_USDC_POOL() view returns(address)
-func (_Dexon *DexonSession) WETHUSDCPOOL() (common.Address, error) {
-	return _Dexon.Contract.WETHUSDCPOOL(&_Dexon.CallOpts)
+func (_Yexus *YexusSession) WETHUSDCPOOL() (common.Address, error) {
+	return _Yexus.Contract.WETHUSDCPOOL(&_Yexus.CallOpts)
 }
 
 // WETHUSDCPOOL is a free data retrieval call binding the contract method 0xe492288f.
 //
 // Solidity: function WETH_USDC_POOL() view returns(address)
-func (_Dexon *DexonCallerSession) WETHUSDCPOOL() (common.Address, error) {
-	return _Dexon.Contract.WETHUSDCPOOL(&_Dexon.CallOpts)
+func (_Yexus *YexusCallerSession) WETHUSDCPOOL() (common.Address, error) {
+	return _Yexus.Contract.WETHUSDCPOOL(&_Yexus.CallOpts)
 }
 
 // Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
 //
 // Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_Dexon *DexonCaller) Eip712Domain(opts *bind.CallOpts) (struct {
+func (_Yexus *YexusCaller) Eip712Domain(opts *bind.CallOpts) (struct {
 	Fields            [1]byte
 	Name              string
 	Version           string
@@ -530,7 +530,7 @@ func (_Dexon *DexonCaller) Eip712Domain(opts *bind.CallOpts) (struct {
 	Extensions        []*big.Int
 }, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "eip712Domain")
+	err := _Yexus.contract.Call(opts, &out, "eip712Domain")
 
 	outstruct := new(struct {
 		Fields            [1]byte
@@ -560,7 +560,7 @@ func (_Dexon *DexonCaller) Eip712Domain(opts *bind.CallOpts) (struct {
 // Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
 //
 // Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_Dexon *DexonSession) Eip712Domain() (struct {
+func (_Yexus *YexusSession) Eip712Domain() (struct {
 	Fields            [1]byte
 	Name              string
 	Version           string
@@ -569,13 +569,13 @@ func (_Dexon *DexonSession) Eip712Domain() (struct {
 	Salt              [32]byte
 	Extensions        []*big.Int
 }, error) {
-	return _Dexon.Contract.Eip712Domain(&_Dexon.CallOpts)
+	return _Yexus.Contract.Eip712Domain(&_Yexus.CallOpts)
 }
 
 // Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
 //
 // Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_Dexon *DexonCallerSession) Eip712Domain() (struct {
+func (_Yexus *YexusCallerSession) Eip712Domain() (struct {
 	Fields            [1]byte
 	Name              string
 	Version           string
@@ -584,15 +584,15 @@ func (_Dexon *DexonCallerSession) Eip712Domain() (struct {
 	Salt              [32]byte
 	Extensions        []*big.Int
 }, error) {
-	return _Dexon.Contract.Eip712Domain(&_Dexon.CallOpts)
+	return _Yexus.Contract.Eip712Domain(&_Yexus.CallOpts)
 }
 
 // GetTokenPriceOnUsdc is a free data retrieval call binding the contract method 0x74ddafad.
 //
 // Solidity: function getTokenPriceOnUsdc(bytes path) view returns(uint256)
-func (_Dexon *DexonCaller) GetTokenPriceOnUsdc(opts *bind.CallOpts, path []byte) (*big.Int, error) {
+func (_Yexus *YexusCaller) GetTokenPriceOnUsdc(opts *bind.CallOpts, path []byte) (*big.Int, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "getTokenPriceOnUsdc", path)
+	err := _Yexus.contract.Call(opts, &out, "getTokenPriceOnUsdc", path)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -607,23 +607,23 @@ func (_Dexon *DexonCaller) GetTokenPriceOnUsdc(opts *bind.CallOpts, path []byte)
 // GetTokenPriceOnUsdc is a free data retrieval call binding the contract method 0x74ddafad.
 //
 // Solidity: function getTokenPriceOnUsdc(bytes path) view returns(uint256)
-func (_Dexon *DexonSession) GetTokenPriceOnUsdc(path []byte) (*big.Int, error) {
-	return _Dexon.Contract.GetTokenPriceOnUsdc(&_Dexon.CallOpts, path)
+func (_Yexus *YexusSession) GetTokenPriceOnUsdc(path []byte) (*big.Int, error) {
+	return _Yexus.Contract.GetTokenPriceOnUsdc(&_Yexus.CallOpts, path)
 }
 
 // GetTokenPriceOnUsdc is a free data retrieval call binding the contract method 0x74ddafad.
 //
 // Solidity: function getTokenPriceOnUsdc(bytes path) view returns(uint256)
-func (_Dexon *DexonCallerSession) GetTokenPriceOnUsdc(path []byte) (*big.Int, error) {
-	return _Dexon.Contract.GetTokenPriceOnUsdc(&_Dexon.CallOpts, path)
+func (_Yexus *YexusCallerSession) GetTokenPriceOnUsdc(path []byte) (*big.Int, error) {
+	return _Yexus.Contract.GetTokenPriceOnUsdc(&_Yexus.CallOpts, path)
 }
 
 // Nonces is a free data retrieval call binding the contract method 0x502e1a16.
 //
 // Solidity: function nonces(address account, uint256 nonce) view returns(bool used)
-func (_Dexon *DexonCaller) Nonces(opts *bind.CallOpts, account common.Address, nonce *big.Int) (bool, error) {
+func (_Yexus *YexusCaller) Nonces(opts *bind.CallOpts, account common.Address, nonce *big.Int) (bool, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "nonces", account, nonce)
+	err := _Yexus.contract.Call(opts, &out, "nonces", account, nonce)
 
 	if err != nil {
 		return *new(bool), err
@@ -638,23 +638,23 @@ func (_Dexon *DexonCaller) Nonces(opts *bind.CallOpts, account common.Address, n
 // Nonces is a free data retrieval call binding the contract method 0x502e1a16.
 //
 // Solidity: function nonces(address account, uint256 nonce) view returns(bool used)
-func (_Dexon *DexonSession) Nonces(account common.Address, nonce *big.Int) (bool, error) {
-	return _Dexon.Contract.Nonces(&_Dexon.CallOpts, account, nonce)
+func (_Yexus *YexusSession) Nonces(account common.Address, nonce *big.Int) (bool, error) {
+	return _Yexus.Contract.Nonces(&_Yexus.CallOpts, account, nonce)
 }
 
 // Nonces is a free data retrieval call binding the contract method 0x502e1a16.
 //
 // Solidity: function nonces(address account, uint256 nonce) view returns(bool used)
-func (_Dexon *DexonCallerSession) Nonces(account common.Address, nonce *big.Int) (bool, error) {
-	return _Dexon.Contract.Nonces(&_Dexon.CallOpts, account, nonce)
+func (_Yexus *YexusCallerSession) Nonces(account common.Address, nonce *big.Int) (bool, error) {
+	return _Yexus.Contract.Nonces(&_Yexus.CallOpts, account, nonce)
 }
 
 // TwapCounts is a free data retrieval call binding the contract method 0x3fa9deda.
 //
 // Solidity: function twapCounts(address account, uint256 nonce) view returns(uint256 twapCount)
-func (_Dexon *DexonCaller) TwapCounts(opts *bind.CallOpts, account common.Address, nonce *big.Int) (*big.Int, error) {
+func (_Yexus *YexusCaller) TwapCounts(opts *bind.CallOpts, account common.Address, nonce *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Dexon.contract.Call(opts, &out, "twapCounts", account, nonce)
+	err := _Yexus.contract.Call(opts, &out, "twapCounts", account, nonce)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -669,62 +669,62 @@ func (_Dexon *DexonCaller) TwapCounts(opts *bind.CallOpts, account common.Addres
 // TwapCounts is a free data retrieval call binding the contract method 0x3fa9deda.
 //
 // Solidity: function twapCounts(address account, uint256 nonce) view returns(uint256 twapCount)
-func (_Dexon *DexonSession) TwapCounts(account common.Address, nonce *big.Int) (*big.Int, error) {
-	return _Dexon.Contract.TwapCounts(&_Dexon.CallOpts, account, nonce)
+func (_Yexus *YexusSession) TwapCounts(account common.Address, nonce *big.Int) (*big.Int, error) {
+	return _Yexus.Contract.TwapCounts(&_Yexus.CallOpts, account, nonce)
 }
 
 // TwapCounts is a free data retrieval call binding the contract method 0x3fa9deda.
 //
 // Solidity: function twapCounts(address account, uint256 nonce) view returns(uint256 twapCount)
-func (_Dexon *DexonCallerSession) TwapCounts(account common.Address, nonce *big.Int) (*big.Int, error) {
-	return _Dexon.Contract.TwapCounts(&_Dexon.CallOpts, account, nonce)
+func (_Yexus *YexusCallerSession) TwapCounts(account common.Address, nonce *big.Int) (*big.Int, error) {
+	return _Yexus.Contract.TwapCounts(&_Yexus.CallOpts, account, nonce)
 }
 
 // ExecuteOrder is a paid mutator transaction binding the contract method 0x6bc180f8.
 //
 // Solidity: function executeOrder((address,uint256,bytes,uint256,uint256,uint256,uint8,uint8,uint256,bytes) order) returns()
-func (_Dexon *DexonTransactor) ExecuteOrder(opts *bind.TransactOpts, order DexonOrder) (*types.Transaction, error) {
-	return _Dexon.contract.Transact(opts, "executeOrder", order)
+func (_Yexus *YexusTransactor) ExecuteOrder(opts *bind.TransactOpts, order YexusOrder) (*types.Transaction, error) {
+	return _Yexus.contract.Transact(opts, "executeOrder", order)
 }
 
 // ExecuteOrder is a paid mutator transaction binding the contract method 0x6bc180f8.
 //
 // Solidity: function executeOrder((address,uint256,bytes,uint256,uint256,uint256,uint8,uint8,uint256,bytes) order) returns()
-func (_Dexon *DexonSession) ExecuteOrder(order DexonOrder) (*types.Transaction, error) {
-	return _Dexon.Contract.ExecuteOrder(&_Dexon.TransactOpts, order)
+func (_Yexus *YexusSession) ExecuteOrder(order YexusOrder) (*types.Transaction, error) {
+	return _Yexus.Contract.ExecuteOrder(&_Yexus.TransactOpts, order)
 }
 
 // ExecuteOrder is a paid mutator transaction binding the contract method 0x6bc180f8.
 //
 // Solidity: function executeOrder((address,uint256,bytes,uint256,uint256,uint256,uint8,uint8,uint256,bytes) order) returns()
-func (_Dexon *DexonTransactorSession) ExecuteOrder(order DexonOrder) (*types.Transaction, error) {
-	return _Dexon.Contract.ExecuteOrder(&_Dexon.TransactOpts, order)
+func (_Yexus *YexusTransactorSession) ExecuteOrder(order YexusOrder) (*types.Transaction, error) {
+	return _Yexus.Contract.ExecuteOrder(&_Yexus.TransactOpts, order)
 }
 
 // ExecuteTwapOrder is a paid mutator transaction binding the contract method 0xdc3ff069.
 //
 // Solidity: function executeTwapOrder((address,uint256,bytes,uint256,uint8,uint256,uint256,uint256,bytes) order) returns()
-func (_Dexon *DexonTransactor) ExecuteTwapOrder(opts *bind.TransactOpts, order DexonTwapOrder) (*types.Transaction, error) {
-	return _Dexon.contract.Transact(opts, "executeTwapOrder", order)
+func (_Yexus *YexusTransactor) ExecuteTwapOrder(opts *bind.TransactOpts, order YexusTwapOrder) (*types.Transaction, error) {
+	return _Yexus.contract.Transact(opts, "executeTwapOrder", order)
 }
 
 // ExecuteTwapOrder is a paid mutator transaction binding the contract method 0xdc3ff069.
 //
 // Solidity: function executeTwapOrder((address,uint256,bytes,uint256,uint8,uint256,uint256,uint256,bytes) order) returns()
-func (_Dexon *DexonSession) ExecuteTwapOrder(order DexonTwapOrder) (*types.Transaction, error) {
-	return _Dexon.Contract.ExecuteTwapOrder(&_Dexon.TransactOpts, order)
+func (_Yexus *YexusSession) ExecuteTwapOrder(order YexusTwapOrder) (*types.Transaction, error) {
+	return _Yexus.Contract.ExecuteTwapOrder(&_Yexus.TransactOpts, order)
 }
 
 // ExecuteTwapOrder is a paid mutator transaction binding the contract method 0xdc3ff069.
 //
 // Solidity: function executeTwapOrder((address,uint256,bytes,uint256,uint8,uint256,uint256,uint256,bytes) order) returns()
-func (_Dexon *DexonTransactorSession) ExecuteTwapOrder(order DexonTwapOrder) (*types.Transaction, error) {
-	return _Dexon.Contract.ExecuteTwapOrder(&_Dexon.TransactOpts, order)
+func (_Yexus *YexusTransactorSession) ExecuteTwapOrder(order YexusTwapOrder) (*types.Transaction, error) {
+	return _Yexus.Contract.ExecuteTwapOrder(&_Yexus.TransactOpts, order)
 }
 
-// DexonEIP712DomainChangedIterator is returned from FilterEIP712DomainChanged and is used to iterate over the raw logs and unpacked data for EIP712DomainChanged events raised by the Dexon contract.
-type DexonEIP712DomainChangedIterator struct {
-	Event *DexonEIP712DomainChanged // Event containing the contract specifics and raw log
+// YexusEIP712DomainChangedIterator is returned from FilterEIP712DomainChanged and is used to iterate over the raw logs and unpacked data for EIP712DomainChanged events raised by the Yexus contract.
+type YexusEIP712DomainChangedIterator struct {
+	Event *YexusEIP712DomainChanged // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -738,7 +738,7 @@ type DexonEIP712DomainChangedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *DexonEIP712DomainChangedIterator) Next() bool {
+func (it *YexusEIP712DomainChangedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -747,7 +747,7 @@ func (it *DexonEIP712DomainChangedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(DexonEIP712DomainChanged)
+			it.Event = new(YexusEIP712DomainChanged)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -762,7 +762,7 @@ func (it *DexonEIP712DomainChangedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(DexonEIP712DomainChanged)
+		it.Event = new(YexusEIP712DomainChanged)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -778,40 +778,40 @@ func (it *DexonEIP712DomainChangedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *DexonEIP712DomainChangedIterator) Error() error {
+func (it *YexusEIP712DomainChangedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *DexonEIP712DomainChangedIterator) Close() error {
+func (it *YexusEIP712DomainChangedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// DexonEIP712DomainChanged represents a EIP712DomainChanged event raised by the Dexon contract.
-type DexonEIP712DomainChanged struct {
+// YexusEIP712DomainChanged represents a EIP712DomainChanged event raised by the Yexus contract.
+type YexusEIP712DomainChanged struct {
 	Raw types.Log // Blockchain specific contextual infos
 }
 
 // FilterEIP712DomainChanged is a free log retrieval operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
 //
 // Solidity: event EIP712DomainChanged()
-func (_Dexon *DexonFilterer) FilterEIP712DomainChanged(opts *bind.FilterOpts) (*DexonEIP712DomainChangedIterator, error) {
+func (_Yexus *YexusFilterer) FilterEIP712DomainChanged(opts *bind.FilterOpts) (*YexusEIP712DomainChangedIterator, error) {
 
-	logs, sub, err := _Dexon.contract.FilterLogs(opts, "EIP712DomainChanged")
+	logs, sub, err := _Yexus.contract.FilterLogs(opts, "EIP712DomainChanged")
 	if err != nil {
 		return nil, err
 	}
-	return &DexonEIP712DomainChangedIterator{contract: _Dexon.contract, event: "EIP712DomainChanged", logs: logs, sub: sub}, nil
+	return &YexusEIP712DomainChangedIterator{contract: _Yexus.contract, event: "EIP712DomainChanged", logs: logs, sub: sub}, nil
 }
 
 // WatchEIP712DomainChanged is a free log subscription operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
 //
 // Solidity: event EIP712DomainChanged()
-func (_Dexon *DexonFilterer) WatchEIP712DomainChanged(opts *bind.WatchOpts, sink chan<- *DexonEIP712DomainChanged) (event.Subscription, error) {
+func (_Yexus *YexusFilterer) WatchEIP712DomainChanged(opts *bind.WatchOpts, sink chan<- *YexusEIP712DomainChanged) (event.Subscription, error) {
 
-	logs, sub, err := _Dexon.contract.WatchLogs(opts, "EIP712DomainChanged")
+	logs, sub, err := _Yexus.contract.WatchLogs(opts, "EIP712DomainChanged")
 	if err != nil {
 		return nil, err
 	}
@@ -821,8 +821,8 @@ func (_Dexon *DexonFilterer) WatchEIP712DomainChanged(opts *bind.WatchOpts, sink
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(DexonEIP712DomainChanged)
-				if err := _Dexon.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
+				event := new(YexusEIP712DomainChanged)
+				if err := _Yexus.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -846,18 +846,18 @@ func (_Dexon *DexonFilterer) WatchEIP712DomainChanged(opts *bind.WatchOpts, sink
 // ParseEIP712DomainChanged is a log parse operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
 //
 // Solidity: event EIP712DomainChanged()
-func (_Dexon *DexonFilterer) ParseEIP712DomainChanged(log types.Log) (*DexonEIP712DomainChanged, error) {
-	event := new(DexonEIP712DomainChanged)
-	if err := _Dexon.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
+func (_Yexus *YexusFilterer) ParseEIP712DomainChanged(log types.Log) (*YexusEIP712DomainChanged, error) {
+	event := new(YexusEIP712DomainChanged)
+	if err := _Yexus.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// DexonOrderExecutedIterator is returned from FilterOrderExecuted and is used to iterate over the raw logs and unpacked data for OrderExecuted events raised by the Dexon contract.
-type DexonOrderExecutedIterator struct {
-	Event *DexonOrderExecuted // Event containing the contract specifics and raw log
+// YexusOrderExecutedIterator is returned from FilterOrderExecuted and is used to iterate over the raw logs and unpacked data for OrderExecuted events raised by the Yexus contract.
+type YexusOrderExecutedIterator struct {
+	Event *YexusOrderExecuted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -871,7 +871,7 @@ type DexonOrderExecutedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *DexonOrderExecutedIterator) Next() bool {
+func (it *YexusOrderExecutedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -880,7 +880,7 @@ func (it *DexonOrderExecutedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(DexonOrderExecuted)
+			it.Event = new(YexusOrderExecuted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -895,7 +895,7 @@ func (it *DexonOrderExecutedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(DexonOrderExecuted)
+		it.Event = new(YexusOrderExecuted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -911,19 +911,19 @@ func (it *DexonOrderExecutedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *DexonOrderExecutedIterator) Error() error {
+func (it *YexusOrderExecutedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *DexonOrderExecutedIterator) Close() error {
+func (it *YexusOrderExecutedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// DexonOrderExecuted represents a OrderExecuted event raised by the Dexon contract.
-type DexonOrderExecuted struct {
+// YexusOrderExecuted represents a OrderExecuted event raised by the Yexus contract.
+type YexusOrderExecuted struct {
 	Account      common.Address
 	Nonce        *big.Int
 	Path         []byte
@@ -939,7 +939,7 @@ type DexonOrderExecuted struct {
 // FilterOrderExecuted is a free log retrieval operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
 // Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
-func (_Dexon *DexonFilterer) FilterOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int) (*DexonOrderExecutedIterator, error) {
+func (_Yexus *YexusFilterer) FilterOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int) (*YexusOrderExecutedIterator, error) {
 
 	var accountRule []interface{}
 	for _, accountItem := range account {
@@ -950,17 +950,17 @@ func (_Dexon *DexonFilterer) FilterOrderExecuted(opts *bind.FilterOpts, account 
 		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Dexon.contract.FilterLogs(opts, "OrderExecuted", accountRule, nonceRule)
+	logs, sub, err := _Yexus.contract.FilterLogs(opts, "OrderExecuted", accountRule, nonceRule)
 	if err != nil {
 		return nil, err
 	}
-	return &DexonOrderExecutedIterator{contract: _Dexon.contract, event: "OrderExecuted", logs: logs, sub: sub}, nil
+	return &YexusOrderExecutedIterator{contract: _Yexus.contract, event: "OrderExecuted", logs: logs, sub: sub}, nil
 }
 
 // WatchOrderExecuted is a free log subscription operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
 // Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
-func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<- *DexonOrderExecuted, account []common.Address, nonce []*big.Int) (event.Subscription, error) {
+func (_Yexus *YexusFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<- *YexusOrderExecuted, account []common.Address, nonce []*big.Int) (event.Subscription, error) {
 
 	var accountRule []interface{}
 	for _, accountItem := range account {
@@ -971,7 +971,7 @@ func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<
 		nonceRule = append(nonceRule, nonceItem)
 	}
 
-	logs, sub, err := _Dexon.contract.WatchLogs(opts, "OrderExecuted", accountRule, nonceRule)
+	logs, sub, err := _Yexus.contract.WatchLogs(opts, "OrderExecuted", accountRule, nonceRule)
 	if err != nil {
 		return nil, err
 	}
@@ -981,8 +981,8 @@ func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(DexonOrderExecuted)
-				if err := _Dexon.contract.UnpackLog(event, "OrderExecuted", log); err != nil {
+				event := new(YexusOrderExecuted)
+				if err := _Yexus.contract.UnpackLog(event, "OrderExecuted", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1006,18 +1006,18 @@ func (_Dexon *DexonFilterer) WatchOrderExecuted(opts *bind.WatchOpts, sink chan<
 // ParseOrderExecuted is a log parse operation binding the contract event 0xc93dd372329320fe5794f13c7039ac2ac5d719c59333fcce8ce1088bc6eae671.
 //
 // Solidity: event OrderExecuted(address indexed account, uint256 indexed nonce, bytes path, uint256 baseAmount, uint256 quoteAmount, uint256 triggerPrice, uint256 slippage, uint8 orderType, uint8 orderSide)
-func (_Dexon *DexonFilterer) ParseOrderExecuted(log types.Log) (*DexonOrderExecuted, error) {
-	event := new(DexonOrderExecuted)
-	if err := _Dexon.contract.UnpackLog(event, "OrderExecuted", log); err != nil {
+func (_Yexus *YexusFilterer) ParseOrderExecuted(log types.Log) (*YexusOrderExecuted, error) {
+	event := new(YexusOrderExecuted)
+	if err := _Yexus.contract.UnpackLog(event, "OrderExecuted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// DexonTwapOrderExecutedIterator is returned from FilterTwapOrderExecuted and is used to iterate over the raw logs and unpacked data for TwapOrderExecuted events raised by the Dexon contract.
-type DexonTwapOrderExecutedIterator struct {
-	Event *DexonTwapOrderExecuted // Event containing the contract specifics and raw log
+// YexusTwapOrderExecutedIterator is returned from FilterTwapOrderExecuted and is used to iterate over the raw logs and unpacked data for TwapOrderExecuted events raised by the Yexus contract.
+type YexusTwapOrderExecutedIterator struct {
+	Event *YexusTwapOrderExecuted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1031,7 +1031,7 @@ type DexonTwapOrderExecutedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *DexonTwapOrderExecutedIterator) Next() bool {
+func (it *YexusTwapOrderExecutedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1040,7 +1040,7 @@ func (it *DexonTwapOrderExecutedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(DexonTwapOrderExecuted)
+			it.Event = new(YexusTwapOrderExecuted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1055,7 +1055,7 @@ func (it *DexonTwapOrderExecutedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(DexonTwapOrderExecuted)
+		it.Event = new(YexusTwapOrderExecuted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1071,19 +1071,19 @@ func (it *DexonTwapOrderExecutedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *DexonTwapOrderExecutedIterator) Error() error {
+func (it *YexusTwapOrderExecutedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *DexonTwapOrderExecutedIterator) Close() error {
+func (it *YexusTwapOrderExecutedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// DexonTwapOrderExecuted represents a TwapOrderExecuted event raised by the Dexon contract.
-type DexonTwapOrderExecuted struct {
+// YexusTwapOrderExecuted represents a TwapOrderExecuted event raised by the Yexus contract.
+type YexusTwapOrderExecuted struct {
 	Account           common.Address
 	Nonce             *big.Int
 	OrderNth          *big.Int
@@ -1102,7 +1102,7 @@ type DexonTwapOrderExecuted struct {
 // FilterTwapOrderExecuted is a free log retrieval operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
 // Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
-func (_Dexon *DexonFilterer) FilterTwapOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (*DexonTwapOrderExecutedIterator, error) {
+func (_Yexus *YexusFilterer) FilterTwapOrderExecuted(opts *bind.FilterOpts, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (*YexusTwapOrderExecutedIterator, error) {
 
 	var accountRule []interface{}
 	for _, accountItem := range account {
@@ -1117,17 +1117,17 @@ func (_Dexon *DexonFilterer) FilterTwapOrderExecuted(opts *bind.FilterOpts, acco
 		orderNthRule = append(orderNthRule, orderNthItem)
 	}
 
-	logs, sub, err := _Dexon.contract.FilterLogs(opts, "TwapOrderExecuted", accountRule, nonceRule, orderNthRule)
+	logs, sub, err := _Yexus.contract.FilterLogs(opts, "TwapOrderExecuted", accountRule, nonceRule, orderNthRule)
 	if err != nil {
 		return nil, err
 	}
-	return &DexonTwapOrderExecutedIterator{contract: _Dexon.contract, event: "TwapOrderExecuted", logs: logs, sub: sub}, nil
+	return &YexusTwapOrderExecutedIterator{contract: _Yexus.contract, event: "TwapOrderExecuted", logs: logs, sub: sub}, nil
 }
 
 // WatchTwapOrderExecuted is a free log subscription operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
 // Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
-func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink chan<- *DexonTwapOrderExecuted, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (event.Subscription, error) {
+func (_Yexus *YexusFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink chan<- *YexusTwapOrderExecuted, account []common.Address, nonce []*big.Int, orderNth []*big.Int) (event.Subscription, error) {
 
 	var accountRule []interface{}
 	for _, accountItem := range account {
@@ -1142,7 +1142,7 @@ func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink c
 		orderNthRule = append(orderNthRule, orderNthItem)
 	}
 
-	logs, sub, err := _Dexon.contract.WatchLogs(opts, "TwapOrderExecuted", accountRule, nonceRule, orderNthRule)
+	logs, sub, err := _Yexus.contract.WatchLogs(opts, "TwapOrderExecuted", accountRule, nonceRule, orderNthRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1152,8 +1152,8 @@ func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink c
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(DexonTwapOrderExecuted)
-				if err := _Dexon.contract.UnpackLog(event, "TwapOrderExecuted", log); err != nil {
+				event := new(YexusTwapOrderExecuted)
+				if err := _Yexus.contract.UnpackLog(event, "TwapOrderExecuted", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1177,9 +1177,9 @@ func (_Dexon *DexonFilterer) WatchTwapOrderExecuted(opts *bind.WatchOpts, sink c
 // ParseTwapOrderExecuted is a log parse operation binding the contract event 0xbd1f49d33312b791c378c4e094f99abf2b236db830ec495e907218ee04604fd9.
 //
 // Solidity: event TwapOrderExecuted(address indexed account, uint256 indexed nonce, uint256 indexed orderNth, uint256 baseAmount, uint256 quoteAmount, uint256 executedTimestamp, bytes path, uint8 orderSide, uint256 totalBaseAmount, uint256 interval, uint256 totalOrders, uint256 startTimestamp)
-func (_Dexon *DexonFilterer) ParseTwapOrderExecuted(log types.Log) (*DexonTwapOrderExecuted, error) {
-	event := new(DexonTwapOrderExecuted)
-	if err := _Dexon.contract.UnpackLog(event, "TwapOrderExecuted", log); err != nil {
+func (_Yexus *YexusFilterer) ParseTwapOrderExecuted(log types.Log) (*YexusTwapOrderExecuted, error) {
+	event := new(YexusTwapOrderExecuted)
+	if err := _Yexus.contract.UnpackLog(event, "TwapOrderExecuted", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

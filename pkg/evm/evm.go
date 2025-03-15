@@ -10,16 +10,16 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/config"
+	"github.com/zuni-lab/yexus-api/config"
 )
 
 type Manager struct {
-	client        *ethclient.Client
-	backoff       *backoff.ExponentialBackOff
-	maxAttempts   uint64
-	handlers      []SwapHandler
-	chainID       *big.Int
-	dexonContract *Dexon
+	client      *ethclient.Client
+	backoff     *backoff.ExponentialBackOff
+	maxAttempts uint64
+	handlers    []SwapHandler
+	chainID     *big.Int
+	contract    *Yexus
 }
 
 func NewManager() *Manager {
@@ -109,13 +109,6 @@ func (m *Manager) Client() *ethclient.Client {
 	return m.client
 }
 
-func (m *Manager) DexonInstance(ctx context.Context) (*Dexon, error) {
-	if m.dexonContract != nil {
-		return m.dexonContract, nil
-	}
-	return NewDexon(config.Env.DexonContractAddress, m.client)
-}
-
 func (m *Manager) ChainID(ctx context.Context) (*big.Int, error) {
 	if m.chainID != nil {
 		return m.chainID, nil
@@ -128,4 +121,11 @@ func (m *Manager) ChainID(ctx context.Context) (*big.Int, error) {
 
 	m.chainID = chainID
 	return chainID, nil
+}
+
+func (m *Manager) YexusInstance(ctx context.Context) (*Yexus, error) {
+	if m.contract != nil {
+		return m.contract, nil
+	}
+	return NewYexus(config.Env.ContractAddress, m.client)
 }

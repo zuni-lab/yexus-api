@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/zuni-lab/dexon-service/pkg/db"
+	"github.com/zuni-lab/yexus-api/pkg/db"
 )
 
 type PoolExtendedInfo struct {

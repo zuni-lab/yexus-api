@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 var testCases = []struct {

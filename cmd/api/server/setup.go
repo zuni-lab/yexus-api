@@ -8,9 +8,9 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/zuni-lab/dexon-service/config"
-	"github.com/zuni-lab/dexon-service/pkg/openobserve"
-	"github.com/zuni-lab/dexon-service/pkg/utils"
+	"github.com/zuni-lab/yexus-api/config"
+	"github.com/zuni-lab/yexus-api/pkg/openobserve"
+	"github.com/zuni-lab/yexus-api/pkg/utils"
 )
 
 type RouteInfo struct {
@@ -22,7 +22,7 @@ type RouteInfo struct {
 
 var RouteRecs map[string][]RouteInfo = make(map[string][]RouteInfo)
 
-const trimModule = "github.com/zuni-lab/dexon-service/internal/"
+const trimModule = "github.com/zuni-lab/yexus-api/internal/"
 
 func setupAddHandlerEvent(e *echo.Echo) {
 	e.OnAddRouteHandler = func(host string, route echo.Route, handler echo.HandlerFunc, middleware []echo.MiddlewareFunc) {

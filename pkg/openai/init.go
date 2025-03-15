@@ -3,7 +3,7 @@ package openai
 import (
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
-	"github.com/zuni-lab/dexon-service/config"
+	"github.com/zuni-lab/yexus-api/config"
 )
 
 var (

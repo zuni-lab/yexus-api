@@ -6,7 +6,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/zuni-lab/dexon-service/pkg/openobserve"
+	"github.com/zuni-lab/yexus-api/pkg/openobserve"
 )
 
 func InitLogger() {
