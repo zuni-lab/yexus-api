@@ -18,6 +18,7 @@ import (
 	"github.com/zuni-lab/yexus-api/pkg/openobserve"
 	"github.com/zuni-lab/yexus-api/pkg/swap"
 	"github.com/zuni-lab/yexus-api/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/worker"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -28,6 +29,7 @@ type Server struct {
 	ctx           context.Context
 	cancel        context.CancelFunc
 	wg            sync.WaitGroup
+	workers       []*worker.Scheduler
 }
 
 func New() *Server {
@@ -59,6 +61,8 @@ func New() *Server {
 	setupRoute(e)
 	setupValidator(e)
 
+	workers := setupWorkers()
+
 	loadSvcs(ctx)
 
 	return &Server{
@@ -66,6 +70,7 @@ func New() *Server {
 		traceProvider: tp,
 		ctx:           ctx,
 		cancel:        cancel,
+		workers:       workers,
 	}
 }
 
@@ -77,6 +82,7 @@ func (s *Server) Start() error {
 
 	s.printRoutes()
 	s.startTwapMatcher()
+	s.startWorkers()
 
 	log.Info().Msgf("🥪 Environment loaded: %+v", config.Env)
 
@@ -130,6 +136,20 @@ func (s *Server) startTwapMatcher() {
 	}()
 }
 
+func (s *Server) startWorkers() {
+	var wg sync.WaitGroup
+	for _, w := range s.workers {
+		wg.Add(1)
+		go func(worker *worker.Scheduler) {
+			defer wg.Done()
+			worker.Start()
+		}(w)
+	}
+	wg.Wait()
+
+	log.Info().Msg("All workers started")
+}
+
 func (s *Server) Close() {
 	s.cancel()  // Signal all goroutines to stop
 	s.wg.Wait() // Wait for all goroutines to finish
@@ -151,6 +171,7 @@ func loadSvcs(ctx context.Context) {
 	db.Init(ctx, config.Env.PostgresUrl, config.Env.MigrationUrl)
 	openai.Init()
 	swap.InitPoolInfo()
+	worker.Init()
 }
 
 func closeSvcs() {

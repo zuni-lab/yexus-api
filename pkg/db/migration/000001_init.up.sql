@@ -98,17 +98,6 @@ INSERT INTO pools (id, token0_id, token1_id) VALUES
 LOWER('0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'),
 LOWER('0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619')); 
 
--- -- For tracking processed blocks
-CREATE TABLE block_processing_state (
-    pool_address VARCHAR(42) NOT NULL,
-    last_processed_block BIGINT NOT NULL,
-    is_backfill BOOLEAN NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (pool_address, is_backfill)
-);
-
-
 --- For user chat ---
 CREATE TABLE IF NOT EXISTS chat_threads (
     id BIGSERIAL PRIMARY KEY,
@@ -121,3 +110,47 @@ CREATE TABLE IF NOT EXISTS chat_threads (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_chat_threads_thread_id_user_address ON chat_threads(thread_id, user_address) WHERE NOT is_deleted;
+
+CREATE TABLE IF NOT EXISTS yield_metrics (
+    id BIGSERIAL PRIMARY KEY,
+    pool TEXT NOT NULL,
+    chain TEXT NOT NULL,
+    project TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    tvl_usd NUMERIC(20,2),
+    apy_base NUMERIC(10,3),
+    apy_reward NUMERIC(10,3),
+    apy NUMERIC(10,3),
+    reward_tokens TEXT[],
+    apy_pct_1d NUMERIC(10,3),
+    apy_pct_7d NUMERIC(10,3),
+    apy_pct_30d NUMERIC(10,3),
+    stablecoin BOOLEAN DEFAULT false,
+    il_risk TEXT,
+    exposure TEXT,
+    predictions JSONB,
+    pool_meta TEXT,
+    mu NUMERIC(10,5),
+    sigma NUMERIC(10,5),
+    count INTEGER,
+    outlier BOOLEAN DEFAULT false,
+    underlying_tokens TEXT[],
+    il_7d NUMERIC(10,3),
+    apy_base_7d NUMERIC(10,3),
+    apy_mean_30d NUMERIC(10,3),
+    volume_usd_1d NUMERIC(20,2),
+    volume_usd_7d NUMERIC(20,2),
+    apy_base_inception NUMERIC(10,3),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP INDEX IF EXISTS idx_yield_metrics_pool_created_at;
+
+-- Create unique index
+CREATE UNIQUE INDEX idx_yield_metrics_pool_created_at ON yield_metrics(pool, created_at);
+
+-- Create index on frequently queried columns
+CREATE INDEX idx_yield_metrics_pool ON yield_metrics(pool);
+CREATE INDEX idx_yield_metrics_chain ON yield_metrics(chain);
+CREATE INDEX idx_yield_metrics_project ON yield_metrics(project);

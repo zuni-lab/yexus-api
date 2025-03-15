@@ -54,12 +54,9 @@ type RealtimeManagerConfig struct {
 	Address         common.Address
 }
 
-// Indexer-specific configuration
-type IndexerConfig struct {
-	ChunkSize     uint64        `validate:"min=1"`
-	Concurrency   int           `validate:"min=1"`
-	StartBlock    uint64        `validate:"min=1"`
-	FetchInterval time.Duration `validate:"min=1s"`
+type WorkerConfig struct {
+	YieldMetricsSource string    `validate:"url"`
+	YieldMetricsRunAt  time.Time `validate:"required"`
 }
 
 // ServerEnv combines all configurations
@@ -67,6 +64,7 @@ type ServerEnv struct {
 	CommonConfig
 	ServerConfig
 	RealtimeManagerConfig
+	WorkerConfig
 }
 
 var Env ServerEnv
@@ -102,10 +100,13 @@ func loadEnv() {
 
 	managerConfig := loadRealtimeManagerConfig()
 
+	workerConfig := loadWorkerConfig()
+
 	Env = ServerEnv{
 		CommonConfig:          commonConfig,
 		ServerConfig:          serverConfig,
 		RealtimeManagerConfig: managerConfig,
+		WorkerConfig:          workerConfig,
 	}
 
 	validate := validator.New()
@@ -176,6 +177,18 @@ func loadRealtimeManagerConfig() RealtimeManagerConfig {
 		ContractAddress:  contractAddress,
 		PrivateKey:       priv,
 		Address:          crypto.PubkeyToAddress(*publicKeyECDSA),
+	}
+}
+
+func loadWorkerConfig() WorkerConfig {
+	runAt, err := time.Parse("15:04", os.Getenv("YIELD_METRICS_RUN_AT"))
+	if err != nil {
+		log.Fatal().Msgf("Error parsing YIELD_METRICS_AT: %s", err)
+	}
+
+	return WorkerConfig{
+		YieldMetricsSource: os.Getenv("YIELD_METRICS_SOURCE"),
+		YieldMetricsRunAt:  runAt,
 	}
 }
 

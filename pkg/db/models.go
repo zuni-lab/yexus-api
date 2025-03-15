@@ -142,14 +142,6 @@ func (ns NullOrderType) Value() (driver.Value, error) {
 	return string(ns.OrderType), nil
 }
 
-type BlockProcessingState struct {
-	PoolAddress        string           `json:"poolAddress"`
-	LastProcessedBlock int64            `json:"lastProcessedBlock"`
-	IsBackfill         bool             `json:"isBackfill"`
-	CreatedAt          pgtype.Timestamp `json:"createdAt"`
-	UpdatedAt          pgtype.Timestamp `json:"updatedAt"`
-}
-
 type ChatThread struct {
 	ID          int64            `json:"id"`
 	ThreadID    string           `json:"threadId"`
@@ -221,4 +213,38 @@ type Token struct {
 	Decimals  int32              `json:"decimals"`
 	IsStable  bool               `json:"isStable"`
 	CreatedAt pgtype.Timestamptz `json:"createdAt"`
+}
+
+type YieldMetric struct {
+	ID               int64              `json:"id"`
+	Pool             string             `json:"pool"`
+	Chain            string             `json:"chain"`
+	Project          string             `json:"project"`
+	Symbol           string             `json:"symbol"`
+	TvlUsd           pgtype.Numeric     `json:"tvlUsd"`
+	ApyBase          pgtype.Numeric     `json:"apyBase"`
+	ApyReward        pgtype.Numeric     `json:"apyReward"`
+	Apy              pgtype.Numeric     `json:"apy"`
+	RewardTokens     []string           `json:"rewardTokens"`
+	ApyPct1d         pgtype.Numeric     `json:"apyPct1d"`
+	ApyPct7d         pgtype.Numeric     `json:"apyPct7d"`
+	ApyPct30d        pgtype.Numeric     `json:"apyPct30d"`
+	Stablecoin       pgtype.Bool        `json:"stablecoin"`
+	IlRisk           pgtype.Text        `json:"ilRisk"`
+	Exposure         pgtype.Text        `json:"exposure"`
+	Predictions      []byte             `json:"predictions"`
+	PoolMeta         pgtype.Text        `json:"poolMeta"`
+	Mu               pgtype.Numeric     `json:"mu"`
+	Sigma            pgtype.Numeric     `json:"sigma"`
+	Count            pgtype.Int4        `json:"count"`
+	Outlier          pgtype.Bool        `json:"outlier"`
+	UnderlyingTokens []string           `json:"underlyingTokens"`
+	Il7d             pgtype.Numeric     `json:"il7d"`
+	ApyBase7d        pgtype.Numeric     `json:"apyBase7d"`
+	ApyMean30d       pgtype.Numeric     `json:"apyMean30d"`
+	VolumeUsd1d      pgtype.Numeric     `json:"volumeUsd1d"`
+	VolumeUsd7d      pgtype.Numeric     `json:"volumeUsd7d"`
+	ApyBaseInception pgtype.Numeric     `json:"apyBaseInception"`
+	CreatedAt        pgtype.Timestamptz `json:"createdAt"`
+	UpdatedAt        pgtype.Timestamptz `json:"updatedAt"`
 }
