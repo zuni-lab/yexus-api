@@ -3,7 +3,6 @@ package config
 import (
 	"crypto/ecdsa"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -203,18 +202,6 @@ func getEnvDuration(key, defaultValue string) time.Duration {
 		log.Fatal().Msgf("Error parsing %s: %s", key, err)
 	}
 	return duration
-}
-
-func getEnvUint64(key string, defaultValue uint64) uint64 {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	parsed, err := strconv.ParseUint(value, 10, 64)
-	if err != nil {
-		log.Fatal().Msgf("Error parsing %s: %s", key, err)
-	}
-	return parsed
 }
 
 func getEnvPrivateKey(key string) *ecdsa.PrivateKey {
