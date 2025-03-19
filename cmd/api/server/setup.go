@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"os"
 	"sort"
 	"strings"
@@ -8,9 +9,11 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog/log"
 	"github.com/zuni-lab/yexus-api/config"
 	"github.com/zuni-lab/yexus-api/pkg/openobserve"
 	"github.com/zuni-lab/yexus-api/pkg/utils"
+	"github.com/zuni-lab/yexus-api/pkg/worker"
 )
 
 type RouteInfo struct {
@@ -82,6 +85,21 @@ func setupErrorHandler(e *echo.Echo) {
 
 func setupValidator(e *echo.Echo) {
 	e.Validator = utils.NewValidator()
+}
+
+func setupWorkers() []*worker.Scheduler {
+	workers := make([]*worker.Scheduler, 0)
+	yieldMetricsAt := config.Env.YieldMetricsRunAt
+	w := worker.NewScheduler(yieldMetricsAt, "fetch-yield-metrics")
+	w.AddJob(func() {
+		log.Info().Msg("Fetching yield metrics")
+		err := worker.FetchAndUpdateYieldMetrics(context.Background())
+		if err != nil {
+			log.Err(err).Msg("Error fetching yield metrics")
+		}
+	})
+	workers = append(workers, w)
+	return workers
 }
 
 func (s *Server) printRoutes() {

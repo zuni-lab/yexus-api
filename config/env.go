@@ -3,7 +3,6 @@ package config
 import (
 	"crypto/ecdsa"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -54,12 +53,9 @@ type RealtimeManagerConfig struct {
 	Address         common.Address
 }
 
-// Indexer-specific configuration
-type IndexerConfig struct {
-	ChunkSize     uint64        `validate:"min=1"`
-	Concurrency   int           `validate:"min=1"`
-	StartBlock    uint64        `validate:"min=1"`
-	FetchInterval time.Duration `validate:"min=1s"`
+type WorkerConfig struct {
+	YieldMetricsSource string    `validate:"url"`
+	YieldMetricsRunAt  time.Time `validate:"required"`
 }
 
 // ServerEnv combines all configurations
@@ -67,6 +63,7 @@ type ServerEnv struct {
 	CommonConfig
 	ServerConfig
 	RealtimeManagerConfig
+	WorkerConfig
 }
 
 var Env ServerEnv
@@ -102,10 +99,13 @@ func loadEnv() {
 
 	managerConfig := loadRealtimeManagerConfig()
 
+	workerConfig := loadWorkerConfig()
+
 	Env = ServerEnv{
 		CommonConfig:          commonConfig,
 		ServerConfig:          serverConfig,
 		RealtimeManagerConfig: managerConfig,
+		WorkerConfig:          workerConfig,
 	}
 
 	validate := validator.New()
@@ -179,6 +179,18 @@ func loadRealtimeManagerConfig() RealtimeManagerConfig {
 	}
 }
 
+func loadWorkerConfig() WorkerConfig {
+	runAt, err := time.Parse("15:04", os.Getenv("YIELD_METRICS_RUN_AT"))
+	if err != nil {
+		log.Fatal().Msgf("Error parsing YIELD_METRICS_AT: %s", err)
+	}
+
+	return WorkerConfig{
+		YieldMetricsSource: os.Getenv("YIELD_METRICS_SOURCE"),
+		YieldMetricsRunAt:  runAt,
+	}
+}
+
 // Helper functions for environment variable parsing
 func getEnvDuration(key, defaultValue string) time.Duration {
 	value := os.Getenv(key)
@@ -190,18 +202,6 @@ func getEnvDuration(key, defaultValue string) time.Duration {
 		log.Fatal().Msgf("Error parsing %s: %s", key, err)
 	}
 	return duration
-}
-
-func getEnvUint64(key string, defaultValue uint64) uint64 {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	parsed, err := strconv.ParseUint(value, 10, 64)
-	if err != nil {
-		log.Fatal().Msgf("Error parsing %s: %s", key, err)
-	}
-	return parsed
 }
 
 func getEnvPrivateKey(key string) *ecdsa.PrivateKey {
